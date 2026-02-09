@@ -9,6 +9,8 @@ DEFAULTS = {
     "close_to_tray": True,
     "autostart": False,
     "theme": "dark",
+    "shortcut": "<Ctrl><Shift>v",
+    "shortcut_enabled": True,
 }
 
 _settings_cache = None

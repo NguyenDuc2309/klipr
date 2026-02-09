@@ -8,6 +8,7 @@ from database import init_db, add_item, get_items, delete_item, toggle_pin, clea
 from clipboard_manager import ClipboardManager
 from ui.window import ClipboardWindow
 from tray import TrayIcon
+from global_shortcut import GlobalShortcut
 
 
 class ClipboardApp(Gtk.Application):
@@ -19,6 +20,7 @@ class ClipboardApp(Gtk.Application):
         self.window = None
         self.clipboard_manager = None
         self.tray_icon = None
+        self.global_shortcut = None
         self._start_hidden = False
 
         # Custom CLI option: --hidden (used by autostart)
@@ -62,7 +64,12 @@ class ClipboardApp(Gtk.Application):
 
         self.clipboard_manager = ClipboardManager(self._on_clipboard_update)
 
-        self.window = ClipboardWindow(self, self._create_db_interface(), self._on_user_copy)
+        self.window = ClipboardWindow(
+            self,
+            self._create_db_interface(),
+            self._on_user_copy,
+            on_shortcut_changed=self._on_shortcut_changed,
+        )
 
         # Tray icon (SNI + DBusMenu via Gio.DBus — no AppIndicator, no GTK3)
         self.tray_icon = TrayIcon(
@@ -75,12 +82,17 @@ class ClipboardApp(Gtk.Application):
         else:
             print("Tray: host not available (no StatusNotifierWatcher on this desktop)")
 
+        # Global keyboard shortcut
+        self._setup_global_shortcut()
+
         # Check for --hidden flag (for autostart)
         if not self._start_hidden:
             self.window.present()
 
     def do_shutdown(self):
-        """Clean up tray resources on app shutdown."""
+        """Clean up tray and shortcut resources on app shutdown."""
+        if self.global_shortcut:
+            self.global_shortcut.unbind()
         if self.tray_icon:
             self.tray_icon.shutdown()
         Gtk.Application.do_shutdown(self)
@@ -89,6 +101,48 @@ class ClipboardApp(Gtk.Application):
         if self.window:
             self.window.present()
         return False
+
+    def _toggle_window(self):
+        """Toggle window visibility (called by global shortcut)."""
+        if not self.window:
+            return False
+
+        if self.window.get_visible():
+            self.window.hide()
+        else:
+            # Force the window to pop up immediately
+            self.window.set_visible(True)
+            self.window.present()
+        return False  # for GLib.idle_add
+
+    def _setup_global_shortcut(self):
+        """Register global keyboard shortcut from settings."""
+        if not settings.get("shortcut_enabled"):
+            return
+
+        shortcut = settings.get("shortcut")
+        if not shortcut:
+            return
+
+        self.global_shortcut = GlobalShortcut(self._toggle_window)
+
+        if GlobalShortcut.is_available():
+            if self.global_shortcut.bind(shortcut):
+                pass  # success message printed by GlobalShortcut
+            else:
+                print("Global shortcut: failed to bind (key may be in use)")
+        else:
+            print("Global shortcut: X11 not available")
+
+    def _on_shortcut_changed(self):
+        """Re-register global shortcut after settings change."""
+        # Unbind current shortcut
+        if self.global_shortcut:
+            self.global_shortcut.unbind()
+            self.global_shortcut = None
+
+        # Re-setup with new settings
+        self._setup_global_shortcut()
 
     def _create_db_interface(self):
         class DBInterface:

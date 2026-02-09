@@ -8,12 +8,13 @@ from ui.settings_dialog import SettingsDialog
 
 
 class ClipboardWindow(Gtk.ApplicationWindow):
-    def __init__(self, app, db_interface, on_copy):
+    def __init__(self, app, db_interface, on_copy, on_shortcut_changed=None):
         super().__init__(application=app, title="Klipr")
         self.set_default_size(420, 600)
 
         self.db = db_interface
         self.on_copy_callback = on_copy
+        self.on_shortcut_changed = on_shortcut_changed
         self._toast_timeout_id = None
 
         # CSS
@@ -299,13 +300,16 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     def _on_settings_clicked(self, btn):
         """Open settings dialog."""
-        dialog = SettingsDialog(self, on_theme_changed=self._on_theme_changed)
+        dialog = SettingsDialog(
+            self,
+            on_theme_changed=self._on_theme_changed,
+            on_shortcut_changed=self.on_shortcut_changed,
+        )
         dialog.connect("response", self._on_settings_response)
         dialog.present()
 
     def _on_settings_response(self, dialog, response):
         dialog.destroy()
-        self.show_toast("Settings saved", "success")
 
     def _on_theme_changed(self, theme):
         """Handle theme change from settings dialog."""
@@ -337,7 +341,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             self.css_provider.load_from_path(css_path)
             Gtk.StyleContext.add_provider_for_display(
                 display, self.css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION,
+                Gtk.STYLE_PROVIDER_PRIORITY_USER,
             )
         except Exception as e:
             print(f"Error loading theme CSS: {e}")
@@ -375,6 +379,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         row.item_data = item
         row.set_selectable(False)
         row.set_activatable(True)
+        row.set_css_classes([])  # Remove 'activatable' class to kill GTK hover
+        # Remove GTK's 'activatable' CSS class to kill its built-in hover effect
+        row.set_css_classes([])
 
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         item_box.add_css_class("clipboard-item")
