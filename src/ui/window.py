@@ -286,12 +286,13 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_close_request(self, window):
         """Handle window close based on settings.
 
-        close_to_tray ON  → hide window, app stays alive (hold() keeps it running)
-        close_to_tray OFF → quit the application
+        close_to_tray ON + tray available → hide window, app stays alive
+        close_to_tray ON + no tray        → still hide (re-open via desktop entry)
+        close_to_tray OFF                 → quit the application
         """
         if settings.get("close_to_tray"):
             self.hide()
-            return True  # Prevent default destroy behavior
+            return True  # Prevent default destroy
         else:
             self.get_application().quit()
             return False
@@ -299,8 +300,12 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_settings_clicked(self, btn):
         """Open settings dialog."""
         dialog = SettingsDialog(self, on_theme_changed=self._on_theme_changed)
-        dialog.connect("response", lambda d, r: d.destroy())
+        dialog.connect("response", self._on_settings_response)
         dialog.present()
+
+    def _on_settings_response(self, dialog, response):
+        dialog.destroy()
+        self.show_toast("Settings saved", "success")
 
     def _on_theme_changed(self, theme):
         """Handle theme change from settings dialog."""

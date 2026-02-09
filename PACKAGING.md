@@ -1,34 +1,90 @@
-# Klipr - Packaging Guide
+# Klipr — Packaging & Architecture Guide
 
 ## Package Information
 
-- **Package Name**: `klipr`
-- **Version Convention**: Semantic versioning (e.g., `1.0.0`, `1.1.0`, `1.1.1`)
-- **Architecture**: `amd64` (x86_64 Linux)
+| Field | Value |
+|---|---|
+| **Name** | `klipr` |
+| **Version** | Semantic versioning (`1.0.0`, `1.1.0`, ...) |
+| **Architecture** | `all` (pure Python, platform-independent) |
+| **License** | MIT |
+| **Format** | `.deb` (Debian/Ubuntu) |
+
+---
+
+## Architecture Overview
+
+```
+src/
+├── main.py              # Entry point — GtkApplication, lifecycle, tray init
+├── clipboard_manager.py # Reads/writes system clipboard (text + images)
+├── database.py          # SQLite storage (UPSERT, dedup, pruning)
+├── settings.py          # JSON config (~/.config/klipr/settings.json)
+├── tray.py              # System tray — pure D-Bus SNI + DBusMenu
+├── utils.py             # Helpers (format_time)
+├── style.css            # Dark theme
+├── style_light.css      # Light theme
+└── ui/
+    ├── __init__.py
+    ├── window.py         # Main window UI
+    └── settings_dialog.py # Settings modal
+```
+
+### System Tray — Pure D-Bus (no AppIndicator)
+
+The tray icon is implemented using **StatusNotifierItem (SNI)** + **DBusMenu** protocols
+directly over `Gio.DBus`. This means:
+
+- **No AppIndicator3** dependency
+- **No GTK3** — runs entirely within the GTK4 process
+- **No extra GIR typelibs** to install
+- Uses only `Gio.DBus` which is already part of `python3-gi`
+
+The tray exports two D-Bus objects:
+
+| Object Path | Interface | Purpose |
+|---|---|---|
+| `/StatusNotifierItem` | `org.kde.StatusNotifierItem` | Icon, title, click handling |
+| `/MenuBar` | `com.canonical.dbusmenu` | Right-click menu (Open / Quit) |
+
+On startup, it registers with `org.kde.StatusNotifierWatcher`. The desktop's tray host
+(provided by the DE or an extension) then discovers and displays the icon.
+
+**Desktop compatibility:**
+- **KDE Plasma**: Native support (StatusNotifierWatcher built-in)
+- **GNOME**: Requires `gnome-shell-extension-appindicator` (pre-installed on Ubuntu 22.04+)
+- **XFCE/Cinnamon/MATE**: Generally supported via built-in SNI support
+
+The tray includes `IconPixmap` (embedded ARGB pixel data) so the icon displays even if
+`klipr` is not in the system icon theme.
+
+---
 
 ## Dependencies
 
-The package requires the following system dependencies:
+### Runtime (declared in .deb, auto-installed by apt)
 
-- `python3` (Python 3.8+)
-- `python3-gi` (Python GTK bindings)
-- `gir1.2-gtk-4.0` (GTK 4.0 introspection data)
-- `python3-pil` (Pillow for image processing)
+| Package | Purpose |
+|---|---|
+| `python3` | Python 3.8+ runtime |
+| `python3-gi` | PyGObject — GI bindings (includes `Gio.DBus` for tray) |
+| `python3-gi-cairo` | Cairo rendering for GTK |
+| `gir1.2-gtk-4.0` | GTK4 GIR typelib |
+| `python3-pil` | Pillow — image hashing for dedup |
 
-These are automatically declared in the `.deb` package and will be installed when installing Klipr.
+**No additional system packages needed.** The tray icon uses only `Gio.DBus`
+(part of `python3-gi`), so no AppIndicator/Ayatana libraries are required.
 
-## Build Requirements
-
-To build the `.deb` package, you need:
+### Build-time
 
 ```bash
 sudo apt install ruby ruby-dev build-essential
 sudo gem install --no-document fpm
 ```
 
-## Building the Package
+---
 
-From the project root directory:
+## Building the .deb Package
 
 ```bash
 cd /path/to/clipboard
@@ -40,25 +96,27 @@ Example:
 ./packaging/build.sh 1.0.0
 ```
 
-If no version is specified, it defaults to `1.0.0`.
+Default version: `1.0.0` if not specified.
 
-The build script will:
-1. Clean previous build artifacts
-2. Create the package directory structure
-3. Copy source files to `/usr/share/klipr/`
-4. Install launcher script to `/usr/bin/klipr`
-5. Install desktop entry to `/usr/share/applications/`
-6. Install icon to `/usr/share/icons/hicolor/128x128/apps/`
-7. Build the `.deb` package using `fpm`
+The build script:
+1. Cleans previous build artifacts
+2. Creates FHS directory structure under `build/root/`
+3. Copies source to `/usr/share/klipr/`
+4. Installs launcher to `/usr/bin/klipr`
+5. Installs `.desktop` entry to `/usr/share/applications/`
+6. Installs icon to `/usr/share/icons/hicolor/128x128/apps/`
+7. Runs `gtk-update-icon-cache` post-install
+8. Produces `klipr_VERSION_all.deb`
 
-Output: `klipr_VERSION_amd64.deb`
+---
 
-## Installing the Package
+## Installing
 
 ```bash
-sudo dpkg -i klipr_1.0.0_amd64.deb
-sudo apt -f install  # Install any missing dependencies
+sudo apt install ./klipr_1.0.0_all.deb
 ```
+
+This single command installs Klipr and all its dependencies automatically.
 
 ## Uninstalling
 
@@ -66,96 +124,115 @@ sudo apt -f install  # Install any missing dependencies
 sudo apt remove klipr
 ```
 
-**Note**: User data (clipboard history database) is stored in `~/.local/share/klipr/` and is **not** removed during uninstall. This allows users to preserve their clipboard history if they reinstall later.
+User data (`~/.local/share/klipr/`, `~/.cache/klipr/`, `~/.config/klipr/`) is preserved.
+
+---
 
 ## Running Klipr
 
-After installation, you can run Klipr in several ways:
+| Method | Command |
+|---|---|
+| Command line | `klipr` |
+| App launcher | Search "Klipr" in application menu |
+| Hidden start (autostart) | `klipr --hidden` |
+| Development | `cd /path/to/clipboard && python3 src/main.py` |
 
-1. **Command line**: `klipr`
-2. **Application launcher**: Search for "Klipr" in your application menu
-3. **Hidden start** (for autostart): `klipr --hidden`
+---
 
-## Application Lifecycle
+## Application Behavior
 
-### Close-to-Background
+### Close to Tray (default: ON)
 
-When you close the Klipr window (click X), the application **hides** but continues running in the background. This allows clipboard monitoring to continue.
+When closing the window (X button), Klipr **hides** and continues running in the background.
+The clipboard monitor stays active. To bring the window back:
 
-To bring the window back:
-- Run `klipr` again from command line or launcher
-- The existing process will show the hidden window
+- **Click the tray icon** (left click)
+- **Right-click tray icon → "Open Klipr"**
+- Run `klipr` again (existing process shows its window)
 
 ### Quit Completely
 
-To fully exit Klipr:
-- Click the **Quit** button (power icon) in the header
-- Or use the Quit option from the application menu
+- **Right-click tray icon → "Quit"**
+- Or disable "Close to system tray" in Settings, then close normally
+
+### Settings
+
+Click the **menu icon** (hamburger) in the header to open Settings:
+
+| Setting | Default | Description |
+|---|---|---|
+| Close to system tray | ON | Hide on close instead of quitting |
+| Start on login | OFF | Create autostart `.desktop` entry |
+| Theme | Dark | Dark / Light / System |
 
 ### Autostart
 
-Klipr supports optional autostart on login:
+When enabled, creates `~/.config/autostart/klipr.desktop` with `Exec=klipr --hidden`.
+Klipr starts hidden on login and monitors clipboard in the background.
 
-1. Click the **Settings** (gear) icon in the header
-2. Toggle **"Start on login"** ON/OFF
-
-When enabled:
-- Creates `~/.config/autostart/klipr.desktop`
-- Klipr starts automatically on login (hidden, in background)
-- You can bring up the window by running `klipr` manually
-
-When disabled:
-- Removes the autostart desktop file
-- Klipr will not start automatically on login
+---
 
 ## Data Storage
 
-Klipr stores user data in standard XDG directories:
+| Data | Path | Persists across updates |
+|---|---|---|
+| Clipboard history DB | `~/.local/share/klipr/clipboard.db` | Yes |
+| Image cache | `~/.cache/klipr/images/` | Yes |
+| Settings | `~/.config/klipr/settings.json` | Yes |
 
-- **Database**: `~/.local/share/klipr/clipboard.db`
-- **Image cache**: `~/.cache/klipr/images/`
+All directories are created automatically on first run.
 
-These directories are created automatically on first run. User data persists across updates and reinstalls.
+---
 
 ## Icon
 
-The package includes an icon at `/usr/share/icons/hicolor/128x128/apps/klipr.png`.
+The package includes a 128x128 PNG icon at:
+- **Installed**: `/usr/share/icons/hicolor/128x128/apps/klipr.png`
+- **Source**: `packaging/klipr.png`
 
-If you want to customize the icon:
-1. Place your icon file at `packaging/klipr.png` (128x128 PNG recommended)
-2. Rebuild the package
+The tray icon embeds pixel data via `IconPixmap` D-Bus property, so it displays
+regardless of whether the icon is in the system theme.
 
-If no icon is provided, the build script creates a minimal placeholder.
+To customize: replace `packaging/klipr.png` and rebuild.
+
+---
 
 ## Version Management
 
-When releasing a new version:
+1. Build: `./packaging/build.sh 1.1.0`
+2. Test locally: `sudo apt install ./klipr_1.1.0_all.deb`
+3. Tag: `git tag v1.1.0`
+4. Upload `.deb` to GitHub Releases or distribution channel
 
-1. Update version in `packaging/build.sh` default or pass as argument
-2. Build: `./packaging/build.sh 1.1.0`
-3. Test the `.deb` package locally
-4. Tag the release: `git tag v1.1.0`
-5. Upload `klipr_1.1.0_amd64.deb` to GitHub Releases or your distribution channel
+---
 
 ## Troubleshooting
 
-### Import Errors After Installation
+### Tray icon not visible
 
-If you see import errors when running `klipr`, ensure:
-- All Python dependencies are installed: `sudo apt install python3-gi gir1.2-gtk-4.0 python3-pil`
-- The launcher script has execute permissions: `ls -l /usr/bin/klipr`
+The tray requires a **StatusNotifierWatcher** on the desktop:
+- **Ubuntu/GNOME**: Install `gnome-shell-extension-appindicator` if not already present
+  (`sudo apt install gnome-shell-extension-appindicator`)
+- **KDE**: Works out of the box
+- Klipr still functions normally without the tray — close-to-tray will hide the window,
+  and running `klipr` again will bring it back
 
-### Autostart Not Working
+### Import errors after installation
 
-If autostart doesn't work:
-- Check if `~/.config/autostart/klipr.desktop` exists
-- Verify your desktop environment supports `.desktop` autostart files
-- Check desktop environment logs for errors
+```bash
+sudo apt install -f   # Fix missing dependencies
+```
 
-### Window Doesn't Appear
+### Window doesn't appear
 
-If the window doesn't appear when running `klipr`:
-- Check if Klipr is already running: `ps aux | grep klipr`
-- Kill existing process: `pkill -f klipr`
-- Try running again: `klipr`
+```bash
+ps aux | grep klipr   # Check if already running
+pkill -f klipr        # Kill existing instance
+klipr                 # Start fresh
+```
 
+### Autostart not working
+
+- Verify `~/.config/autostart/klipr.desktop` exists
+- Check that your DE supports XDG autostart
+- Verify `klipr` is in `$PATH` (`which klipr`)

@@ -14,11 +14,34 @@ class ClipboardApp(Gtk.Application):
     def __init__(self):
         super().__init__(
             application_id="dev.klipr.app",
-            flags=Gio.ApplicationFlags.FLAGS_NONE,
+            flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
         )
         self.window = None
         self.clipboard_manager = None
         self.tray_icon = None
+        self._start_hidden = False
+
+        # Custom CLI option: --hidden (used by autostart)
+        # Without this, GTK rejects unknown options before do_activate() runs.
+        self.add_main_option(
+            "hidden",
+            0,
+            GLib.OptionFlags.NONE,
+            GLib.OptionArg.NONE,
+            "Start Klipr hidden (do not present the window)",
+            None,
+        )
+
+    def do_command_line(self, command_line: Gio.ApplicationCommandLine):
+        options = command_line.get_options_dict()
+        try:
+            self._start_hidden = bool(options.contains("hidden"))
+        except Exception:
+            argv = command_line.get_arguments() or []
+            self._start_hidden = "--hidden" in argv
+
+        self.activate()
+        return 0
 
     def do_activate(self):
         # Load settings
@@ -41,18 +64,31 @@ class ClipboardApp(Gtk.Application):
 
         self.window = ClipboardWindow(self, self._create_db_interface(), self._on_user_copy)
 
-        # Launch tray icon as a separate subprocess (GTK3 cannot coexist with GTK4)
-        self.tray_icon = TrayIcon(self)
+        # Tray icon (SNI + DBusMenu via Gio.DBus — no AppIndicator, no GTK3)
+        self.tray_icon = TrayIcon(
+            self,
+            on_open=self._tray_open,
+            on_quit=self.quit,
+        )
+        if self.tray_icon.is_available():
+            print("Tray: registered with StatusNotifierWatcher")
+        else:
+            print("Tray: host not available (no StatusNotifierWatcher on this desktop)")
 
         # Check for --hidden flag (for autostart)
-        if '--hidden' not in sys.argv:
+        if not self._start_hidden:
             self.window.present()
 
     def do_shutdown(self):
-        """Clean up tray subprocess on app shutdown."""
+        """Clean up tray resources on app shutdown."""
         if self.tray_icon:
             self.tray_icon.shutdown()
         Gtk.Application.do_shutdown(self)
+
+    def _tray_open(self):
+        if self.window:
+            self.window.present()
+        return False
 
     def _create_db_interface(self):
         class DBInterface:
