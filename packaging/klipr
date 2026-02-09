@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cd /usr/share/klipr
+exec /usr/bin/python3 main.py "$@"
+

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Klipr
+Comment=Clipboard history manager for Linux
+Exec=klipr
+Icon=klipr
+Terminal=false
+Categories=Utility;
+StartupNotify=false
+

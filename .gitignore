@@ -1,0 +1,39 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE / Editor
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.deb
+
+# Database (created at runtime, not shipped)
+*.db
+
+# Logs
+log.txt
+
+# Environment
+.env
+.env.local
+
+# Settings (user-specific, created at runtime)
+settings.json

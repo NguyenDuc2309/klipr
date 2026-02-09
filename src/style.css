@@ -1,0 +1,265 @@
+/* ══════════════════════════════════════════════════════════════
+   Klipr — Dark Theme
+   Override EVERY GTK4 node that has a background so nothing
+   leaks through from the system Adwaita theme.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base / Global ──────────────────────────────────────────── */
+
+window,
+window overlay,
+window overlay > box {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+
+.header-area {
+    background-color: #2d2d30;
+    padding: 8px 12px;
+    border-bottom: 1px solid #3e3e42;
+}
+
+.header-right {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+entry {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #3e3e42;
+    border-radius: 6px;
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    min-height: 30px;
+    transition: all 0.2s;
+}
+
+entry:focus {
+    border-color: #4cc2ff;
+    background-color: #1e1e1e;
+}
+
+entry image.left {
+    color: #999999;
+    margin-right: 6px;
+}
+
+/* ── Tabs ───────────────────────────────────────────────────── */
+
+button.tab {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #3e3e42;
+    border-radius: 8px;
+    padding: 4px 6px;
+    font-size: 12px;
+    margin-right: 4px;
+}
+
+button.tab:checked {
+    border-color: #4cc2ff;
+    color: #4cc2ff;
+    background-color: #1e1e1e;
+}
+
+button.tab:hover {
+    background-color: #3e3e42;
+}
+
+label.count {
+    color: #999999;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+/* ── Header action buttons (trash, settings) ── */
+
+button.header-btn {
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: #999999;
+    padding: 4px;
+    min-width: 30px;
+    min-height: 30px;
+    transition: all 0.15s ease;
+}
+
+button.header-btn:hover {
+    background-color: #3e3e42;
+    color: #ffffff;
+}
+
+/* ── Content area — override every layer ────────────────────── */
+
+scrolledwindow,
+scrolledwindow > viewport,
+scrolledwindow > viewport > listbox {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+listbox > row {
+    background-color: transparent;
+    color: #ffffff;
+}
+
+listbox > row:hover {
+    background-color: transparent;
+}
+
+/* ── Clipboard items ────────────────────────────────────────── */
+
+.clipboard-item {
+    background-color: #2d2d30;
+    border: 1px solid #3e3e42;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 4px 12px;
+    transition: all 0.1s;
+}
+
+listbox > row:hover .clipboard-item {
+    background-color: #3e3e42;
+    border-color: #4a4a4f;
+}
+
+.clipboard-item-text {
+    color: #ffffff;
+    font-size: 13px;
+    line-height: 1.3;
+    margin-bottom: 4px;
+}
+
+.clipboard-item-meta {
+    color: #999999;
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.content-image {
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+
+/* ── Item action buttons ────────────────────────────────────── */
+
+.actions {
+    opacity: 0;
+    transition: opacity 0.15s ease-in-out;
+}
+
+row:hover .actions {
+    opacity: 1;
+}
+
+.clipboard-item:hover .actions {
+    opacity: 1;
+}
+
+button.icon-btn {
+    background-color: #2d2d30;
+    border: 1px solid #3e3e42;
+    border-radius: 4px;
+    color: #cccccc;
+    padding: 0px;
+    min-width: 22px;
+    min-height: 22px;
+    margin-left: 4px;
+    transition: all 0.15s;
+}
+
+button.icon-btn:hover {
+    color: #ffffff;
+    border-color: transparent;
+}
+
+button.icon-btn.copy:hover {
+    background-color: #1971c2;
+}
+
+button.icon-btn.fav:hover {
+    background-color: #f08c00;
+}
+
+button.icon-btn.delete:hover {
+    background-color: #e03131;
+}
+
+button.icon-btn.active {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: #ffffff;
+}
+
+/* ── Toast notification ──────────────────────────────────────── */
+
+.toast {
+    background-color: #3e3e42;
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    border: 1px solid #4a4a4f;
+}
+
+.toast-success {
+    background-color: #2b8a3e;
+    border-color: #2b8a3e;
+}
+
+.toast-info {
+    background-color: #1864ab;
+    border-color: #1864ab;
+}
+
+.toast-warning {
+    background-color: #e67700;
+    border-color: #e67700;
+}
+
+.toast image {
+    color: #ffffff;
+}
+
+/* ── Settings Dialog ──────────────────────────────────────────── */
+
+.settings-section-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+dialog,
+dialog > box,
+dialog > box > box {
+    background-color: #2d2d30;
+    color: #ffffff;
+}
+
+dialog label,
+dialog checkbutton label {
+    color: #ffffff;
+}
+
+dialog entry {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border-color: #3e3e42;
+}
+
+dialog button {
+    background-color: #2d2d30;
+    color: #ffffff;
+    border-color: #3e3e42;
+}
+
+dialog button:hover {
+    background-color: #3e3e42;
+}
