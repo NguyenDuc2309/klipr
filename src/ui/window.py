@@ -40,24 +40,40 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         header_area.add_css_class("header-area")
         self.main_view.append(header_area)
 
-        # ── Row 1: Title bar ─────────────────────────────────────────
+        # ── Row 1: Title + actions ──────────────────────────────────
         title_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         title_row.add_css_class("title-row")
         header_area.append(title_row)
 
         app_name = settings.get("name") or "Klipr"
+        brand_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        brand_box.add_css_class("app-brand")
+        brand_box.set_hexpand(True)
+        title_row.append(brand_box)
+
+        logo_path = self._resolve_logo_path()
+        if logo_path:
+            logo_image = Gtk.Image.new_from_file(logo_path)
+            logo_image.set_pixel_size(32)
+            logo_image.add_css_class("app-logo")
+            brand_box.append(logo_image)
+
         self.title_label = Gtk.Label(label=app_name)
         self.title_label.set_xalign(0)
         self.title_label.add_css_class("app-title")
-        self.title_label.set_hexpand(True)
-        title_row.append(self.title_label)
+        brand_box.append(self.title_label)
 
-        # DISABLED: Theme toggle button (feature under development)
-        # self.btn_theme = Gtk.Button(icon_name="weather-clear-night-symbolic")
-        # self.btn_theme.set_tooltip_text("Toggle theme")
-        # self.btn_theme.add_css_class("header-btn")
-        # self.btn_theme.connect('clicked', self._on_theme_toggle_clicked)
-        # title_row.append(self.btn_theme)
+        self.btn_search = Gtk.ToggleButton(icon_name="system-search-symbolic")
+        self.btn_search.set_tooltip_text("Search")
+        self.btn_search.add_css_class("header-btn")
+        self.btn_search.connect('toggled', self._on_search_toggled)
+        title_row.append(self.btn_search)
+
+        self.btn_delete_all = Gtk.Button(icon_name="user-trash-symbolic")
+        self.btn_delete_all.set_tooltip_text("Delete History")
+        self.btn_delete_all.add_css_class("header-btn")
+        self.btn_delete_all.connect('clicked', self._on_clear_clicked)
+        title_row.append(self.btn_delete_all)
 
         btn_settings = Gtk.Button(icon_name="emblem-system-symbolic")
         btn_settings.set_tooltip_text("Settings")
@@ -65,7 +81,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         btn_settings.connect('clicked', self._on_settings_clicked)
         title_row.append(btn_settings)
 
-        # ── Row 2: Tabs + Delete ─────────────────────────────────────
+        # ── Row 2: Tabs ──────────────────────────────────────────────
         tab_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         tab_row.add_css_class("tab-row")
         header_area.append(tab_row)
@@ -75,37 +91,35 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         # Tab group (segmented control)
         tab_group = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         tab_group.add_css_class("tab-group")
+        tab_group.set_hexpand(True)
         tab_row.append(tab_group)
 
         self.btn_all = Gtk.ToggleButton(label="History")
         self.btn_all.set_active(True)
         self.btn_all.add_css_class("tab")
         self.btn_all.add_css_class("tab-first")
+        self.btn_all.set_hexpand(True)
         self.btn_all.connect('toggled', lambda b: self._on_filter_toggled("all"))
         tab_group.append(self.btn_all)
 
         self.btn_fav = Gtk.ToggleButton(label="Favourite")
         self.btn_fav.add_css_class("tab")
         self.btn_fav.add_css_class("tab-last")
+        self.btn_fav.set_hexpand(True)
         self.btn_fav.set_group(self.btn_all)
         self.btn_fav.connect('toggled', lambda b: self._on_filter_toggled("favorites"))
         tab_group.append(self.btn_fav)
 
-        tab_spacer = Gtk.Label()
-        tab_spacer.set_hexpand(True)
-        tab_row.append(tab_spacer)
-
-        self.btn_delete_all = Gtk.Button(icon_name="user-trash-symbolic")
-        self.btn_delete_all.set_tooltip_text("Delete History")
-        self.btn_delete_all.add_css_class("header-btn")
-        self.btn_delete_all.connect('clicked', self._on_clear_clicked)
-        tab_row.append(self.btn_delete_all)
-
-        # ── Row 3: Search ────────────────────────────────────────────
+        # ── Row 3: Search (revealed on demand) ──────────────────────
         self.search_entry = Gtk.SearchEntry()
         self.search_entry.set_property("placeholder-text", "Search clipboard...")
         self.search_entry.connect('search-changed', self._on_search_changed)
-        header_area.append(self.search_entry)
+        self.search_revealer = Gtk.Revealer()
+        self.search_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
+        self.search_revealer.set_transition_duration(160)
+        self.search_revealer.set_reveal_child(False)
+        self.search_revealer.set_child(self.search_entry)
+        header_area.append(self.search_revealer)
 
         # List
         scrolled = Gtk.ScrolledWindow()
@@ -115,7 +129,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
-        self.listbox.set_margin_top(6)
+        self.listbox.set_margin_top(2)
         self.listbox.set_margin_bottom(6)
         self.listbox.connect("row-activated", self._on_row_activated)
         scrolled.set_child(self.listbox)
@@ -282,6 +296,16 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_search_changed(self, entry):
         self.refresh_list(entry.get_text())
 
+    def _on_search_toggled(self, btn):
+        is_active = btn.get_active()
+        self.search_revealer.set_reveal_child(is_active)
+        if is_active:
+            self.search_entry.grab_focus()
+        else:
+            if self.search_entry.get_text():
+                self.search_entry.set_text("")
+            self.refresh_list()
+
     def _on_clear_clicked(self, btn):
         if self.active_filter == "favorites":
             self._show_confirm(
@@ -408,6 +432,19 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         except Exception as e:
             print(f"Error loading CSS: {e}")
 
+    def _resolve_logo_path(self):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        candidates = [
+            os.path.join(base_dir, "..", "assets", "logo.png"),
+            os.path.join(base_dir, "..", "..", "assets", "logo.png"),
+            os.path.join(os.getcwd(), "assets", "logo.png"),
+        ]
+        for path in candidates:
+            abs_path = os.path.abspath(path)
+            if os.path.exists(abs_path):
+                return abs_path
+        return None
+
     # ── Row Builder ─────────────────────────────────────────────────
 
     def _create_row(self, item):
@@ -485,7 +522,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         if is_pinned:
             btn_fav.add_css_class("active")
             btn_fav.set_tooltip_text("Remove from Favorites")
-        
+
         def set_fav_active(active):
             if active:
                 btn_fav.add_css_class("active")

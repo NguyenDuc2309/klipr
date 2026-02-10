@@ -15,32 +15,41 @@ listbox row {
 }
 
 .header-area {
-  background-color: #2d2d30;
-  padding: 8px 12px;
+  background-color: #242428;
+  padding: 14px 12px 4px 12px;
   border-bottom: 1px solid #3e3e42;
 }
 
 .title-row {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+}
+
+.app-brand {
+  min-height: 28px;
+}
+
+.app-logo {
+  margin-right: 2px;
 }
 
 .app-title {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
   color: #ffffff;
 }
 
 .tab-row {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 entry {
-  background-color: #1e1e1e;
+  background-color: #1a1a1e;
   color: #ffffff;
   border: 1px solid #3e3e42;
   border-radius: 6px;
   padding: 0px 8px;
-  margin-top: 4px;
+  margin-top: 2px;
   transition: all 0.2s;
 }
 
@@ -54,8 +63,10 @@ entry image.left {
 }
 
 .tab-group {
-  border: 1px solid #3e3e42;
-  border-radius: 8px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #3e3e42;
+  border-radius: 0;
 }
 
 button.tab {
@@ -63,30 +74,34 @@ button.tab {
   color: #cccccc;
   border: none;
   border-radius: 0;
-  padding: 4px 14px;
+  padding: 4px 12px;
   font-size: 13px;
   font-weight: 500;
   min-height: 28px;
+  border-bottom: 2px solid transparent;
   transition: all 0.15s ease;
 }
 
 button.tab.tab-first {
-  border-radius: 7px 0 0 7px;
+  margin-right: 0;
+  border-radius: 0;
 }
 
 button.tab.tab-last {
-  border-radius: 0 7px 7px 0;
-  border-left: 1px solid #3e3e42;
+  margin-left: 0;
+  border-radius: 0;
+  border-left: none;
 }
 
 button.tab:checked {
-  background-color: #3e3e42;
+  background-color: transparent;
   color: #ffffff;
   font-weight: 600;
+  border-bottom-color: #6366f1;
 }
 
 button.tab:hover:not(:checked) {
-  background-color: rgba(255, 255, 255, 0.06);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 button.header-btn {
@@ -97,10 +112,16 @@ button.header-btn {
   padding: 4px;
   min-width: 30px;
   min-height: 30px;
+  margin-left: 2px;
   transition: all 0.15s ease;
 }
 
 button.header-btn:hover {
+  background-color: #3e3e42;
+  color: #ffffff;
+}
+
+button.header-btn:checked {
   background-color: #3e3e42;
   color: #ffffff;
 }
@@ -126,7 +147,7 @@ listbox row:hover .clipboard-item {
 }
 
 .clipboard-item-text {
-  color: #ffffff;
+  color: #d4d4d8;
   font-size: 13px;
   line-height: 1.3;
   margin-bottom: 4px;
