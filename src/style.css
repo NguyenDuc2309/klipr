@@ -97,7 +97,7 @@ button.tab:checked {
   background-color: transparent;
   color: #ffffff;
   font-weight: 600;
-  border-bottom-color: #6366f1;
+  border-bottom-color: #1d7cf2;
 }
 
 button.tab:hover:not(:checked) {
