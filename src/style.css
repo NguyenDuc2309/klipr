@@ -15,7 +15,7 @@ listbox row {
 }
 
 .header-area {
-  background-color: #242428;
+  background-color: #1C1C1D;
   padding: 14px 12px 4px 12px;
   border-bottom: 1px solid #3e3e42;
 }
@@ -149,7 +149,7 @@ scrolledwindow>viewport>listbox {
 /* FIX: row hover color */
 
 row {
-  background-color: #38383c;
+  background-color: #1C1C1D;
 }
 
 .clipboard-item-text {
