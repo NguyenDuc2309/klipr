@@ -27,7 +27,7 @@ mkdir -p "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps"
 cp src/main.py              "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/database.py          "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/clipboard_manager.py "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
-# cp src/global_shortcut.py   "$ROOT_DIR/usr/share/$PACKAGE_NAME/"  # DISABLED: under development
+cp src/global_shortcut.py   "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/settings.py          "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/tray.py              "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/utils.py             "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
