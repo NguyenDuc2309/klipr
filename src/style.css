@@ -141,8 +141,14 @@ scrolledwindow>viewport>listbox {
   transition: all 0.1s;
 }
 
-listbox row:hover .clipboard-item {
+.clipboard-item:hover {
   border-color: #4cc2ff;
+  background-color: #38383c;
+}
+
+/* FIX: row hover color */
+
+row {
   background-color: #38383c;
 }
 
