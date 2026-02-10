@@ -1,0 +1,11 @@
+{
+    "name": "Klipr",
+    "version": "1.0.0",
+    "description": "Clipboard Manager",
+    "closeToTray": true,
+    "autostart": false,
+    "theme": "dark",
+    "shortcut": "<Alt>v",
+    "shortcutEnabled": true,
+    "historyLimit": 50
+}

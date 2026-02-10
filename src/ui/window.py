@@ -1,15 +1,15 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, Pango, GLib, Gio
+from gi.repository import Gtk, Gdk, Pango, GLib
 import os
 import utils
 import settings
-from ui.settings_dialog import SettingsDialog
+
 
 
 class ClipboardWindow(Gtk.ApplicationWindow):
     def __init__(self, app, db_interface, on_copy, on_shortcut_changed=None):
-        super().__init__(application=app, title="Klipr")
+        super().__init__(application=app, title="Klipr - Clipboard Manager")
         self.set_default_size(420, 600)
 
         self.db = db_interface
@@ -19,66 +19,99 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         # CSS
         self.css_provider = Gtk.CssProvider()
-        self._load_css()
+        self.load_css()
         self._setup_css_monitor()
 
         # Main overlay (allows toast to float on top of content)
         overlay = Gtk.Overlay()
         self.set_child(overlay)
 
-        # Main content
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        overlay.set_child(vbox)
+        # ── Stack (Root Container) ──────────────────────────────────────
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.SLIDE_LEFT_RIGHT)
+        overlay.set_child(self.stack)
 
-        # ── Header ──────────────────────────────────────────────────
+        # ── Page 1: Main View ───────────────────────────────────────────
+        self.main_view = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.stack.add_named(self.main_view, "main")
+
+        # Header Area
         header_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         header_area.add_css_class("header-area")
-        vbox.append(header_area)
+        self.main_view.append(header_area)
 
-        self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_property("placeholder-text", "Search clipboard history...")
-        self.search_entry.connect('search-changed', self._on_search_changed)
-        header_area.append(self.search_entry)
+        # ── Row 1: Title bar ─────────────────────────────────────────
+        title_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        title_row.add_css_class("title-row")
+        header_area.append(title_row)
 
-        header_right = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
-        header_right.add_css_class("header-right")
-        header_area.append(header_right)
+        app_name = settings.get("name") or "Klipr"
+        self.title_label = Gtk.Label(label=app_name)
+        self.title_label.set_xalign(0)
+        self.title_label.add_css_class("app-title")
+        self.title_label.set_hexpand(True)
+        title_row.append(self.title_label)
 
-        self.active_filter = "all"
+        # DISABLED: Theme toggle button (feature under development)
+        # self.btn_theme = Gtk.Button(icon_name="weather-clear-night-symbolic")
+        # self.btn_theme.set_tooltip_text("Toggle theme")
+        # self.btn_theme.add_css_class("header-btn")
+        # self.btn_theme.connect('clicked', self._on_theme_toggle_clicked)
+        # title_row.append(self.btn_theme)
 
-        self.btn_all = Gtk.ToggleButton(label="All")
-        self.btn_all.set_active(True)
-        self.btn_all.add_css_class("tab")
-        self.btn_all.connect('toggled', lambda b: self._on_filter_toggled("all"))
-        header_right.append(self.btn_all)
-
-        self.btn_fav = Gtk.ToggleButton(label="Favorites")
-        self.btn_fav.add_css_class("tab")
-        self.btn_fav.set_group(self.btn_all)
-        self.btn_fav.connect('toggled', lambda b: self._on_filter_toggled("favorites"))
-        header_right.append(self.btn_fav)
-
-        spacer = Gtk.Label()
-        spacer.set_hexpand(True)
-        header_right.append(spacer)
-
-        btn_delete_all = Gtk.Button(icon_name="user-trash-symbolic")
-        btn_delete_all.set_tooltip_text("Delete all history")
-        btn_delete_all.add_css_class("header-btn")
-        btn_delete_all.connect('clicked', self._on_clear_clicked)
-        header_right.append(btn_delete_all)
-
-        btn_settings = Gtk.Button(icon_name="open-menu-symbolic")
+        btn_settings = Gtk.Button(icon_name="emblem-system-symbolic")
         btn_settings.set_tooltip_text("Settings")
         btn_settings.add_css_class("header-btn")
         btn_settings.connect('clicked', self._on_settings_clicked)
-        header_right.append(btn_settings)
+        title_row.append(btn_settings)
 
-        # ── Scrolled list ───────────────────────────────────────────
+        # ── Row 2: Tabs + Delete ─────────────────────────────────────
+        tab_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        tab_row.add_css_class("tab-row")
+        header_area.append(tab_row)
+
+        self.active_filter = "all"
+
+        # Tab group (segmented control)
+        tab_group = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        tab_group.add_css_class("tab-group")
+        tab_row.append(tab_group)
+
+        self.btn_all = Gtk.ToggleButton(label="History")
+        self.btn_all.set_active(True)
+        self.btn_all.add_css_class("tab")
+        self.btn_all.add_css_class("tab-first")
+        self.btn_all.connect('toggled', lambda b: self._on_filter_toggled("all"))
+        tab_group.append(self.btn_all)
+
+        self.btn_fav = Gtk.ToggleButton(label="Favourite")
+        self.btn_fav.add_css_class("tab")
+        self.btn_fav.add_css_class("tab-last")
+        self.btn_fav.set_group(self.btn_all)
+        self.btn_fav.connect('toggled', lambda b: self._on_filter_toggled("favorites"))
+        tab_group.append(self.btn_fav)
+
+        tab_spacer = Gtk.Label()
+        tab_spacer.set_hexpand(True)
+        tab_row.append(tab_spacer)
+
+        self.btn_delete_all = Gtk.Button(icon_name="user-trash-symbolic")
+        self.btn_delete_all.set_tooltip_text("Delete History")
+        self.btn_delete_all.add_css_class("header-btn")
+        self.btn_delete_all.connect('clicked', self._on_clear_clicked)
+        tab_row.append(self.btn_delete_all)
+
+        # ── Row 3: Search ────────────────────────────────────────────
+        self.search_entry = Gtk.SearchEntry()
+        self.search_entry.set_property("placeholder-text", "Search clipboard...")
+        self.search_entry.connect('search-changed', self._on_search_changed)
+        header_area.append(self.search_entry)
+
+        # List
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_vexpand(True)
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        vbox.append(scrolled)
+        self.main_view.append(scrolled)
 
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -87,16 +120,26 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.listbox.connect("row-activated", self._on_row_activated)
         scrolled.set_child(self.listbox)
 
-        # ── Toast notification (floating overlay) ───────────────────
+        from ui.settings_dialog import SettingsView
+        self.settings_view = SettingsView(
+            on_close_callback=self._on_settings_closed,
+            on_theme_changed=None,  # DISABLED: Theme feature removed
+            on_shortcut_changed=None  # DISABLED: Shortcut feature removed
+        )
+        self.stack.add_named(self.settings_view, "settings")
+
+        # ── Toast notification (floating overlay) ───────────────────────
         self.toast_revealer = Gtk.Revealer()
         self.toast_revealer.set_transition_type(Gtk.RevealerTransitionType.CROSSFADE)
         self.toast_revealer.set_transition_duration(200)
         self.toast_revealer.set_halign(Gtk.Align.CENTER)
         self.toast_revealer.set_valign(Gtk.Align.END)
         self.toast_revealer.set_margin_bottom(16)
+        self.toast_revealer.set_can_target(False)
 
         self.toast_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.toast_box.add_css_class("toast")
+        self.toast_box.set_can_target(False)
 
         self.toast_icon = Gtk.Image()
         self.toast_icon.set_pixel_size(16)
@@ -108,6 +151,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.toast_revealer.set_child(self.toast_box)
         overlay.add_overlay(self.toast_revealer)
 
+        # Set correct theme icon on startup
+        self._update_theme_icon()
+
         # Load initial data
         self.refresh_list()
 
@@ -116,32 +162,39 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     # ── CSS ─────────────────────────────────────────────────────────
 
-    def _load_css(self):
+    def load_css(self):
         """Load CSS based on current theme setting."""
         self._apply_theme()
+        print("CSS Reloaded")
+        return False
 
     def _setup_css_monitor(self):
-        css_path = os.path.join(os.path.dirname(__file__), "..", "style.css")
-        file = Gio.File.new_for_path(css_path)
-        self._css_monitor = file.monitor_file(Gio.FileMonitorFlags.NONE, None)
-        self._css_monitor.connect("changed", self._on_css_changed)
+        pass
 
-    def _on_css_changed(self, monitor, file, other_file, event_type):
-        if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
-            GLib.idle_add(self._load_css)
+    # ── Settings Update ─────────────────────────────────────────────
+    
+    def update_from_settings(self):
+        """Called when settings file changes on disk."""
+        # Update Title if name changed
+        app_name = settings.get("name") or "Klipr"
+        self.set_title(f"{app_name} - Clipboard Manager")
+        
+        # Reload settings view if open
+        if self.settings_view:
+             self.settings_view.reload_state()
+             
+        # Re-apply theme in case it changed
+        self.load_css()
+        print(f"UI Updated from Settings: {app_name}")
 
     # ── Toast ───────────────────────────────────────────────────────
 
     def show_toast(self, message, toast_type="success"):
-        """Show a brief notification at the bottom of the window.
-
-        toast_type: "success" (green), "info" (blue), "warning" (amber)
-        """
+        """Show a brief notification at the bottom of the window."""
         if self._toast_timeout_id:
             GLib.source_remove(self._toast_timeout_id)
             self._toast_timeout_id = None
 
-        # Icon per type
         icons = {
             "success": "object-select-symbolic",
             "info": "dialog-information-symbolic",
@@ -151,7 +204,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             icons.get(toast_type, "dialog-information-symbolic")
         )
 
-        # CSS class per type
         for cls in ("toast-success", "toast-info", "toast-warning"):
             self.toast_box.remove_css_class(cls)
         self.toast_box.add_css_class(f"toast-{toast_type}")
@@ -163,47 +215,56 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _hide_toast(self):
         self.toast_revealer.set_reveal_child(False)
         self._toast_timeout_id = None
-        return False  # Don't repeat
+        return False
 
     # ── Confirm Dialog ──────────────────────────────────────────────
 
     def _show_confirm(self, title, message, on_confirm):
-        """Show a confirmation dialog before destructive actions."""
-        try:
-            dialog = Gtk.AlertDialog()
-            dialog.set_message(title)
-            dialog.set_detail(message)
-            dialog.set_buttons(["Cancel", "Delete"])
-            dialog.set_cancel_button(0)
-            dialog.set_default_button(0)
+        """Show a simple confirmation dialog before destructive actions."""
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            modal=True,
+            message_type=Gtk.MessageType.WARNING,
+            buttons=Gtk.ButtonsType.NONE,
+            text=title,
+            secondary_text=message,
+        )
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.add_button("Delete", Gtk.ResponseType.OK)
 
-            def on_response(source, result):
-                try:
-                    choice = source.choose_finish(result)
-                    if choice == 1:  # "Delete" button
-                        on_confirm()
-                except GLib.Error:
-                    pass  # Dialog dismissed / cancelled
+        def on_response(_dialog, response_id):
+            _dialog.destroy()
+            if response_id == Gtk.ResponseType.OK:
+                on_confirm()
 
-            dialog.choose(self, None, on_response)
-        except AttributeError:
-            # Fallback for GTK < 4.10 — confirm directly
-            on_confirm()
+        dialog.connect("response", on_response)
+        dialog.present()
 
     # ── Data & List ─────────────────────────────────────────────────
 
     def refresh_list(self, search_query=None):
-        total, favs = self.db.get_counts()
-        self.btn_all.set_label(f"All {total}")
-        self.btn_fav.set_label(f"Favorites {favs}")
+        hist_count, fav_count = self.db.get_counts()
+        self.btn_all.set_label(f"History ({hist_count})" if hist_count else "History")
+        self.btn_fav.set_label(f"Favourite ({fav_count})" if fav_count else "Favourite")
+        
+        if self.active_filter == "favorites":
+             self.btn_delete_all.set_tooltip_text("Delete All Favorites")
+             self.btn_delete_all.set_sensitive(fav_count > 0)
+        else:
+             self.btn_delete_all.set_tooltip_text("Delete All History")
+             self.btn_delete_all.set_sensitive(hist_count > 0)
 
         child = self.listbox.get_first_child()
         while child:
             self.listbox.remove(child)
             child = self.listbox.get_first_child()
 
-        filter_pinned = True if self.active_filter == "favorites" else None
-        items = self.db.get_items(search_query, filter_pinned)
+        items = []
+        if self.active_filter == "favorites":
+            items = self.db.get_favorites(search_query)
+        else:
+            items = self.db.get_history(search_query)
+
         for item in items:
             self.listbox.append(self._create_row(item))
 
@@ -222,37 +283,23 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.refresh_list(entry.get_text())
 
     def _on_clear_clicked(self, btn):
-        total, favs = self.db.get_counts()
-
         if self.active_filter == "favorites":
-            # Favorites tab → delete all favorites
-            if favs == 0:
-                self.show_toast("Nothing to delete", "info")
-                return
-            item_word = "favorite" if favs == 1 else "favorites"
             self._show_confirm(
                 "Delete all favorites?",
-                f"{favs} {item_word} will be permanently deleted.",
+                "All items in the Favorites list will be permanently deleted.",
                 self._do_clear_favorites,
             )
         else:
-            # All tab → delete unpinned only, keep favorites
-            unpinned = total - favs
-            if unpinned == 0:
-                self.show_toast("Nothing to delete", "info")
-                return
-            item_word = "item" if unpinned == 1 else "items"
             self._show_confirm(
                 "Delete all history?",
-                f"{unpinned} {item_word} will be permanently deleted. "
-                "Favorites will be kept.",
-                self._do_clear_unpinned,
+                "All items in the History list will be permanently deleted.\nFavorites will be SAFE.",
+                self._do_clear_history,
             )
 
-    def _do_clear_unpinned(self):
-        count = self.db.clear_unpinned()
+    def _do_clear_history(self):
+        count = self.db.clear_history()
         item_word = "item" if count == 1 else "items"
-        self.show_toast(f"Deleted {count} {item_word}", "success")
+        self.show_toast(f"Deleted {count} history {item_word}", "success")
         self.refresh_list(self.search_entry.get_text())
 
     def _do_clear_favorites(self):
@@ -265,122 +312,115 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.on_copy_callback(content)
         self.show_toast("Copied to clipboard", "success")
 
-    def _on_pin_clicked(self, item_id):
-        is_pinned = self.db.toggle_pin(item_id)
-        if is_pinned:
-            self.show_toast("Added to favorites", "success")
-        else:
+    def _on_pin_clicked(self, row, item_id, content):
+        """Toggle favorite status."""
+        if self.active_filter == "favorites":
+            self.db.remove_from_favorites(content)
             self.show_toast("Removed from favorites", "info")
-        self.refresh_list(self.search_entry.get_text())
+            self.refresh_list(self.search_entry.get_text())
+        else:
+            if self.db.is_favorite(content):
+                self.db.remove_from_favorites(content)
+                self.show_toast("Removed from favorites", "info")
+                row.set_fav_active(False)
+            else:
+                self.db.add_to_favorites(content)
+                self.show_toast("Added to favorites", "success")
+                row.set_fav_active(True)
+            self.refresh_list(self.search_entry.get_text())
 
     def _on_delete_clicked(self, item_id):
-        self.db.delete_item(item_id)
+        if self.active_filter == "favorites":
+            self.db.delete_favorite_item(item_id)
+        else:
+            self.db.delete_history_item(item_id)
         self.show_toast("Deleted", "success")
         self.refresh_list(self.search_entry.get_text())
 
     def _on_row_activated(self, listbox, row):
         if not hasattr(row, 'item_data'):
             return
-        _, content, _, _ = row.item_data
+        _, content, _ = row.item_data
         self._on_copy_clicked(content)
 
     def _on_close_request(self, window):
-        """Handle window close based on settings.
-
-        close_to_tray ON + tray available → hide window, app stays alive
-        close_to_tray ON + no tray        → still hide (re-open via desktop entry)
-        close_to_tray OFF                 → quit the application
-        """
-        if settings.get("close_to_tray"):
+        if settings.get("closeToTray"):
             self.hide()
-            return True  # Prevent default destroy
+            return True
         else:
             self.get_application().quit()
             return False
 
-    def _on_settings_clicked(self, btn):
-        """Open settings dialog."""
-        dialog = SettingsDialog(
-            self,
-            on_theme_changed=self._on_theme_changed,
-            on_shortcut_changed=self.on_shortcut_changed,
-        )
-        dialog.connect("response", self._on_settings_response)
-        dialog.present()
+    # ── Settings Navigation ─────────────────────────────────────────
 
-    def _on_settings_response(self, dialog, response):
-        dialog.destroy()
+    def _on_theme_toggle_clicked(self, btn):
+        """Quick toggle between dark and light theme."""
+        current = settings.get("theme")
+        new_theme = "light" if current != "light" else "dark"
+        settings.set("theme", new_theme)
+        self._apply_theme(new_theme)
+        self._update_theme_icon(new_theme)
+
+    def _update_theme_icon(self, theme=None):
+        """Update the theme toggle button icon to reflect current theme."""
+        if not hasattr(self, 'btn_theme'):
+            return  # Button disabled
+        if theme is None:
+            theme = settings.get("theme")
+        if theme == "light":
+            self.btn_theme.set_icon_name("weather-clear-symbolic")
+            self.btn_theme.set_tooltip_text("Switch to dark mode")
+        else:
+            self.btn_theme.set_icon_name("weather-clear-night-symbolic")
+            self.btn_theme.set_tooltip_text("Switch to light mode")
+
+    def _on_settings_clicked(self, btn):
+        self.settings_view.reload_state()
+        self.stack.set_visible_child_name("settings")
+
+    def _on_settings_closed(self, saved):
+        self.stack.set_visible_child_name("main")
+        self._update_theme_icon()
+        if saved:
+            self.show_toast("Settings saved", "success")
 
     def _on_theme_changed(self, theme):
-        """Handle theme change from settings dialog."""
         self._apply_theme(theme)
 
     def _apply_theme(self, theme=None):
-        """Apply theme by loading appropriate CSS."""
         if theme is None:
             theme = settings.get("theme")
 
         display = Gdk.Display.get_default()
-
-        # Always remove first to avoid stacking
         try:
             Gtk.StyleContext.remove_provider_for_display(display, self.css_provider)
         except Exception:
             pass
 
-        if theme == "light":
-            css_file = "style_light.css"
-        elif theme == "system":
-            # Detect system dark/light via org.gnome.desktop.interface
-            css_file = self._detect_system_theme()
-        else:  # dark or default
-            css_file = "style.css"
+        css_file = "style_light.css" if theme == "light" else "style.css"
 
         try:
             css_path = os.path.join(os.path.dirname(__file__), "..", css_file)
             self.css_provider.load_from_path(css_path)
             Gtk.StyleContext.add_provider_for_display(
-                display, self.css_provider,
-                Gtk.STYLE_PROVIDER_PRIORITY_USER,
+                display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER,
             )
         except Exception as e:
-            print(f"Error loading theme CSS: {e}")
-
-    def _detect_system_theme(self):
-        """Detect system color scheme preference. Returns CSS filename."""
-        try:
-            schema = Gio.Settings.new("org.gnome.desktop.interface")
-            color_scheme = schema.get_string("color-scheme")
-            # Values: "default", "prefer-dark", "prefer-light"
-            if "dark" in color_scheme:
-                return "style.css"
-            else:
-                return "style_light.css"
-        except Exception:
-            pass
-
-        # Fallback: check GTK theme name
-        try:
-            gtk_settings = Gtk.Settings.get_default()
-            theme_name = gtk_settings.get_property("gtk-theme-name") or ""
-            if "dark" in theme_name.lower():
-                return "style.css"
-            else:
-                return "style_light.css"
-        except Exception:
-            return "style.css"
+            print(f"Error loading CSS: {e}")
 
     # ── Row Builder ─────────────────────────────────────────────────
 
     def _create_row(self, item):
-        item_id, content, is_pinned, timestamp = item
+        item_id, content, timestamp = item
+        
+        is_pinned = True
+        if self.active_filter == "all":
+            is_pinned = self.db.is_favorite(content)
 
         row = Gtk.ListBoxRow()
         row.item_data = item
         row.set_selectable(False)
         row.set_activatable(True)
-        row.set_css_classes([])  # Remove 'activatable' class to kill GTK hover
-        # Remove GTK's 'activatable' CSS class to kill its built-in hover effect
         row.set_css_classes([])
 
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -389,7 +429,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         item_box.append(top_row)
 
-        # Content: image or text
         if content.startswith("IMAGE::"):
             image_path = content.replace("IMAGE::", "")
             if os.path.exists(image_path):
@@ -398,13 +437,10 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                     picture = Gtk.Picture.new_for_paintable(texture)
                     picture.set_can_shrink(True)
                     picture.add_css_class("content-image")
-
-                    # Scale height proportionally to container width,
-                    # cap at 250px — don't force a fixed min-height
-                    # so small images stay at their natural size.
+                    
                     nat_w = texture.get_width()
                     nat_h = texture.get_height()
-                    avail_w = 370  # approx available width after margins
+                    avail_w = 370
                     if nat_w > avail_w:
                         display_h = min(int(nat_h * avail_w / nat_w), 250)
                     else:
@@ -416,27 +452,20 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                     img_box.append(picture)
                     top_row.append(img_box)
                 except Exception as e:
-                    print(f"Error loading image: {e}")
                     top_row.append(Gtk.Label(label="[Image Error]"))
             else:
-                lbl = Gtk.Label(label="[Image Missing]")
-                lbl.add_css_class("clipboard-item-text")
-                top_row.append(lbl)
+                top_row.append(Gtk.Label(label="[Image Missing]", css_classes=["clipboard-item-text"]))
         else:
-            display_text = content[:300]
-            if len(content) > 300:
-                display_text += "..."
+            display_text = content[:300] + ("..." if len(content) > 300 else "")
+            lbl = Gtk.Label(label=display_text)
+            lbl.set_xalign(0)
+            lbl.set_wrap(True)
+            lbl.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
+            lbl.set_lines(5)
+            lbl.add_css_class("clipboard-item-text")
+            lbl.set_hexpand(True)
+            top_row.append(lbl)
 
-            lbl_content = Gtk.Label(label=display_text)
-            lbl_content.set_xalign(0)
-            lbl_content.set_wrap(True)
-            lbl_content.set_wrap_mode(Pango.WrapMode.WORD_CHAR)
-            lbl_content.set_lines(5)
-            lbl_content.add_css_class("clipboard-item-text")
-            lbl_content.set_hexpand(True)
-            top_row.append(lbl_content)
-
-        # Action buttons
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         actions.add_css_class("actions")
         actions.set_valign(Gtk.Align.START)
@@ -452,10 +481,21 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         btn_fav = Gtk.Button(icon_name="emblem-favorite-symbolic")
         btn_fav.add_css_class("icon-btn")
         btn_fav.add_css_class("fav")
-        btn_fav.set_tooltip_text("Favorite")
+        btn_fav.set_tooltip_text("Add to Favorites")
         if is_pinned:
             btn_fav.add_css_class("active")
-        btn_fav.connect('clicked', lambda b: self._on_pin_clicked(item_id))
+            btn_fav.set_tooltip_text("Remove from Favorites")
+        
+        def set_fav_active(active):
+            if active:
+                btn_fav.add_css_class("active")
+                btn_fav.set_tooltip_text("Remove from Favorites")
+            else:
+                btn_fav.remove_css_class("active")
+                btn_fav.set_tooltip_text("Add to Favorites")
+        row.set_fav_active = set_fav_active
+
+        btn_fav.connect('clicked', lambda b: self._on_pin_clicked(row, item_id, content))
         actions.append(btn_fav)
 
         btn_del = Gtk.Button(icon_name="user-trash-symbolic")
@@ -465,21 +505,14 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         btn_del.connect('clicked', lambda b: self._on_delete_clicked(item_id))
         actions.append(btn_del)
 
-        # Meta row
         meta_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         meta_row.add_css_class("clipboard-item-meta")
         item_box.append(meta_row)
 
-        lbl_time = Gtk.Label(label=utils.format_time(timestamp))
-        meta_row.append(lbl_time)
-
-        meta_spacer = Gtk.Label()
-        meta_spacer.set_hexpand(True)
-        meta_row.append(meta_spacer)
-
+        meta_row.append(Gtk.Label(label=utils.format_time(timestamp)))
+        meta_row.append(Gtk.Label(hexpand=True))
         if not content.startswith("IMAGE::"):
-            lbl_len = Gtk.Label(label=f"{len(content)} chars")
-            meta_row.append(lbl_len)
+            meta_row.append(Gtk.Label(label=f"{len(content)} chars"))
 
         row.set_child(item_box)
         return row

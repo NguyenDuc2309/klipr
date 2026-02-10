@@ -18,6 +18,7 @@ rm -f "${PACKAGE_NAME}"_*.deb
 # ── Create FHS directory structure ─────────────────────────────
 mkdir -p "$ROOT_DIR/usr/share/$PACKAGE_NAME"
 mkdir -p "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui"
+mkdir -p "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets"
 mkdir -p "$ROOT_DIR/usr/bin"
 mkdir -p "$ROOT_DIR/usr/share/applications"
 mkdir -p "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps"
@@ -26,14 +27,16 @@ mkdir -p "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps"
 cp src/main.py              "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/database.py          "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/clipboard_manager.py "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
+# cp src/global_shortcut.py   "$ROOT_DIR/usr/share/$PACKAGE_NAME/"  # DISABLED: under development
 cp src/settings.py          "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/tray.py              "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/utils.py             "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/style.css            "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
-cp src/style_light.css      "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
+# cp src/style_light.css      "$ROOT_DIR/usr/share/$PACKAGE_NAME/"  # DISABLED: under development
 cp src/ui/__init__.py       "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/window.py         "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/settings_dialog.py "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
+cp assets/logo.png          "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
 
 # Copy launcher script
 cp packaging/klipr "$ROOT_DIR/usr/bin/"
@@ -43,10 +46,10 @@ chmod +x "$ROOT_DIR/usr/bin/klipr"
 cp packaging/klipr.desktop "$ROOT_DIR/usr/share/applications/"
 
 # Copy icon
-if [ -f "packaging/klipr.png" ]; then
-    cp packaging/klipr.png "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps/"
+if [ -f "assets/logo.png" ]; then
+    cp assets/logo.png "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps/klipr.png"
 else
-    echo "Warning: packaging/klipr.png not found, creating placeholder..."
+    echo "Warning: assets/logo.png not found, creating placeholder..."
     echo "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" | base64 -d > "$ROOT_DIR/usr/share/icons/hicolor/128x128/apps/klipr.png"
 fi
 

@@ -275,7 +275,7 @@ class GlobalShortcut:
                         # Verify keycode matches (ignore stray events)
                         if event.detail == self._keycode:
                             GLib.idle_add(self._callback)
-                except Exception as e:
+                except Exception:
                     if self._running:
                         continue
                     break

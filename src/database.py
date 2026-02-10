@@ -2,6 +2,7 @@ import sqlite3
 import os
 import shutil
 from contextlib import contextmanager
+import settings
 
 DATA_DIR = os.path.expanduser("~/.local/share/klipr")
 DB_PATH = os.path.join(DATA_DIR, "clipboard.db")
@@ -22,10 +23,9 @@ def _get_connection():
 
 
 def init_db():
-    """Initialize database, migrating from old locations if needed."""
+    """Initialize database with separate tables for history and favorites."""
     os.makedirs(DATA_DIR, exist_ok=True)
 
-    # Migrate from old locations if DB doesn't exist yet
     if not os.path.exists(DB_PATH):
         src_dir = os.path.dirname(os.path.abspath(__file__))
         for old_path in [
@@ -41,117 +41,147 @@ def init_db():
             CREATE TABLE IF NOT EXISTS clipboard (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 content TEXT NOT NULL,
-                is_pinned INTEGER DEFAULT 0,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS favorites (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                content TEXT NOT NULL UNIQUE,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
-        # ── Dedup migration ────────────────────────────────────────
-        # Clean up any existing duplicates (keep the newest per content)
-        conn.execute('''
-            DELETE FROM clipboard WHERE id NOT IN (
-                SELECT MAX(id) FROM clipboard GROUP BY content
-            )
-        ''')
-        # Add UNIQUE index as a DB-level safety net against future dupes
+        try:
+            cursor = conn.execute("PRAGMA table_info(clipboard)")
+            columns = [info[1] for info in cursor.fetchall()]
+            
+            if "is_pinned" in columns:
+                print("Migrating favorites...")
+                conn.execute('''
+                    INSERT OR IGNORE INTO favorites (content, timestamp)
+                    SELECT content, timestamp FROM clipboard WHERE is_pinned = 1
+                ''')
+        except Exception as e:
+            print(f"Migration warning: {e}")
+
         conn.execute(
-            'CREATE UNIQUE INDEX IF NOT EXISTS idx_content_unique ON clipboard(content)'
+            'CREATE UNIQUE INDEX IF NOT EXISTS idx_clipboard_content ON clipboard(content)'
+        )
+        conn.execute(
+            'CREATE UNIQUE INDEX IF NOT EXISTS idx_favorites_content ON favorites(content)'
         )
 
 
 def add_item(content):
-    """Add or update a clipboard item (atomic upsert). Returns the item id."""
+    """Add item to clipboard history. does NOT affect favorites."""
     with _get_connection() as conn:
         c = conn.cursor()
 
-        # Atomic upsert — no gap between SELECT and INSERT
         c.execute("""
             INSERT INTO clipboard (content, timestamp)
             VALUES (?, CURRENT_TIMESTAMP)
             ON CONFLICT(content) DO UPDATE SET timestamp = CURRENT_TIMESTAMP
         """, (content,))
 
-        item_id = c.execute(
-            "SELECT id FROM clipboard WHERE content = ?", (content,)
-        ).fetchone()[0]
-
-        # Prune oldest unpinned items beyond 50-item limit
+        limit = settings.get("historyLimit")
         count = c.execute("SELECT COUNT(*) FROM clipboard").fetchone()[0]
-        if count > 50:
+        if count > limit:
             c.execute("""
                 DELETE FROM clipboard
                 WHERE id IN (
                     SELECT id FROM clipboard
-                    WHERE is_pinned = 0
                     ORDER BY timestamp ASC
                     LIMIT ?
                 )
-            """, (count - 50,))
-
-    return item_id
+            """, (count - limit,))
 
 
-def get_items(search_query=None, filter_pinned=None):
-    """Get clipboard items with optional search and pin filter."""
+def get_history(search_query=None):
+    """Get items from clipboard history."""
     with _get_connection() as conn:
-        query = "SELECT id, content, is_pinned, timestamp FROM clipboard"
+        query = "SELECT id, content, timestamp FROM clipboard"
         params = []
-        conditions = []
-
+        
         if search_query:
-            conditions.append("content LIKE ?")
+            query += " WHERE content LIKE ?"
             params.append(f"%{search_query}%")
+            
+        query += " ORDER BY timestamp DESC"
+        return conn.execute(query, params).fetchall()
 
-        if filter_pinned is not None:
-            conditions.append("is_pinned = ?")
-            params.append(1 if filter_pinned else 0)
 
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-
-        query += " ORDER BY is_pinned DESC, timestamp DESC"
+def get_favorites(search_query=None):
+    """Get items from favorites."""
+    with _get_connection() as conn:
+        query = "SELECT id, content, timestamp FROM favorites"
+        params = []
+        
+        if search_query:
+            query += " WHERE content LIKE ?"
+            params.append(f"%{search_query}%")
+            
+        query += " ORDER BY timestamp DESC"
         return conn.execute(query, params).fetchall()
 
 
 def get_counts():
-    """Get total and favorites counts."""
+    """Get total history and favorites counts."""
     with _get_connection() as conn:
-        total = conn.execute("SELECT COUNT(*) FROM clipboard").fetchone()[0]
-        favorites = conn.execute(
-            "SELECT COUNT(*) FROM clipboard WHERE is_pinned = 1"
-        ).fetchone()[0]
-    return total, favorites
+        history = conn.execute("SELECT COUNT(*) FROM clipboard").fetchone()[0]
+        favs = conn.execute("SELECT COUNT(*) FROM favorites").fetchone()[0]
+    return history, favs
 
 
-def delete_item(item_id):
-    """Delete a single clipboard item."""
+def delete_history_item(item_id):
+    """Delete from history."""
     with _get_connection() as conn:
         conn.execute("DELETE FROM clipboard WHERE id = ?", (item_id,))
 
 
-def toggle_pin(item_id):
-    """Toggle pin state. Returns the new is_pinned state (bool) or None if not found."""
+def delete_favorite_item(item_id):
+    """Delete from favorites."""
     with _get_connection() as conn:
-        conn.execute(
-            "UPDATE clipboard SET is_pinned = NOT is_pinned WHERE id = ?", (item_id,)
-        )
-        result = conn.execute(
-            "SELECT is_pinned FROM clipboard WHERE id = ?", (item_id,)
+        conn.execute("DELETE FROM favorites WHERE id = ?", (item_id,))
+        
+
+def add_to_favorites(content):
+    """Add content to favorites table."""
+    with _get_connection() as conn:
+        conn.execute("""
+            INSERT INTO favorites (content, timestamp)
+            VALUES (?, CURRENT_TIMESTAMP)
+            ON CONFLICT(content) DO UPDATE SET timestamp = CURRENT_TIMESTAMP
+        """, (content,))
+
+
+def remove_from_favorites(content):
+    """Remove content from favorites table by content string."""
+    with _get_connection() as conn:
+        conn.execute("DELETE FROM favorites WHERE content = ?", (content,))
+
+
+def is_favorite(content):
+    """Check if content is in favorites."""
+    with _get_connection() as conn:
+        res = conn.execute(
+            "SELECT 1 FROM favorites WHERE content = ?", (content,)
         ).fetchone()
-    return bool(result[0]) if result else None
+    return bool(res)
 
 
-def clear_unpinned():
-    """Delete all unpinned items. Returns count of deleted items."""
+def clear_history():
+    """Delete ALL history items."""
     with _get_connection() as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM clipboard WHERE is_pinned = 0")
+        c.execute("DELETE FROM clipboard")
         return c.rowcount
 
 
 def clear_favorites():
-    """Delete all favorited (pinned) items. Returns count of deleted items."""
+    """Delete ALL favorite items."""
     with _get_connection() as conn:
         c = conn.cursor()
-        c.execute("DELETE FROM clipboard WHERE is_pinned = 1")
+        c.execute("DELETE FROM favorites")
         return c.rowcount

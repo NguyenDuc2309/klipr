@@ -1,7 +1,6 @@
 import gi
-gi.require_version('Gtk', '4.0')
 gi.require_version('Gdk', '4.0')
-from gi.repository import Gtk, Gdk, GLib, Gio
+from gi.repository import Gdk, GLib
 import os
 import time
 import hashlib

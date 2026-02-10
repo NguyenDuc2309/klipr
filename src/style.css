@@ -1,21 +1,18 @@
-/* ══════════════════════════════════════════════════════════════
-   Klipr — Dark Theme
-   Override EVERY GTK4 node that has a background so nothing
-   leaks through from the system Adwaita theme.
-   ══════════════════════════════════════════════════════════════ */
-
-/* ── Base / Global ──────────────────────────────────────────── */
-
 window,
 window overlay,
-window overlay > box {
+window overlay>box {
   background-color: #1e1e1e;
   color: #ffffff;
   font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 13px;
 }
 
-/* ── Header ─────────────────────────────────────────────────── */
+button,
+entry,
+listbox row {
+  outline: none;
+  box-shadow: none;
+}
 
 .header-area {
   background-color: #2d2d30;
@@ -23,9 +20,18 @@ window overlay > box {
   border-bottom: 1px solid #3e3e42;
 }
 
-.header-right {
-  margin-top: 0px;
-  margin-bottom: 0px;
+.title-row {
+  margin-bottom: 8px;
+}
+
+.app-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tab-row {
+  margin-bottom: 8px;
 }
 
 entry {
@@ -33,15 +39,13 @@ entry {
   color: #ffffff;
   border: 1px solid #3e3e42;
   border-radius: 6px;
-  padding: 4px 8px;
-  margin-bottom: 8px;
-  min-height: 30px;
+  padding: 0px 8px;
+  margin-top: 4px;
   transition: all 0.2s;
 }
 
 entry:focus {
   border-color: #4cc2ff;
-  background-color: #1e1e1e;
 }
 
 entry image.left {
@@ -49,35 +53,41 @@ entry image.left {
   margin-right: 6px;
 }
 
-/* ── Tabs ───────────────────────────────────────────────────── */
-
-button.tab {
-  background-color: #1e1e1e;
-  color: #ffffff;
+.tab-group {
   border: 1px solid #3e3e42;
   border-radius: 8px;
-  padding: 4px 6px;
-  font-size: 12px;
-  margin-right: 4px;
+}
+
+button.tab {
+  background-color: transparent;
+  color: #cccccc;
+  border: none;
+  border-radius: 0;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  min-height: 28px;
+  transition: all 0.15s ease;
+}
+
+button.tab.tab-first {
+  border-radius: 7px 0 0 7px;
+}
+
+button.tab.tab-last {
+  border-radius: 0 7px 7px 0;
+  border-left: 1px solid #3e3e42;
 }
 
 button.tab:checked {
-  border-color: #4cc2ff;
-  color: #4cc2ff;
-  background-color: #1e1e1e;
-}
-
-button.tab:hover {
   background-color: #3e3e42;
+  color: #ffffff;
+  font-weight: 600;
 }
 
-label.count {
-  color: #999999;
-  font-size: 11px;
-  margin-left: 4px;
+button.tab:hover:not(:checked) {
+  background-color: rgba(255, 255, 255, 0.06);
 }
-
-/* ── Header action buttons (trash, settings) ── */
 
 button.header-btn {
   background: none;
@@ -95,30 +105,11 @@ button.header-btn:hover {
   color: #ffffff;
 }
 
-/* ── Content area — override every layer ────────────────────── */
-
 scrolledwindow,
-scrolledwindow > viewport,
-scrolledwindow > viewport > listbox {
+scrolledwindow>viewport,
+scrolledwindow>viewport>listbox {
   background-color: #1e1e1e;
-  color: #ffffff;
 }
-
-listbox row,
-listbox row:hover,
-listbox row:focus,
-listbox row:focus-within,
-listbox row:selected {
-  background: #1e1e1e;
-  background-color: #1e1e1e;
-  background-image: none;
-  outline: none;
-  box-shadow: none;
-  color: #ffffff;
-  transition: none;
-}
-
-/* ── Clipboard items ────────────────────────────────────────── */
 
 .clipboard-item {
   background-color: #2d2d30;
@@ -131,6 +122,7 @@ listbox row:selected {
 
 listbox row:hover .clipboard-item {
   border-color: #4cc2ff;
+  background-color: #38383c;
 }
 
 .clipboard-item-text {
@@ -151,17 +143,12 @@ listbox row:hover .clipboard-item {
   margin-bottom: 4px;
 }
 
-/* ── Item action buttons ────────────────────────────────────── */
-
 .actions {
   opacity: 0;
   transition: opacity 0.15s ease-in-out;
 }
 
-row:hover .actions {
-  opacity: 1;
-}
-
+listbox row:hover .actions,
 .clipboard-item:hover .actions {
   opacity: 1;
 }
@@ -171,7 +158,7 @@ button.icon-btn {
   border: 1px solid #3e3e42;
   border-radius: 4px;
   color: #cccccc;
-  padding: 0px;
+  padding: 0;
   min-width: 22px;
   min-height: 22px;
   margin-left: 4px;
@@ -201,8 +188,6 @@ button.icon-btn.active {
   color: #ffffff;
 }
 
-/* ── Toast notification ──────────────────────────────────────── */
-
 .toast {
   background-color: #3e3e42;
   color: #ffffff;
@@ -231,31 +216,10 @@ button.icon-btn.active {
   color: #ffffff;
 }
 
-/* ── Settings Dialog ──────────────────────────────────────────── */
-
-.settings-section-label {
-  font-weight: 600;
-  font-size: 14px;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
-
 dialog,
-dialog > box,
-dialog > box > box {
+dialog>box {
   background-color: #2d2d30;
   color: #ffffff;
-}
-
-dialog label,
-dialog checkbutton label {
-  color: #ffffff;
-}
-
-dialog entry {
-  background-color: #1e1e1e;
-  color: #ffffff;
-  border-color: #3e3e42;
 }
 
 dialog button {
@@ -268,7 +232,6 @@ dialog button:hover {
   background-color: #3e3e42;
 }
 
-/* Shortcut recorder button */
 button.shortcut-btn {
   background-color: #1e1e1e;
   color: #4cc2ff;
