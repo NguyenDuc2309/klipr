@@ -127,7 +127,12 @@ button.header-btn:checked {
 
 scrolledwindow,
 scrolledwindow>viewport,
-scrolledwindow>viewport>listbox {
+scrolledwindow>viewport>listbox,
+stack,
+.content-scroll,
+.content-scroll > viewport,
+.content-scroll listbox,
+.empty-state {
   background-color: #1e1e1e;
 }
 
@@ -138,6 +143,14 @@ scrolledwindow>viewport>listbox {
   padding: 8px 12px;
   margin: 4px 12px;
   transition: all 0.1s;
+}
+
+
+
+.empty-state .title-2 {
+  font-weight: 600;
+  color: #e5e5e5;
+  margin-top: 8px;
 }
 
 .clipboard-item:hover {

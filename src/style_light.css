@@ -64,7 +64,12 @@ button.header-btn:checked {
 
 scrolledwindow,
 scrolledwindow>viewport,
-scrolledwindow>viewport>listbox {
+scrolledwindow>viewport>listbox,
+stack,
+.content-scroll,
+.content-scroll > viewport,
+.content-scroll listbox,
+.empty-state {
   background-color: #F8FAFC;
 }
 
@@ -137,4 +142,10 @@ button.shortcut-btn {
 button.shortcut-btn:hover {
   border-color: #3B82F6;
   background-color: #FFFFFF;
+}
+
+.empty-state .title-2 {
+  font-weight: 600;
+  color: #1E293B;
+  margin-top: 8px;
 }

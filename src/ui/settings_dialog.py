@@ -126,38 +126,46 @@ class SettingsView(Gtk.Box):
         theme_row.append(self.theme_light)
         theme_row.append(self.theme_system)
 
-        # DISABLED: Shortcuts section (feature under development)
-        # self._add_section_header(vbox, "Shortcuts")
-        # 
-        # shortcut_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        # vbox.append(shortcut_box)
-        # 
-        # self.shortcut_enable_check = Gtk.CheckButton(label="Enable global shortcut")
-        # self.shortcut_enable_check.connect("toggled", self._on_shortcut_enable_toggled)
-        # shortcut_box.append(self.shortcut_enable_check)
-        # 
-        # self.shortcut_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        # self.shortcut_row.set_margin_start(20)
-        # shortcut_box.append(self.shortcut_row)
-        # 
-        # shortcut_label = Gtk.Label(label="Toggle Window:")
-        # self.shortcut_row.append(shortcut_label)
-        # 
-        # self.shortcut_btn = Gtk.Button()
-        # self.shortcut_btn.add_css_class("shortcut-btn")
-        # self.shortcut_btn.set_tooltip_text("Click to record new shortcut")
-        # self.shortcut_btn.connect("clicked", self._on_record_clicked)
-        # self.shortcut_row.append(self.shortcut_btn)
-        # 
-        # key_ctrl = Gtk.EventControllerKey()
-        # key_ctrl.connect("key-pressed", self._on_key_pressed)
-        # self.shortcut_btn.add_controller(key_ctrl)
-        # 
-        # reset_btn = Gtk.Button(icon_name="edit-undo-symbolic")
-        # reset_btn.add_css_class("flat")
-        # reset_btn.set_tooltip_text("Reset to default (Alt+V)")
-        # reset_btn.connect("clicked", self._on_reset_shortcut)
-        # self.shortcut_row.append(reset_btn)
+        self._add_section_header(vbox, "Shortcuts")
+        
+        shortcut_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        vbox.append(shortcut_box)
+        
+        self.shortcut_enable_check = Gtk.CheckButton(label="Enable global shortcut")
+        if "shortcutEnabled" not in self.pending_settings:
+             self.pending_settings["shortcutEnabled"] = True
+
+        self.shortcut_enable_check.set_active(self.pending_settings.get("shortcutEnabled", True))
+        self.shortcut_enable_check.connect("toggled", self._on_shortcut_enable_toggled)
+        shortcut_box.append(self.shortcut_enable_check)
+        
+        self.shortcut_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        self.shortcut_row.set_margin_start(20)
+        self.shortcut_row.set_sensitive(self.pending_settings.get("shortcutEnabled", True))
+        shortcut_box.append(self.shortcut_row)
+        
+        shortcut_label = Gtk.Label(label="Toggle Window:")
+        self.shortcut_row.append(shortcut_label)
+        
+        self.shortcut_btn = Gtk.Button()
+        self.shortcut_btn.add_css_class("shortcut-btn")
+        self.shortcut_btn.set_tooltip_text("Click to record new shortcut")
+        
+        current_shortcut = self.pending_settings.get("shortcut", "<Alt>v")
+        self.shortcut_btn.set_label(parse_shortcut_label(current_shortcut))
+        
+        self.shortcut_btn.connect("clicked", self._on_record_clicked)
+        self.shortcut_row.append(self.shortcut_btn)
+        
+        key_ctrl = Gtk.EventControllerKey()
+        key_ctrl.connect("key-pressed", self._on_key_pressed)
+        self.shortcut_btn.add_controller(key_ctrl)
+        
+        reset_btn = Gtk.Button(icon_name="edit-undo-symbolic")
+        reset_btn.add_css_class("flat")
+        reset_btn.set_tooltip_text("Reset to default (Alt+V)")
+        reset_btn.connect("clicked", self._on_reset_shortcut)
+        self.shortcut_row.append(reset_btn)
 
         action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         action_box.set_halign(Gtk.Align.FILL)
@@ -344,6 +352,12 @@ class SettingsView(Gtk.Box):
 
         if self.on_theme_changed:
             self.on_theme_changed(self.pending_settings["theme"])
+
+        if self.on_shortcut_changed:
+            self.on_shortcut_changed(
+                self.pending_settings.get("shortcut", "<Alt>v"),
+                self.pending_settings.get("shortcutEnabled", True)
+            )
 
         self.on_close(True)
 

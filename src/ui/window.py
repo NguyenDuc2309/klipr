@@ -128,24 +128,56 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.search_revealer.set_child(self.search_entry)
         header_area.append(self.search_revealer)
 
-        # List
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.set_vexpand(True)
-        scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.main_view.append(scrolled)
+        # ── Content Area (Stack: List vs Empty) ─────────────────────────
+        self.content_stack = Gtk.Stack()
+        self.content_stack.set_vexpand(True)
+        self.content_stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.main_view.append(self.content_stack)
 
+        # View 1: List
+        self.scrolled = Gtk.ScrolledWindow()
+        self.scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scrolled.add_css_class("content-scroll")
+        
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         self.listbox.set_margin_top(2)
         self.listbox.set_margin_bottom(6)
         self.listbox.connect("row-activated", self._on_row_activated)
-        scrolled.set_child(self.listbox)
+        self.scrolled.set_child(self.listbox)
+        
+        self.content_stack.add_named(self.scrolled, "list")
+
+        # View 2: Empty State
+        self.empty_state = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self.empty_state.set_halign(Gtk.Align.CENTER)
+        self.empty_state.set_valign(Gtk.Align.CENTER)
+        self.empty_state.add_css_class("empty-state")
+        
+        self.empty_icon = Gtk.Image()
+        self.empty_icon.set_pixel_size(72)
+        self.empty_icon.add_css_class("dim-label")
+        self.empty_icon.set_opacity(0.5)
+        self.empty_state.append(self.empty_icon)
+        
+        self.empty_title = Gtk.Label()
+        self.empty_title.add_css_class("title-2")
+        self.empty_state.append(self.empty_title)
+        
+        self.empty_desc = Gtk.Label()
+        self.empty_desc.add_css_class("dim-label")
+        self.empty_desc.set_max_width_chars(30)
+        self.empty_desc.set_wrap(True)
+        self.empty_desc.set_justify(Gtk.Justification.CENTER)
+        self.empty_state.append(self.empty_desc)
+        
+        self.content_stack.add_named(self.empty_state, "empty")
 
         from ui.settings_dialog import SettingsView
         self.settings_view = SettingsView(
             on_close_callback=self._on_settings_closed,
             on_theme_changed=self._on_theme_changed,
-            on_shortcut_changed=None
+            on_shortcut_changed=self.on_shortcut_changed
         )
         self.stack.add_named(self.settings_view, "settings")
 
@@ -286,8 +318,27 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         else:
             items = self.db.get_history(search_query)
 
-        for item in items:
-            self.listbox.append(self._create_row(item))
+        if not items:
+            self._update_empty_state_ui(search_query)
+            self.content_stack.set_visible_child_name("empty")
+        else:
+            self.content_stack.set_visible_child_name("list")
+            for item in items:
+                self.listbox.append(self._create_row(item))
+
+    def _update_empty_state_ui(self, search_query):
+        if search_query:
+            self.empty_icon.set_from_icon_name("system-search-symbolic")
+            self.empty_title.set_label("No results found")
+            self.empty_desc.set_label(f"No matches for '{search_query}'")
+        elif self.active_filter == "favorites":
+            self.empty_icon.set_from_icon_name("starred-symbolic")
+            self.empty_title.set_label("No favorites yet")
+            self.empty_desc.set_label("Star items in your history to pin them here for quick access.")
+        else:
+            self.empty_icon.set_from_icon_name("edit-paste-symbolic")
+            self.empty_title.set_label("Clipboard is empty")
+            self.empty_desc.set_label("Copy text or images to see them appear in your history.")
 
     # ── Event Handlers ──────────────────────────────────────────────
 

@@ -32,11 +32,12 @@ cp src/settings.py          "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/tray.py              "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/utils.py             "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/style.css            "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
-# cp src/style_light.css      "$ROOT_DIR/usr/share/$PACKAGE_NAME/"  # DISABLED: under development
+cp src/style_light.css      "$ROOT_DIR/usr/share/$PACKAGE_NAME/"
 cp src/ui/__init__.py       "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/window.py         "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/settings_dialog.py "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp assets/logo.png          "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
+# cp assets/logo_light.png    "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
 
 # Copy launcher script
 cp packaging/klipr "$ROOT_DIR/usr/bin/"
