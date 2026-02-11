@@ -7,12 +7,11 @@ import settings
 
 
 class SettingsView(Gtk.Box):
-    def __init__(self, on_close_callback, on_theme_changed=None, on_shortcut_changed=None, on_show_confirm=None, on_show_toast=None):
+    def __init__(self, on_close_callback, on_theme_changed=None, on_show_confirm=None, on_show_toast=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         
         self.on_close = on_close_callback
         self.on_theme_changed = on_theme_changed
-        self.on_shortcut_changed = on_shortcut_changed
         self.on_show_confirm = on_show_confirm
         self.on_show_toast = on_show_toast
         
@@ -246,25 +245,24 @@ class SettingsView(Gtk.Box):
         """Update all UI widgets to match self.pending_settings."""
         s = self.pending_settings
         
-        name = s.get("name", "Klipr")
-        version = s.get("version", "0.2")
+        name = s["name"]
+        version = s["version"]
         self.app_title.set_label(name)
 
-        desc = s.get("description", "Clipboard Manager")
+        desc = s["description"]
         self.app_desc.set_label(f"{desc}\nVersion {version}")
 
-        limit_str = str(s.get("historyLimit", 50))
-        if limit_str == "100":
-            self.limit_dropdown.set_selected(1)
-        elif limit_str == "150":
-            self.limit_dropdown.set_selected(2)
-        else:
-            self.limit_dropdown.set_selected(0)
+        limit = int(s["historyLimit"])
+        limit_map = {50: 0, 100: 1, 150: 2}
+        if limit not in limit_map:
+            raise ValueError(f"Unsupported historyLimit value: {limit}")
+        idx = limit_map[limit]
+        self.limit_dropdown.set_selected(idx)
             
-        self.autostart_check.set_active(s.get("autostart", False))
-        self.close_tray_check.set_active(s.get("closeToTray", True))
+        self.autostart_check.set_active(s["autostart"])
+        self.close_tray_check.set_active(s["closeToTray"])
 
-        t = s.get("theme", "dark")
+        t = s["theme"]
         self._update_theme_cards(t)
         self._update_logo(t)
 
@@ -281,11 +279,11 @@ class SettingsView(Gtk.Box):
              self._do_restore_defaults()
 
     def _do_restore_defaults(self):
-        self.pending_settings = settings.DEFAULTS.copy()
+        self.pending_settings = settings.load_base_defaults().copy()
         self._refresh_ui()
         
         # Apply restored theme immediately
-        restored_theme = self.pending_settings.get("theme", "dark")
+        restored_theme = self.pending_settings["theme"]
         if self.on_theme_changed:
             self.on_theme_changed(restored_theme)
             
@@ -333,8 +331,6 @@ class SettingsView(Gtk.Box):
         if self.on_theme_changed:
             self.on_theme_changed(self.pending_settings["theme"])
 
-        if self.on_shortcut_changed:
-            self.on_shortcut_changed()
 
         self.on_close(True)
 

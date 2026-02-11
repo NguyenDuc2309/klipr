@@ -8,13 +8,12 @@ import settings
 
 
 class ClipboardWindow(Gtk.ApplicationWindow):
-    def __init__(self, app, db_interface, on_copy, on_shortcut_changed=None):
+    def __init__(self, app, db_interface, on_copy):
         super().__init__(application=app, title="Klipr - Clipboard Manager")
         self.set_default_size(420, 600)
 
         self.db = db_interface
         self.on_copy_callback = on_copy
-        self.on_shortcut_changed = on_shortcut_changed
         self._toast_timeout_id = None
 
         # CSS
@@ -45,7 +44,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         title_row.add_css_class("title-row")
         header_area.append(title_row)
 
-        app_name = settings.get("name") or "Klipr"
+        app_name = settings.get("name")
         brand_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
         brand_box.add_css_class("app-brand")
         brand_box.set_hexpand(True)
@@ -185,7 +184,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.settings_view = SettingsView(
             on_close_callback=self._on_settings_closed,
             on_theme_changed=self._on_theme_changed,
-            on_shortcut_changed=self.on_shortcut_changed,
             on_show_confirm=self._show_confirm,
             on_show_toast=self.show_toast
         )
@@ -235,7 +233,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def update_from_settings(self):
         """Called when settings file changes on disk."""
         # Update Title if name changed
-        app_name = settings.get("name") or "Klipr"
+        app_name = settings.get("name")
         self.set_title(f"{app_name} - Clipboard Manager")
         
         # Reload settings view if open

@@ -13,7 +13,6 @@ from database import (
 from clipboard_manager import ClipboardManager
 from ui.window import ClipboardWindow
 from tray import TrayIcon
-from global_shortcut import GlobalShortcut
 
 
 class ClipboardApp(Gtk.Application):
@@ -25,7 +24,6 @@ class ClipboardApp(Gtk.Application):
         self.window = None
         self.clipboard_manager = None
         self.tray_icon = None
-        self.global_shortcut = None
         self._start_hidden = False
 
         self.add_main_option(
@@ -86,7 +84,6 @@ class ClipboardApp(Gtk.Application):
             self,
             self._create_db_interface(),
             self._on_user_copy,
-            on_shortcut_changed=self.on_shortcut_changed,
         )
 
         self.tray_icon = TrayIcon(
@@ -95,7 +92,6 @@ class ClipboardApp(Gtk.Application):
             on_quit=self.quit,
         )
 
-        self._setup_global_shortcut()
 
         self._monitor_css()
         self._monitor_settings()
@@ -147,14 +143,9 @@ class ClipboardApp(Gtk.Application):
         
         if self.window:
             self.window.update_from_settings()
-        
-        self.on_shortcut_changed()
         return False
 
     def do_shutdown(self):
-        """Clean up tray and shortcut resources on app shutdown."""
-        if self.global_shortcut:
-            self.global_shortcut.unbind()
         if self.tray_icon:
             self.tray_icon.shutdown()
         if hasattr(self, 'css_monitors'):
@@ -182,30 +173,6 @@ class ClipboardApp(Gtk.Application):
             self.window.present()
         return False
 
-    def _setup_global_shortcut(self):
-        """Register global keyboard shortcut from settings."""
-        if not settings.get("shortcutEnabled"):
-            return
-
-        shortcut = settings.get("shortcut")
-        if not shortcut:
-            return
-
-        self.global_shortcut = GlobalShortcut(self._toggle_window)
-
-        if GlobalShortcut.is_available():
-            if not self.global_shortcut.bind(shortcut):
-                print("Global shortcut: failed to bind (key may be in use)")
-        else:
-            print("Global shortcut: X11 not available")
-
-    def on_shortcut_changed(self):
-        """Re-register global shortcut after settings change."""
-        if self.global_shortcut:
-            self.global_shortcut.unbind()
-            self.global_shortcut = None
-
-        self._setup_global_shortcut()
 
     def _create_db_interface(self):
         class DBInterface:
