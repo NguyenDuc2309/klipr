@@ -21,7 +21,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.css_provider = Gtk.CssProvider()
         self.light_provider = Gtk.CssProvider()
         self.load_css()
-        self._setup_css_monitor()
 
         # Main overlay (allows toast to float on top of content)
         overlay = Gtk.Overlay()
@@ -57,6 +56,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             logo_image = Gtk.Image.new_from_file(logo_path)
             logo_image.set_pixel_size(32)
             logo_image.add_css_class("app-logo")
+            self.logo_image = logo_image
             brand_box.append(logo_image)
 
         self.title_label = Gtk.Label(label=app_name)
@@ -138,6 +138,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.scrolled = Gtk.ScrolledWindow()
         self.scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         self.scrolled.add_css_class("content-scroll")
+        self.scrolled.set_vexpand(True)
         
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.NONE)
@@ -149,27 +150,34 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.content_stack.add_named(self.scrolled, "list")
 
         # View 2: Empty State
-        self.empty_state = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        self.empty_state.set_halign(Gtk.Align.CENTER)
-        self.empty_state.set_valign(Gtk.Align.CENTER)
+        self.empty_state = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.empty_state.set_vexpand(True)
+        self.empty_state.set_hexpand(True)
         self.empty_state.add_css_class("empty-state")
+        
+        # Center content wrapper
+        center_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        center_box.set_halign(Gtk.Align.CENTER)
+        center_box.set_valign(Gtk.Align.CENTER)
+        center_box.set_vexpand(True)
+        self.empty_state.append(center_box)
         
         self.empty_icon = Gtk.Image()
         self.empty_icon.set_pixel_size(72)
         self.empty_icon.add_css_class("dim-label")
         self.empty_icon.set_opacity(0.5)
-        self.empty_state.append(self.empty_icon)
+        center_box.append(self.empty_icon)
         
         self.empty_title = Gtk.Label()
         self.empty_title.add_css_class("title-2")
-        self.empty_state.append(self.empty_title)
+        center_box.append(self.empty_title)
         
         self.empty_desc = Gtk.Label()
         self.empty_desc.add_css_class("dim-label")
         self.empty_desc.set_max_width_chars(30)
         self.empty_desc.set_wrap(True)
         self.empty_desc.set_justify(Gtk.Justification.CENTER)
-        self.empty_state.append(self.empty_desc)
+        center_box.append(self.empty_desc)
         
         self.content_stack.add_named(self.empty_state, "empty")
 
@@ -177,7 +185,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.settings_view = SettingsView(
             on_close_callback=self._on_settings_closed,
             on_theme_changed=self._on_theme_changed,
-            on_shortcut_changed=self.on_shortcut_changed
+            on_shortcut_changed=self.on_shortcut_changed,
+            on_show_confirm=self._show_confirm,
+            on_show_toast=self.show_toast
         )
         self.stack.add_named(self.settings_view, "settings")
 
@@ -218,11 +228,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def load_css(self):
         """Load CSS based on current theme setting."""
         self._apply_theme()
-        print("CSS Reloaded")
         return False
-
-    def _setup_css_monitor(self):
-        pass
 
     # ── Settings Update ─────────────────────────────────────────────
     
@@ -238,7 +244,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
              
         # Re-apply theme in case it changed
         self.load_css()
-        print(f"UI Updated from Settings: {app_name}")
 
     # ── Toast ───────────────────────────────────────────────────────
 
@@ -272,7 +277,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     # ── Confirm Dialog ──────────────────────────────────────────────
 
-    def _show_confirm(self, title, message, on_confirm):
+    def _show_confirm(self, title, message, on_confirm, confirm_label="Delete"):
         """Show a simple confirmation dialog before destructive actions."""
         dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -283,7 +288,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             secondary_text=message,
         )
         dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
-        dialog.add_button("Delete", Gtk.ResponseType.OK)
+        dialog.add_button(confirm_label, Gtk.ResponseType.OK)
 
         def on_response(_dialog, response_id):
             _dialog.destroy()
@@ -526,17 +531,28 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             except Exception as e:
                 print(f"Error loading light CSS: {e}")
 
-    def _resolve_logo_path(self):
+        # Update logo
+        target_logo = "light_logo.png" if resolved == "light" else "logo.png"
+        logo_path = self._resolve_logo_path(target_logo)
+        if logo_path and hasattr(self, 'logo_image'):
+            self.logo_image.set_from_file(logo_path)
+
+    def _resolve_logo_path(self, filename="logo.png"):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         candidates = [
-            os.path.join(base_dir, "..", "assets", "logo.png"),
-            os.path.join(base_dir, "..", "..", "assets", "logo.png"),
-            os.path.join(os.getcwd(), "assets", "logo.png"),
+            os.path.join(base_dir, "..", "assets", filename),
+            os.path.join(base_dir, "..", "..", "assets", filename),
+            os.path.join(os.getcwd(), "assets", filename),
         ]
         for path in candidates:
             abs_path = os.path.abspath(path)
             if os.path.exists(abs_path):
                 return abs_path
+        
+        # Fallback to default logo if light version not found
+        if filename != "logo.png":
+            return self._resolve_logo_path("logo.png")
+            
         return None
 
     # ── Row Builder ─────────────────────────────────────────────────

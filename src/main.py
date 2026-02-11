@@ -77,8 +77,8 @@ class ClipboardApp(Gtk.Application):
 
         try:
             init_db()
-        except Exception as e:
-            print(f"DB Error: {e}")
+        except Exception:
+            pass
 
         self.clipboard_manager = ClipboardManager(self._on_clipboard_update)
 
@@ -118,14 +118,11 @@ class ClipboardApp(Gtk.Application):
                 monitor = f.monitor_file(Gio.FileMonitorFlags.NONE, None)
                 monitor.connect("changed", self._on_style_changed)
                 self.css_monitors.append(monitor)
-                print(f"Monitoring CSS file: {path}")
-            except Exception as e:
-                print(f"Failed to monitor {css}: {e}")
+            except Exception:
+                pass
 
     def _on_style_changed(self, monitor, file, other_file, event_type):
-        """Reload CSS provider when file changes."""
         if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
-            print(f"CSS file changed: {file.get_path()}")
             GLib.idle_add(self.window.load_css)
 
     def _monitor_settings(self):
@@ -138,12 +135,11 @@ class ClipboardApp(Gtk.Application):
         try:
             self.settings_monitor = f.monitor_file(Gio.FileMonitorFlags.NONE, None)
             self.settings_monitor.connect("changed", self._on_settings_file_changed)
-        except Exception as e:
-            print(f"Failed to monitor settings: {e}")
+        except Exception:
+            pass
 
     def _on_settings_file_changed(self, monitor, file, other_file, event_type):
         if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
-            print("Settings file changed, reloading...")
             GLib.idle_add(self._reload_settings)
 
     def _reload_settings(self):

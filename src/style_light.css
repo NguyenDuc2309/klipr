@@ -63,14 +63,22 @@ button.header-btn:checked {
 }
 
 scrolledwindow,
-scrolledwindow>viewport,
-scrolledwindow>viewport>listbox,
+scrolledwindow viewport,
+scrolledwindow list,
+viewport,
+viewport list,
+list,
 stack,
+stackpage,
 .content-scroll,
-.content-scroll > viewport,
-.content-scroll listbox,
+.content-scroll viewport,
+.content-scroll list,
 .empty-state {
   background-color: #F8FAFC;
+}
+
+row {
+  background-color: #F1F5F9;
 }
 
 .clipboard-item {
@@ -83,10 +91,6 @@ stack,
   border-color: #3B82F6;
   background-color: #FFFFFF;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
-}
-
-row {
-  background-color: #F1F5F9;
 }
 
 .clipboard-item-text {
@@ -132,20 +136,45 @@ dialog button:hover {
   background-color: #F1F5F9;
 }
 
-button.shortcut-btn {
-  background-color: #F8FAFC;
-  color: #3B82F6;
-  border-color: #E2E8F0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-button.shortcut-btn:hover {
-  border-color: #3B82F6;
-  background-color: #FFFFFF;
-}
 
 .empty-state .title-2 {
   font-weight: 600;
   color: #1E293B;
   margin-top: 8px;
+}
+
+button.theme-card {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #64748B;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+button.theme-card:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+button.theme-card.theme-card-active {
+  background-color: rgba(59, 130, 246, 0.08);
+  border-color: #3B82F6;
+  color: #3B82F6;
+}
+
+button.settings-restore-btn {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #64748B;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+button.settings-restore-btn:hover {
+  background-color: #F8FAFC;
+  border-color: #CBD5E1;
+  color: #1E293B;
+}
+
+button.settings-restore-btn:active {
+  background-color: #E2E8F0;
 }

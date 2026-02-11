@@ -1,18 +1,20 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk
 import os
 import settings
-from global_shortcut import parse_shortcut_label
+
 
 
 class SettingsView(Gtk.Box):
-    def __init__(self, on_close_callback, on_theme_changed=None, on_shortcut_changed=None):
+    def __init__(self, on_close_callback, on_theme_changed=None, on_shortcut_changed=None, on_show_confirm=None, on_show_toast=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         
         self.on_close = on_close_callback
         self.on_theme_changed = on_theme_changed
         self.on_shortcut_changed = on_shortcut_changed
+        self.on_show_confirm = on_show_confirm
+        self.on_show_toast = on_show_toast
         
         self.set_margin_top(0)
         self.set_margin_bottom(0)
@@ -20,15 +22,11 @@ class SettingsView(Gtk.Box):
         self.set_margin_end(0)
 
         self.pending_settings = settings.load().copy()
-        self._recording = False
+
 
         autostart_path = os.path.expanduser("~/.config/autostart/klipr.desktop")
         self.autostart_initial_state = os.path.exists(autostart_path)
 
-        header = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        header.add_css_class("header-area")
-        header.append(Gtk.Label(label="Settings", css_classes=["title-1"]))
-        self.append(header)
 
         scrolled = Gtk.ScrolledWindow()
         scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
@@ -42,28 +40,34 @@ class SettingsView(Gtk.Box):
         vbox.set_margin_end(40)
         scrolled.set_child(vbox)
 
-        about_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        about_box.set_halign(Gtk.Align.CENTER)
+        about_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
+        about_box.set_halign(Gtk.Align.FILL)
 
-        logo_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "logo.png")
-        if os.path.exists(logo_path):
-             app_icon = Gtk.Picture.new_for_filename(logo_path)
-             app_icon.set_size_request(64, 64)
-             app_icon.set_can_shrink(True)
+        logo_path = self._get_logo_path("logo.png")
+        if logo_path:
+             self.app_icon_widget = Gtk.Picture.new_for_filename(logo_path)
+             self.app_icon_widget.set_size_request(48, 48)
+             self.app_icon_widget.set_can_shrink(True)
         else:
-             app_icon = Gtk.Image.new_from_icon_name("klipr")
-             app_icon.set_pixel_size(64)
-        about_box.append(app_icon)
-        
+             self.app_icon_widget = Gtk.Image.new_from_icon_name("klipr")
+             self.app_icon_widget.set_pixel_size(48)
+        self.app_icon_widget.set_valign(Gtk.Align.CENTER)
+        about_box.append(self.app_icon_widget)
+
+        about_text_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        about_text_box.set_valign(Gtk.Align.CENTER)
+
         self.app_title = Gtk.Label()
-        self.app_title.add_css_class("title-1")
-        about_box.append(self.app_title)
+        self.app_title.add_css_class("title-2")
+        self.app_title.set_halign(Gtk.Align.START)
+        about_text_box.append(self.app_title)
         
         self.app_desc = Gtk.Label()
-        self.app_desc.set_justify(Gtk.Justification.CENTER)
+        self.app_desc.set_halign(Gtk.Align.START)
         self.app_desc.add_css_class("dim-label")
-        about_box.append(self.app_desc)
+        about_text_box.append(self.app_desc)
         
+        about_box.append(about_text_box)
         vbox.append(about_box)
         vbox.append(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL))
 
@@ -103,69 +107,34 @@ class SettingsView(Gtk.Box):
 
         self._add_section_header(vbox, "Appearance")
 
-        appearance_grid = Gtk.Grid()
-        appearance_grid.set_column_spacing(12)
-        appearance_grid.set_row_spacing(12)
-        vbox.append(appearance_grid)
+        theme_cards_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        theme_cards_box.set_homogeneous(True)
+        vbox.append(theme_cards_box)
 
-        theme_label = Gtk.Label(label="App Theme")
-        theme_label.set_halign(Gtk.Align.START)
-        appearance_grid.attach(theme_label, 0, 0, 1, 1)
+        self.theme_dark_btn = self._create_theme_card(
+            "weather-clear-night-symbolic", "Dark"
+        )
+        self.theme_light_btn = self._create_theme_card(
+            "weather-clear-symbolic", "Light"
+        )
+        self.theme_system_btn = self._create_theme_card(
+            "emblem-system-symbolic", "System"
+        )
 
-        theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        theme_row.set_halign(Gtk.Align.END)
-        theme_row.set_hexpand(True)
-        appearance_grid.attach(theme_row, 1, 0, 1, 1)
+        self.theme_dark_btn.connect("clicked", self._on_theme_card_clicked, "dark")
+        self.theme_light_btn.connect("clicked", self._on_theme_card_clicked, "light")
+        self.theme_system_btn.connect("clicked", self._on_theme_card_clicked, "system")
 
-        self.theme_dark = Gtk.CheckButton(label="Dark")
-        self.theme_light = Gtk.CheckButton(label="Light")
-        self.theme_light.set_group(self.theme_dark)
-        self.theme_system = Gtk.CheckButton(label="System")
-        self.theme_system.set_group(self.theme_dark)
-        theme_row.append(self.theme_dark)
-        theme_row.append(self.theme_light)
-        theme_row.append(self.theme_system)
+        theme_cards_box.append(self.theme_dark_btn)
+        theme_cards_box.append(self.theme_light_btn)
+        theme_cards_box.append(self.theme_system_btn)
 
-        self._add_section_header(vbox, "Shortcuts")
-        
-        shortcut_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        vbox.append(shortcut_box)
-        
-        self.shortcut_enable_check = Gtk.CheckButton(label="Enable global shortcut")
-        if "shortcutEnabled" not in self.pending_settings:
-             self.pending_settings["shortcutEnabled"] = True
-
-        self.shortcut_enable_check.set_active(self.pending_settings.get("shortcutEnabled", True))
-        self.shortcut_enable_check.connect("toggled", self._on_shortcut_enable_toggled)
-        shortcut_box.append(self.shortcut_enable_check)
-        
-        self.shortcut_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        self.shortcut_row.set_margin_start(20)
-        self.shortcut_row.set_sensitive(self.pending_settings.get("shortcutEnabled", True))
-        shortcut_box.append(self.shortcut_row)
-        
-        shortcut_label = Gtk.Label(label="Toggle Window:")
-        self.shortcut_row.append(shortcut_label)
-        
-        self.shortcut_btn = Gtk.Button()
-        self.shortcut_btn.add_css_class("shortcut-btn")
-        self.shortcut_btn.set_tooltip_text("Click to record new shortcut")
-        
-        current_shortcut = self.pending_settings.get("shortcut", "<Alt>v")
-        self.shortcut_btn.set_label(parse_shortcut_label(current_shortcut))
-        
-        self.shortcut_btn.connect("clicked", self._on_record_clicked)
-        self.shortcut_row.append(self.shortcut_btn)
-        
-        key_ctrl = Gtk.EventControllerKey()
-        key_ctrl.connect("key-pressed", self._on_key_pressed)
-        self.shortcut_btn.add_controller(key_ctrl)
-        
-        reset_btn = Gtk.Button(icon_name="edit-undo-symbolic")
-        reset_btn.add_css_class("flat")
-        reset_btn.set_tooltip_text("Reset to default (Alt+V)")
-        reset_btn.connect("clicked", self._on_reset_shortcut)
-        self.shortcut_row.append(reset_btn)
+        btn_restore = Gtk.Button(label="Restore Defaults")
+        btn_restore.add_css_class("settings-restore-btn")
+        btn_restore.set_halign(Gtk.Align.FILL)
+        btn_restore.set_margin_top(8)
+        btn_restore.connect("clicked", self._on_restore_defaults)
+        vbox.append(btn_restore)
 
         action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         action_box.set_halign(Gtk.Align.FILL)
@@ -175,18 +144,13 @@ class SettingsView(Gtk.Box):
         action_box.set_margin_end(20)
         action_box.set_margin_start(20)
         
-        btn_restore = Gtk.Button(label="Restore Defaults")
-        btn_restore.add_css_class("destructive-action")
-        btn_restore.connect("clicked", self._on_restore_defaults)
-        action_box.append(btn_restore)
+        btn_cancel = Gtk.Button(label="Cancel")
+        btn_cancel.connect("clicked", self._on_cancel)
+        action_box.append(btn_cancel)
         
         spacer = Gtk.Label()
         spacer.set_hexpand(True)
         action_box.append(spacer)
-        
-        btn_cancel = Gtk.Button(label="Cancel")
-        btn_cancel.connect("clicked", self._on_cancel)
-        action_box.append(btn_cancel)
         
         btn_save = Gtk.Button(label="Save")
         btn_save.add_css_class("suggested-action")
@@ -198,6 +162,41 @@ class SettingsView(Gtk.Box):
 
         self._refresh_ui()
 
+    def _get_logo_path(self, filename):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        candidates = [
+            os.path.join(base_dir, "..", "..", "assets", filename),
+            os.path.join(base_dir, "..", "assets", filename),
+            os.path.join(os.getcwd(), "assets", filename),
+        ]
+        for path in candidates:
+            if os.path.exists(path):
+                return path
+        return None
+
+    def _update_logo(self, theme):
+        if not hasattr(self, 'app_icon_widget'):
+            return
+            
+        # Resolve 'system'
+        resolved = theme
+        if theme == "system":
+            resolved = "dark" # Default to dark for system if checking is hard here, or just assume dark
+            # Simple check
+            gtk_settings = Gtk.Settings.get_default()
+            if gtk_settings and not gtk_settings.get_property("gtk-application-prefer-dark-theme"):
+                 resolved = "light"
+
+        filename = "light_logo.png" if resolved == "light" else "logo.png"
+        path = self._get_logo_path(filename)
+        
+        # Fallback
+        if not path and filename != "logo.png":
+            path = self._get_logo_path("logo.png")
+            
+        if path:
+            self.app_icon_widget.set_filename(path)
+
     def _add_section_header(self, vbox, title):
         label = Gtk.Label()
         label.set_markup(f'<b>{title}</b>')
@@ -205,6 +204,43 @@ class SettingsView(Gtk.Box):
         label.set_margin_top(8)
         label.add_css_class("settings-section-label")
         vbox.append(label)
+
+    def _create_theme_card(self, icon_name, label_text):
+        card = Gtk.Button()
+        card.add_css_class("theme-card")
+        
+        card_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        card_box.set_halign(Gtk.Align.CENTER)
+        card_box.set_valign(Gtk.Align.CENTER)
+        
+        icon = Gtk.Image.new_from_icon_name(icon_name)
+        icon.set_pixel_size(24)
+        card_box.append(icon)
+        
+        label = Gtk.Label(label=label_text)
+        label.add_css_class("theme-card-label")
+        card_box.append(label)
+        
+        card.set_child(card_box)
+        return card
+
+    def _on_theme_card_clicked(self, btn, theme_name):
+        self.pending_settings["theme"] = theme_name
+        self._update_theme_cards(theme_name)
+        self._update_logo(theme_name)
+        if self.on_theme_changed:
+            self.on_theme_changed(theme_name)
+
+    def _update_theme_cards(self, active_theme):
+        for btn, name in [
+            (self.theme_dark_btn, "dark"),
+            (self.theme_light_btn, "light"),
+            (self.theme_system_btn, "system"),
+        ]:
+            if name == active_theme:
+                btn.add_css_class("theme-card-active")
+            else:
+                btn.remove_css_class("theme-card-active")
 
     def _refresh_ui(self):
         """Update all UI widgets to match self.pending_settings."""
@@ -229,85 +265,34 @@ class SettingsView(Gtk.Box):
         self.close_tray_check.set_active(s.get("closeToTray", True))
 
         t = s.get("theme", "dark")
-        if t == "light":
-            self.theme_light.set_active(True)
-        elif t == "system":
-            self.theme_system.set_active(True)
-        else:
-            self.theme_dark.set_active(True)
+        self._update_theme_cards(t)
+        self._update_logo(t)
 
     def _on_restore_defaults(self, btn):
         """Reset all pending settings to factory defaults."""
+        if self.on_show_confirm:
+             self.on_show_confirm(
+                 "Restore Defaults?",
+                 "Are you sure you want to reset all settings to their default values?",
+                 self._do_restore_defaults,
+                 confirm_label="Restore"
+             )
+        else:
+             self._do_restore_defaults()
+
+    def _do_restore_defaults(self):
         self.pending_settings = settings.DEFAULTS.copy()
         self._refresh_ui()
-
-    def _on_record_clicked(self, btn):
-        self._recording = True
-        self.shortcut_btn.set_label("Press shortcut…")
-        self.shortcut_btn.grab_focus()
-
-    def _on_key_pressed(self, controller, keyval, keycode, state):
-        if not self._recording:
-            return False
-
-        _MODIFIER_KEYVALS = {
-            Gdk.KEY_Shift_L, Gdk.KEY_Shift_R,
-            Gdk.KEY_Control_L, Gdk.KEY_Control_R,
-            Gdk.KEY_Alt_L, Gdk.KEY_Alt_R,
-            Gdk.KEY_Super_L, Gdk.KEY_Super_R,
-            Gdk.KEY_Meta_L, Gdk.KEY_Meta_R,
-            Gdk.KEY_ISO_Level3_Shift,
-        }
-        if keyval in _MODIFIER_KEYVALS:
-            return True
-
-        if keyval == Gdk.KEY_Escape:
-            self._recording = False
-            current = self.pending_settings.get("shortcut", "<Alt>v")
-            self.shortcut_btn.set_label(parse_shortcut_label(current))
-            return True
-
-        mods = state & (
-            Gdk.ModifierType.CONTROL_MASK
-            | Gdk.ModifierType.SHIFT_MASK
-            | Gdk.ModifierType.ALT_MASK
-            | Gdk.ModifierType.SUPER_MASK
-        )
-
-        shortcut = ""
-        if mods & Gdk.ModifierType.CONTROL_MASK:
-            shortcut += "<Ctrl>"
-        if mods & Gdk.ModifierType.SHIFT_MASK:
-            shortcut += "<Shift>"
-        if mods & Gdk.ModifierType.ALT_MASK:
-            shortcut += "<Alt>"
-        if mods & Gdk.ModifierType.SUPER_MASK:
-            shortcut += "<Super>"
-
-        key_name = Gdk.keyval_name(keyval)
-        if not key_name:
-            return True
-            
-        if len(key_name) == 1:
-            key_name = key_name.lower()
-            
-        shortcut += key_name
         
-        self.pending_settings["shortcut"] = shortcut
-        self.shortcut_btn.set_label(parse_shortcut_label(shortcut))
-        self._recording = False
-        return True
+        # Apply restored theme immediately
+        restored_theme = self.pending_settings.get("theme", "dark")
+        if self.on_theme_changed:
+            self.on_theme_changed(restored_theme)
+            
+        if self.on_show_toast:
+            self.on_show_toast("Settings restored to defaults", "success")
 
-    def _on_reset_shortcut(self, btn):
-        default = "<Alt>v"
-        self.pending_settings["shortcut"] = default
-        self.shortcut_btn.set_label(parse_shortcut_label(default))
-        self._recording = False
 
-    def _on_shortcut_enable_toggled(self, btn):
-        is_enabled = btn.get_active()
-        self.pending_settings["shortcutEnabled"] = is_enabled
-        self.shortcut_row.set_sensitive(is_enabled)
 
     def reload_state(self):
         """Reload settings from disk when view is shown again (if cancelled previously)."""
@@ -339,12 +324,7 @@ class SettingsView(Gtk.Box):
 
         self.pending_settings["closeToTray"] = self.close_tray_check.get_active()
 
-        if self.theme_light.get_active():
-            self.pending_settings["theme"] = "light"
-        elif self.theme_system.get_active():
-            self.pending_settings["theme"] = "system"
-        else:
-            self.pending_settings["theme"] = "dark"
+        # theme is already set via card clicks in pending_settings
 
         self._apply_autostart(new_autostart_state)
 
@@ -354,10 +334,7 @@ class SettingsView(Gtk.Box):
             self.on_theme_changed(self.pending_settings["theme"])
 
         if self.on_shortcut_changed:
-            self.on_shortcut_changed(
-                self.pending_settings.get("shortcut", "<Alt>v"),
-                self.pending_settings.get("shortcutEnabled", True)
-            )
+            self.on_shortcut_changed()
 
         self.on_close(True)
 

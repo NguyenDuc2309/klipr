@@ -126,14 +126,22 @@ button.header-btn:checked {
 }
 
 scrolledwindow,
-scrolledwindow>viewport,
-scrolledwindow>viewport>listbox,
+scrolledwindow viewport,
+scrolledwindow list,
+viewport,
+viewport list,
+list,
 stack,
+stackpage,
 .content-scroll,
-.content-scroll > viewport,
-.content-scroll listbox,
+.content-scroll viewport,
+.content-scroll list,
 .empty-state {
   background-color: #1e1e1e;
+}
+
+row {
+  background-color: #1C1C1D;
 }
 
 .clipboard-item {
@@ -145,8 +153,6 @@ stack,
   transition: all 0.1s;
 }
 
-
-
 .empty-state .title-2 {
   font-weight: 600;
   color: #e5e5e5;
@@ -156,12 +162,6 @@ stack,
 .clipboard-item:hover {
   border-color: #4cc2ff;
   background-color: #38383c;
-}
-
-/* FIX: row hover color */
-
-row {
-  background-color: #1C1C1D;
 }
 
 .clipboard-item-text {
@@ -271,19 +271,50 @@ dialog button:hover {
   background-color: #3e3e42;
 }
 
-button.shortcut-btn {
-  background-color: #1e1e1e;
-  color: #4cc2ff;
+
+button.theme-card {
+  background-color: #2d2d30;
   border: 1px solid #3e3e42;
-  border-radius: 6px;
-  padding: 4px 12px;
-  font-family: "JetBrains Mono", "Fira Code", monospace;
-  font-size: 12px;
-  font-weight: 600;
-  min-height: 28px;
+  border-radius: 10px;
+  padding: 14px 8px;
+  min-height: 64px;
+  color: #999999;
+  transition: all 0.15s ease;
 }
 
-button.shortcut-btn:hover {
-  border-color: #4cc2ff;
+button.theme-card:hover {
+  background-color: #38383c;
+  border-color: #5a5a5f;
+  color: #cccccc;
+}
+
+button.theme-card.theme-card-active {
+  background-color: rgba(29, 124, 242, 0.15);
+  border-color: #1d7cf2;
+  color: #4cc2ff;
+}
+
+.theme-card-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+button.settings-restore-btn {
   background-color: #2d2d30;
+  border: 1px solid #3e3e42;
+  color: #999999;
+  border-radius: 8px;
+  padding: 10px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+button.settings-restore-btn:hover {
+  background-color: #3e3e42;
+  color: #ffffff;
+  border-color: #5a5a5f;
+}
+
+button.settings-restore-btn:active {
+  background-color: #4a4a4f;
 }

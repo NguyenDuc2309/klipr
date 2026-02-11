@@ -37,7 +37,7 @@ cp src/ui/__init__.py       "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/window.py         "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp src/ui/settings_dialog.py "$ROOT_DIR/usr/share/$PACKAGE_NAME/ui/"
 cp assets/logo.png          "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
-# cp assets/logo_light.png    "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
+cp assets/light_logo.png    "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
 
 # Copy launcher script
 cp packaging/klipr "$ROOT_DIR/usr/bin/"
