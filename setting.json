@@ -4,7 +4,7 @@
     "description": "Clipboard Manager",
     "closeToTray": true,
     "autostart": false,
-    "theme": "dark",
+    "theme": "light",
     "shortcut": "<Alt>v",
     "shortcutEnabled": true,
     "historyLimit": 50

@@ -101,28 +101,30 @@ class SettingsView(Gtk.Box):
         self.close_tray_check = Gtk.CheckButton(label="Close to system tray")
         behavior_box.append(self.close_tray_check)
 
-        # DISABLED: Appearance section (feature under development)
-        # self._add_section_header(vbox, "Appearance")
-        # 
-        # appearance_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        # vbox.append(appearance_box)
-        # 
-        # theme_label = Gtk.Label(label="App Theme")
-        # theme_label.set_halign(Gtk.Align.START)
-        # appearance_box.append(theme_label)
-        # 
-        # theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        # appearance_box.append(theme_row)
-        # 
-        # self.theme_dark = Gtk.CheckButton(label="Dark")
-        # self.theme_light = Gtk.CheckButton(label="Light")
-        # self.theme_light.set_group(self.theme_dark)
-        # self.theme_system = Gtk.CheckButton(label="System")
-        # self.theme_system.set_group(self.theme_dark)
-        # 
-        # theme_row.append(self.theme_dark)
-        # theme_row.append(self.theme_light)
-        # theme_row.append(self.theme_system)
+        self._add_section_header(vbox, "Appearance")
+
+        appearance_grid = Gtk.Grid()
+        appearance_grid.set_column_spacing(12)
+        appearance_grid.set_row_spacing(12)
+        vbox.append(appearance_grid)
+
+        theme_label = Gtk.Label(label="App Theme")
+        theme_label.set_halign(Gtk.Align.START)
+        appearance_grid.attach(theme_label, 0, 0, 1, 1)
+
+        theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        theme_row.set_halign(Gtk.Align.END)
+        theme_row.set_hexpand(True)
+        appearance_grid.attach(theme_row, 1, 0, 1, 1)
+
+        self.theme_dark = Gtk.CheckButton(label="Dark")
+        self.theme_light = Gtk.CheckButton(label="Light")
+        self.theme_light.set_group(self.theme_dark)
+        self.theme_system = Gtk.CheckButton(label="System")
+        self.theme_system.set_group(self.theme_dark)
+        theme_row.append(self.theme_dark)
+        theme_row.append(self.theme_light)
+        theme_row.append(self.theme_system)
 
         # DISABLED: Shortcuts section (feature under development)
         # self._add_section_header(vbox, "Shortcuts")
@@ -189,8 +191,10 @@ class SettingsView(Gtk.Box):
         self._refresh_ui()
 
     def _add_section_header(self, vbox, title):
-        label = Gtk.Label(label=title)
+        label = Gtk.Label()
+        label.set_markup(f'<b>{title}</b>')
         label.set_xalign(0)
+        label.set_margin_top(8)
         label.add_css_class("settings-section-label")
         vbox.append(label)
 
@@ -216,20 +220,13 @@ class SettingsView(Gtk.Box):
         self.autostart_check.set_active(s.get("autostart", False))
         self.close_tray_check.set_active(s.get("closeToTray", True))
 
-        # DISABLED: Theme and shortcut UI refresh (features under development)
-        # t = s.get("theme", "dark")
-        # if t == "light":
-        #     self.theme_light.set_active(True)
-        # elif t == "system":
-        #     self.theme_system.set_active(True)
-        # else:
-        #     self.theme_dark.set_active(True)
-        #     
-        # self.shortcut_enable_check.set_active(s.get("shortcutEnabled", True))
-        # self.shortcut_row.set_sensitive(s.get("shortcutEnabled", True))
-        # 
-        # sc = s.get("shortcut", "<Alt>v")
-        # self.shortcut_btn.set_label(parse_shortcut_label(sc))
+        t = s.get("theme", "dark")
+        if t == "light":
+            self.theme_light.set_active(True)
+        elif t == "system":
+            self.theme_system.set_active(True)
+        else:
+            self.theme_dark.set_active(True)
 
     def _on_restore_defaults(self, btn):
         """Reset all pending settings to factory defaults."""
@@ -334,23 +331,20 @@ class SettingsView(Gtk.Box):
 
         self.pending_settings["closeToTray"] = self.close_tray_check.get_active()
 
-        # DISABLED: Theme and shortcut settings save (features under development)
-        # if self.theme_light.get_active():
-        #     self.pending_settings["theme"] = "light"
-        # elif self.theme_system.get_active():
-        #     self.pending_settings["theme"] = "system"
-        # else:
-        #     self.pending_settings["theme"] = "dark"
-            
+        if self.theme_light.get_active():
+            self.pending_settings["theme"] = "light"
+        elif self.theme_system.get_active():
+            self.pending_settings["theme"] = "system"
+        else:
+            self.pending_settings["theme"] = "dark"
+
         self._apply_autostart(new_autostart_state)
 
         settings.save(self.pending_settings)
 
-        # if self.on_theme_changed:
-        #     self.on_theme_changed(self.pending_settings["theme"])
-        #     
-        # if self.on_shortcut_changed:
-        #     self.on_shortcut_changed()
+        if self.on_theme_changed:
+            self.on_theme_changed(self.pending_settings["theme"])
+
         self.on_close(True)
 
     def _apply_autostart(self, enable):

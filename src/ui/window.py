@@ -19,6 +19,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         # CSS
         self.css_provider = Gtk.CssProvider()
+        self.light_provider = Gtk.CssProvider()
         self.load_css()
         self._setup_css_monitor()
 
@@ -68,6 +69,12 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.btn_search.add_css_class("header-btn")
         self.btn_search.connect('toggled', self._on_search_toggled)
         title_row.append(self.btn_search)
+
+        self.btn_theme = Gtk.Button(icon_name="weather-clear-night-symbolic")
+        self.btn_theme.set_tooltip_text("Switch to light mode")
+        self.btn_theme.add_css_class("header-btn")
+        self.btn_theme.connect('clicked', self._on_theme_toggle_clicked)
+        title_row.append(self.btn_theme)
 
         self.btn_delete_all = Gtk.Button(icon_name="user-trash-symbolic")
         self.btn_delete_all.set_tooltip_text("Delete History")
@@ -137,8 +144,8 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         from ui.settings_dialog import SettingsView
         self.settings_view = SettingsView(
             on_close_callback=self._on_settings_closed,
-            on_theme_changed=None,  # DISABLED: Theme feature removed
-            on_shortcut_changed=None  # DISABLED: Shortcut feature removed
+            on_theme_changed=self._on_theme_changed,
+            on_shortcut_changed=None
         )
         self.stack.add_named(self.settings_view, "settings")
 
@@ -378,25 +385,27 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     # ── Settings Navigation ─────────────────────────────────────────
 
     def _on_theme_toggle_clicked(self, btn):
-        """Quick toggle between dark and light theme."""
+        """Cycle through dark → light → system."""
         current = settings.get("theme")
-        new_theme = "light" if current != "light" else "dark"
+        cycle = {"dark": "light", "light": "system", "system": "dark"}
+        new_theme = cycle.get(current, "dark")
         settings.set("theme", new_theme)
         self._apply_theme(new_theme)
-        self._update_theme_icon(new_theme)
 
     def _update_theme_icon(self, theme=None):
         """Update the theme toggle button icon to reflect current theme."""
         if not hasattr(self, 'btn_theme'):
-            return  # Button disabled
+            return
         if theme is None:
             theme = settings.get("theme")
-        if theme == "light":
-            self.btn_theme.set_icon_name("weather-clear-symbolic")
-            self.btn_theme.set_tooltip_text("Switch to dark mode")
-        else:
-            self.btn_theme.set_icon_name("weather-clear-night-symbolic")
-            self.btn_theme.set_tooltip_text("Switch to light mode")
+        icons = {
+            "dark": ("weather-clear-night-symbolic", "Theme: Dark (click to switch)"),
+            "light": ("weather-clear-symbolic", "Theme: Light (click to switch)"),
+            "system": ("preferences-desktop-appearance-symbolic", "Theme: System (click to switch)"),
+        }
+        icon, tooltip = icons.get(theme, icons["dark"])
+        self.btn_theme.set_icon_name(icon)
+        self.btn_theme.set_tooltip_text(tooltip)
 
     def _on_settings_clicked(self, btn):
         self.settings_view.reload_state()
@@ -404,8 +413,8 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     def _on_settings_closed(self, saved):
         self.stack.set_visible_child_name("main")
-        self._update_theme_icon()
         if saved:
+            self._apply_theme()
             self.show_toast("Settings saved", "success")
 
     def _on_theme_changed(self, theme):
@@ -415,22 +424,56 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         if theme is None:
             theme = settings.get("theme")
 
+        # Resolve "system" to actual dark/light
+        resolved = theme
+        if theme == "system":
+            gtk_settings = Gtk.Settings.get_default()
+            if gtk_settings and gtk_settings.get_property("gtk-application-prefer-dark-theme"):
+                resolved = "dark"
+            else:
+                # Check freedesktop color-scheme
+                try:
+                    import subprocess
+                    result = subprocess.run(
+                        ["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                        capture_output=True, text=True, timeout=2
+                    )
+                    resolved = "dark" if "dark" in result.stdout.lower() else "light"
+                except Exception:
+                    resolved = "dark"
+
+        self._update_theme_icon(theme)
+
         display = Gdk.Display.get_default()
+
+        # Always load base dark theme
         try:
             Gtk.StyleContext.remove_provider_for_display(display, self.css_provider)
         except Exception:
             pass
-
-        css_file = "style_light.css" if theme == "light" else "style.css"
-
         try:
-            css_path = os.path.join(os.path.dirname(__file__), "..", css_file)
+            css_path = os.path.join(os.path.dirname(__file__), "..", "style.css")
             self.css_provider.load_from_path(css_path)
             Gtk.StyleContext.add_provider_for_display(
                 display, self.css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER,
             )
         except Exception as e:
             print(f"Error loading CSS: {e}")
+
+        # Layer light overrides on top when needed
+        try:
+            Gtk.StyleContext.remove_provider_for_display(display, self.light_provider)
+        except Exception:
+            pass
+        if resolved == "light":
+            try:
+                light_path = os.path.join(os.path.dirname(__file__), "..", "style_light.css")
+                self.light_provider.load_from_path(light_path)
+                Gtk.StyleContext.add_provider_for_display(
+                    display, self.light_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER + 1,
+                )
+            except Exception as e:
+                print(f"Error loading light CSS: {e}")
 
     def _resolve_logo_path(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
