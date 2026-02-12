@@ -93,33 +93,10 @@ class ClipboardApp(Gtk.Application):
         )
 
 
-        self._monitor_css()
         self._monitor_settings()
 
         if not self._start_hidden:
             self.window.present()
-
-    def _monitor_css(self):
-        """Watch style.css for changes and reload (dev mode only)."""
-        import os
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        
-        css_files = ["style.css"]  # Only dark mode for now
-        self.css_monitors = []
-        
-        for css in css_files:
-            path = os.path.join(base_path, css)
-            f = Gio.File.new_for_path(path)
-            try:
-                monitor = f.monitor_file(Gio.FileMonitorFlags.NONE, None)
-                monitor.connect("changed", self._on_style_changed)
-                self.css_monitors.append(monitor)
-            except Exception:
-                pass
-
-    def _on_style_changed(self, monitor, file, other_file, event_type):
-        if event_type == Gio.FileMonitorEvent.CHANGES_DONE_HINT:
-            GLib.idle_add(self.window.load_css)
 
     def _monitor_settings(self):
         """Watch setting.json for changes and reload."""

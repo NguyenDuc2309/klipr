@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, Gio
 import os
 import settings
 
@@ -180,12 +180,25 @@ class SettingsView(Gtk.Box):
         # Resolve 'system'
         resolved = theme
         if theme == "system":
-            resolved = "dark" # Default to dark for system if checking is hard here, or just assume dark
-            # Simple check
+            resolved = "dark" # Default fallback
+            
+            # Check GTK prefer-dark property
             gtk_settings = Gtk.Settings.get_default()
-            if gtk_settings and not gtk_settings.get_property("gtk-application-prefer-dark-theme"):
-                 resolved = "light"
+            is_dark_gtk = gtk_settings and gtk_settings.get_property("gtk-application-prefer-dark-theme")
+            
+            # Check Freedesktop/GNOME color-scheme via Gio.Settings (more reliable on modern GNOME)
+            is_dark_gnome = False
+            try:
+                gnome_settings = Gio.Settings.new("org.gnome.desktop.interface")
+                color_scheme = gnome_settings.get_string("color-scheme")
+                if "dark" in color_scheme.lower():
+                    is_dark_gnome = True
+            except Exception:
+                pass
 
+            if not is_dark_gtk and not is_dark_gnome:
+                 resolved = "light"
+             
         filename = "light_logo.png" if resolved == "light" else "logo.png"
         path = self._get_logo_path(filename)
         

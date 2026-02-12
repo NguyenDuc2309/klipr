@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, Pango, GLib
+from gi.repository import Gtk, Gdk, Pango, GLib, Gio
 import os
 import utils
 import settings
@@ -220,6 +220,26 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         # Close-to-background: hide window instead of destroying
         self.connect('close-request', self._on_close_request)
+
+        # Monitor system theme changes
+        settings_default = Gtk.Settings.get_default()
+        if settings_default:
+            settings_default.connect("notify::gtk-application-prefer-dark-theme", self._on_system_theme_changed)
+
+        # Also try to monitor GNOME interface settings directly
+        try:
+             self._gnome_interface_settings = Gio.Settings.new("org.gnome.desktop.interface")
+             self._gnome_interface_settings.connect("changed::color-scheme", self._on_system_theme_changed)
+        except Exception:
+             self._gnome_interface_settings = None
+
+    def _on_system_theme_changed(self, *args):
+        """Called when system theme preference changes."""
+        if settings.get("theme") == "system":
+            self._apply_theme()
+            if self.settings_view:
+                 # Force logo update in settings view if open
+                 self.settings_view._update_logo("system")
 
     # ── CSS ─────────────────────────────────────────────────────────
 

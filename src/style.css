@@ -300,12 +300,12 @@ button.theme-card.theme-card-active {
 }
 
 button.settings-restore-btn {
-  background-color: #2d2d30;
-  border: 1px solid #3e3e42;
-  color: #999999;
+  background-color: #3e3e42;
+  border: 1px solid #5a5a5f;
+  color: #e5e5e5;
   border-radius: 8px;
   padding: 10px;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.15s;
 }
 
@@ -317,4 +317,49 @@ button.settings-restore-btn:hover {
 
 button.settings-restore-btn:active {
   background-color: #4a4a4f;
+}
+
+/* Dropdown & Combobox Styles - Force consistency */
+dropdown, 
+dropdown > button {
+  background-color: #1C1C1D;
+  color: #ffffff;
+  border-radius: 6px;
+}
+
+dropdown {
+  border: 1px solid #3e3e42;
+  padding: 0;
+}
+
+dropdown > button {
+  border: none;
+  min-height: 32px;
+  padding: 0 8px;
+  box-shadow: none;
+}
+
+dropdown:hover {
+  border-color: #5a5a5f;
+}
+
+/* Popover & Dropdown Menu Styles */
+popover {
+  box-shadow: none;
+}
+
+popover > contents {
+  border: 1px solid #3e3e42;
+  border-radius: 8px;
+}
+
+popover listview {
+  color: #ffffff;
+  margin: 0px;
+}
+
+popover row:selected,
+popover listview > row:selected {
+  background-color: #1d7cf2;
+  color: #ffffff;
 }
