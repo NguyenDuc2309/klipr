@@ -142,15 +142,14 @@ class SettingsView(Gtk.Box):
         action_box.set_margin_bottom(10)
         action_box.set_margin_end(20)
         action_box.set_margin_start(20)
-        
-        btn_cancel = Gtk.Button(label="Cancel")
-        btn_cancel.connect("clicked", self._on_cancel)
-        action_box.append(btn_cancel)
-        
         spacer = Gtk.Label()
         spacer.set_hexpand(True)
         action_box.append(spacer)
-        
+
+        btn_cancel = Gtk.Button(label="Cancel")
+        btn_cancel.connect("clicked", self._on_cancel)
+        action_box.append(btn_cancel)
+
         btn_save = Gtk.Button(label="Save")
         btn_save.add_css_class("suggested-action")
         btn_save.connect("clicked", self._on_save)

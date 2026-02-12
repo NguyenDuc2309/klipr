@@ -432,7 +432,78 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                 self.db.add_to_favorites(content)
                 self.show_toast("Added to favorites", "success")
                 row.set_fav_active(True)
+            # Update counts and delete-all button state without resetting scroll position
+            hist_count, fav_count = self.db.get_counts()
+            self.btn_all.set_label(f"History ({hist_count})" if hist_count else "History")
+            self.btn_fav.set_label(f"Favourite ({fav_count})" if fav_count else "Favourite")
+            if self.active_filter == "favorites":
+                self.btn_delete_all.set_tooltip_text("Delete All Favorites")
+                self.btn_delete_all.set_sensitive(fav_count > 0)
+            else:
+                self.btn_delete_all.set_tooltip_text("Delete All History")
+                self.btn_delete_all.set_sensitive(hist_count > 0)
+
+    def _on_edit_favorite_name(self, item_id, current_name):
+        """Open dialog to set optional name for a favorite; search will use this name."""
+        dialog = Gtk.Window(
+            transient_for=self,
+            modal=True,
+            title="Edit name",
+        )
+        dialog.set_resizable(False)
+        dialog.set_default_size(320, -1)
+
+        entry = Gtk.Entry(
+            placeholder_text="Enter clipboard name (optional)",
+            hexpand=True,
+        )
+        if current_name:
+            entry.set_text(current_name)
+
+        def do_close():
+            dialog.destroy()
+
+        def do_save():
+            name = entry.get_text().strip() or None
+            self.db.update_favorite_name(item_id, name)
+            self.show_toast("Saved", "success")
             self.refresh_list(self.search_entry.get_text())
+            dialog.destroy()
+
+        btn_cancel = Gtk.Button(label="Cancel")
+        btn_cancel.connect("clicked", lambda _b: do_close())
+
+        btn_save = Gtk.Button(label="Save")
+        btn_save.add_css_class("suggested-action")
+        btn_save.connect("clicked", lambda _b: do_save())
+
+        header = Gtk.HeaderBar()
+        header.set_show_title_buttons(True)
+        dialog.set_titlebar(header)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        box.set_margin_top(18)
+        box.set_margin_bottom(6)
+        box.set_margin_start(18)
+        box.set_margin_end(18)
+        box.append(entry)
+
+        action_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        action_row.set_margin_top(6)
+        action_row.set_margin_bottom(12)
+        action_row.set_margin_start(18)
+        action_row.set_margin_end(18)
+        action_row.append(Gtk.Label(hexpand=True))
+        action_row.append(btn_cancel)
+        action_row.append(btn_save)
+
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        content.append(box)
+        content.append(action_row)
+        dialog.set_child(content)
+
+        entry.grab_focus()
+        dialog.present()
 
     def _on_delete_clicked(self, item_id):
         if self.active_filter == "favorites":
@@ -445,7 +516,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_row_activated(self, listbox, row):
         if not hasattr(row, 'item_data'):
             return
-        _, content, _ = row.item_data
+        _, content, *_ = row.item_data
         self._on_copy_clicked(content)
 
     def _on_close_request(self, window):
@@ -576,8 +647,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     # ── Row Builder ─────────────────────────────────────────────────
 
     def _create_row(self, item):
-        item_id, content, timestamp = item
-        
+        item_id, content, timestamp = item[0], item[1], item[2]
+        name = (item[3] if len(item) > 3 else None) or None
+
         is_pinned = True
         if self.active_filter == "all":
             is_pinned = self.db.is_favorite(content)
@@ -590,6 +662,18 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         item_box.add_css_class("clipboard-item")
+
+        header_row = None
+        if name:
+            header_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            name_lbl = Gtk.Label(label=name)
+            name_lbl.add_css_class("clipboard-item-name")
+            name_lbl.set_xalign(0)
+            name_lbl.set_ellipsize(Pango.EllipsizeMode.END)
+            name_lbl.set_wrap(False)
+            name_lbl.set_hexpand(True)
+            header_row.append(name_lbl)
+            item_box.append(header_row)
 
         top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         item_box.append(top_row)
@@ -634,7 +718,10 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         actions = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         actions.add_css_class("actions")
         actions.set_valign(Gtk.Align.START)
-        top_row.append(actions)
+        if header_row is not None:
+            header_row.append(actions)
+        else:
+            top_row.append(actions)
 
         btn_copy = Gtk.Button(icon_name="edit-copy-symbolic")
         btn_copy.add_css_class("icon-btn")
@@ -643,25 +730,33 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         btn_copy.connect('clicked', lambda b: self._on_copy_clicked(content))
         actions.append(btn_copy)
 
-        btn_fav = Gtk.Button(icon_name="emblem-favorite-symbolic")
-        btn_fav.add_css_class("icon-btn")
-        btn_fav.add_css_class("fav")
-        btn_fav.set_tooltip_text("Add to Favorites")
-        if is_pinned:
-            btn_fav.add_css_class("active")
-            btn_fav.set_tooltip_text("Remove from Favorites")
-
-        def set_fav_active(active):
-            if active:
+        if self.active_filter == "favorites":
+            btn_edit = Gtk.Button(icon_name="document-edit-symbolic")
+            btn_edit.add_css_class("icon-btn")
+            btn_edit.add_css_class("edit-name")
+            btn_edit.set_tooltip_text("Edit name")
+            btn_edit.connect("clicked", lambda b: self._on_edit_favorite_name(item_id, name))
+            actions.append(btn_edit)
+        else:
+            btn_fav = Gtk.Button(icon_name="emblem-favorite-symbolic")
+            btn_fav.add_css_class("icon-btn")
+            btn_fav.add_css_class("fav")
+            btn_fav.set_tooltip_text("Add to Favorites")
+            if is_pinned:
                 btn_fav.add_css_class("active")
                 btn_fav.set_tooltip_text("Remove from Favorites")
-            else:
-                btn_fav.remove_css_class("active")
-                btn_fav.set_tooltip_text("Add to Favorites")
-        row.set_fav_active = set_fav_active
 
-        btn_fav.connect('clicked', lambda b: self._on_pin_clicked(row, item_id, content))
-        actions.append(btn_fav)
+            def set_fav_active(active):
+                if active:
+                    btn_fav.add_css_class("active")
+                    btn_fav.set_tooltip_text("Remove from Favorites")
+                else:
+                    btn_fav.remove_css_class("active")
+                    btn_fav.set_tooltip_text("Add to Favorites")
+            row.set_fav_active = set_fav_active
+
+            btn_fav.connect('clicked', lambda b: self._on_pin_clicked(row, item_id, content))
+            actions.append(btn_fav)
 
         btn_del = Gtk.Button(icon_name="user-trash-symbolic")
         btn_del.add_css_class("icon-btn")

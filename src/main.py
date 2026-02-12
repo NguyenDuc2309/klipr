@@ -8,6 +8,7 @@ from database import (
     init_db, add_item, get_history, get_favorites, 
     delete_history_item, delete_favorite_item, 
     add_to_favorites, remove_from_favorites, is_favorite,
+    update_favorite_name,
     clear_history, clear_favorites, get_counts
 )
 from clipboard_manager import ClipboardManager
@@ -169,6 +170,8 @@ class ClipboardApp(Gtk.Application):
                 remove_from_favorites(content)
             def is_favorite(self, content):
                 return is_favorite(content)
+            def update_favorite_name(self, item_id, name):
+                update_favorite_name(item_id, name)
             def clear_history(self):
                 return clear_history()
             def clear_favorites(self):

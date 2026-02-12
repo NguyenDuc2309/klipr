@@ -73,6 +73,12 @@ def init_db():
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_favorites_content ON favorites(content)'
         )
 
+        # Migration: add optional name column to favorites if missing
+        cursor = conn.execute("PRAGMA table_info(favorites)")
+        fav_columns = [info[1] for info in cursor.fetchall()]
+        if "name" not in fav_columns:
+            conn.execute("ALTER TABLE favorites ADD COLUMN name TEXT")
+
 
 def add_item(content):
     """Add item to clipboard history. does NOT affect favorites."""
@@ -113,14 +119,14 @@ def get_history(search_query=None):
 
 
 def get_favorites(search_query=None):
-    """Get items from favorites."""
+    """Get items from favorites. Returns (id, content, timestamp, name)."""
     with _get_connection() as conn:
-        query = "SELECT id, content, timestamp FROM favorites"
+        query = "SELECT id, content, timestamp, name FROM favorites"
         params = []
         
         if search_query:
-            query += " WHERE content LIKE ?"
-            params.append(f"%{search_query}%")
+            query += " WHERE (content LIKE ? OR (COALESCE(name,'') LIKE ?))"
+            params.extend([f"%{search_query}%", f"%{search_query}%"])
             
         query += " ORDER BY timestamp DESC"
         return conn.execute(query, params).fetchall()
@@ -160,6 +166,13 @@ def remove_from_favorites(content):
     """Remove content from favorites table by content string."""
     with _get_connection() as conn:
         conn.execute("DELETE FROM favorites WHERE content = ?", (content,))
+
+
+def update_favorite_name(item_id, name):
+    """Update the optional name/label for a favorite by id. Pass None or '' to clear."""
+    with _get_connection() as conn:
+        value = (name or "").strip() or None
+        conn.execute("UPDATE favorites SET name = ? WHERE id = ?", (value, item_id))
 
 
 def is_favorite(content):

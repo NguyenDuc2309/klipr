@@ -97,6 +97,16 @@ row {
   color: #1E293B;
 }
 
+.clipboard-item-name {
+  color: #0F172A;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.clipboard-item:hover .clipboard-item-name {
+  color: #3B82F6;
+}
+
 .clipboard-item-meta {
   color: #64748B;
 }
@@ -110,6 +120,27 @@ button.icon-btn {
 
 button.icon-btn:hover {
   color: #1E293B;
+  border-color: transparent;
+}
+
+button.icon-btn.edit-name:hover {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+}
+
+button.icon-btn.copy:hover {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+}
+
+button.icon-btn.fav:hover {
+  background-color: #F97316;
+  color: #FFFFFF;
+}
+
+button.icon-btn.delete:hover {
+  background-color: #EF4444;
+  color: #FFFFFF;
 }
 
 .toast {
