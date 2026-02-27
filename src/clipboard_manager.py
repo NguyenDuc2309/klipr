@@ -19,11 +19,9 @@ class ClipboardManager:
         self._current_bytes = None
 
     def on_changed(self, clipboard):
-        # Skip re-processing when we are the ones setting the clipboard
         if self._setting_clipboard:
             return
-        # Debounce: rapid clipboard changes (e.g. selection flicker) can fire
-        # multiple 'changed' signals — only process the last one after 100ms.
+
         if self._debounce_id:
             GLib.source_remove(self._debounce_id)
         self._debounce_id = GLib.timeout_add(100, self._do_read_clipboard)
@@ -48,8 +46,6 @@ class ClipboardManager:
                 temp_path = os.path.join(cache_dir, temp_filename)
                 texture.save_to_png(temp_path)
 
-                # Hash pixel data (not raw PNG bytes) so the same image
-                # always produces the same hash regardless of PNG metadata.
                 from PIL import Image
                 try:
                     with Image.open(temp_path) as img:
@@ -91,21 +87,12 @@ class ClipboardManager:
                 image_path = content.replace("IMAGE::", "")
                 if os.path.exists(image_path):
                     try:
-                        # Read raw PNG bytes — this is the key fix:
-                        # Other apps (Chrome, GIMP, LibreOffice...) request clipboard
-                        # data via standard MIME type "image/png", NOT via Gdk.Texture GType.
-                        # ContentProvider.new_for_value(texture) only advertises the
-                        # internal GType, so cross-app paste silently fails.
                         with open(image_path, 'rb') as f:
                             image_data = f.read()
 
                         gbytes = GLib.Bytes.new(image_data)
                         provider = Gdk.ContentProvider.new_for_bytes("image/png", gbytes)
 
-                        # Keep strong references to prevent GC while clipboard is active.
-                        # On Linux the clipboard is lazy — the owning app must serve
-                        # the data when another app requests paste. If Python GC'd
-                        # the provider/bytes, the paste request would get nothing.
                         self._current_provider = provider
                         self._current_bytes = gbytes
 

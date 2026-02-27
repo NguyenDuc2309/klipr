@@ -1,4 +1,6 @@
-import sys
+import os
+os.environ["GDK_BACKEND"] = "x11"
+
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
@@ -190,3 +192,4 @@ class ClipboardApp(Gtk.Application):
 if __name__ == "__main__":
     app = ClipboardApp()
     sys.exit(app.run(sys.argv))
+#
