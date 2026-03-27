@@ -79,7 +79,7 @@ Optionally start Klipr on login. Runs hidden in the background, ready when you n
 ### From `.deb` package (Ubuntu / Debian)
 
 ```bash
-sudo apt install ./klipr_1.1.0_all.deb
+sudo apt install ./klipr_1.2.1_all.deb
 ```
 
 ### From source
@@ -87,7 +87,12 @@ sudo apt install ./klipr_1.1.0_all.deb
 ```bash
 git clone https://github.com/NguyenDuc2309/klipr.git
 cd klipr
-sudo apt install python3 python3-gi python3-gi-cairo gir1.2-gtk-4.0 python3-pil
+# Create and activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+# Install dependencies
+pip install -r requirements.txt
+# Run the application
 python3 src/main.py
 ```
 

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klipr - Trình quản lý Clipboard hiện đại cho Linux</title>
+    <meta name="description" content="Klipr là trình quản lý clipboard nhẹ, nhanh và đẹp cho Linux, được viết bằng GTK4 và Python.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#58a6ff',
+                        primaryHover: '#3182ce',
+                        dark: '#0d1117',
+                        card: 'rgba(22, 27, 34, 0.5)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0d1117;
+            color: #e6edf3;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(88, 166, 255, 0.04), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(88, 166, 255, 0.04), transparent 25%);
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(88, 166, 255, 0.12) 0%, rgba(13,17,23,0) 60%);
+            top: -400px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+            pointer-events: none;
+            animation: pulse 8s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; transform: translateX(-50%) scale(0.95); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1.05); }
+        }
+
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(88, 166, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(88, 166, 255, 0.1);
+            background: rgba(30, 36, 45, 0.7);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #ffffff 0%, #58a6ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .code-block {
+            background: #161b22;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Thêm hiệu ứng trượt vào */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-up {
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+        .delay-100 { animation-delay: 100ms; opacity: 0; }
+        .delay-200 { animation-delay: 200ms; opacity: 0; }
+        
+        .mockup-window {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px rgba(88, 166, 255, 0.15);
+            background: #161b22;
+        }
+        
+        .mockup-header {
+            background: rgba(255,255,255,0.03);
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-primary selection:text-white">
+    <div class="bg-glow"></div>
+
+    <!-- Header / Nav -->
+    <nav class="container mx-auto px-6 py-6 flex justify-between items-center z-10 relative">
+        <div class="flex items-center gap-3">
+            <img src="../assets/logo.png" alt="Klipr Logo" class="w-10 h-10 drop-shadow-lg" />
+            <span class="text-xl font-bold tracking-tight">Klipr</span>
+        </div>
+        <div>
+            <a href="https://github.com/NguyenDuc2309/klipr" target="_blank" class="text-gray-400 hover:text-white transition-colors flex items-center gap-2 text-sm font-medium">
+                <svg viewBox="0 0 24 24" class="w-5 h-5" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path></svg>
+                GitHub
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 pt-12 pb-24 relative z-10">
+        <!-- Hero Section -->
+        <section class="max-w-4xl mx-auto text-center animate-fade-up">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-sm mb-8 text-gray-300">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
+                Phiên bản 1.2.1
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 text-gradient drop-shadow-sm">
+                Quản lý Clipboard<br/>chưa bao giờ dễ đến thế
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Klipr là một công cụ lịch sử clipboard siêu tốc, tối giản và thanh lịch dành riêng cho môi trường Desktop Linux. Lưu mọi thứ - tìm lại trong tích tắc.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+                <!-- Nút tải về -->
+                <a href="../klipr_1.2.1_all.deb" class="group relative flex items-center justify-center gap-2 bg-primary text-gray-900 font-semibold px-8 py-4 rounded-xl hover:bg-primaryHover transition-all transform hover:-translate-y-1 shadow-[0_0_20px_rgba(88,166,255,0.3)] hover:shadow-[0_0_30px_rgba(88,166,255,0.5)]">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Tải File .deb (Ubuntu/Debian)
+                </a>
+                
+                <a href="#installation" class="flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-white font-medium px-8 py-4 rounded-xl hover:bg-white/10 transition-all">
+                    Hướng dẫn cài đặt khác
+                </a>
+            </div>
+            
+            <div class="flex justify-center gap-3 sm:gap-6 flex-wrap text-sm font-medium text-gray-500">
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> GTK 4.0</span>
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Mã nguồn mở</span>
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Gọn nhẹ</span>
+                <span class="flex items-center gap-1.5"><svg class="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Không quảng cáo</span>
+            </div>
+        </section>
+
+        <!-- Features Grid -->
+        <section class="mt-32 max-w-6xl mx-auto animate-fade-up delay-200">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Mọi tính năng bạn cần</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Thiết kế tập trung vào trải nghiệm, giúp bạn dễ dàng tìm kiếm và sử dụng lại những gì đã sao chép từ ngày hôm qua hoặc một tháng trước.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Lịch sử thông minh</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Tự động sao lưu nội dung với giới hạn tùy chỉnh (50, 100, 150 mục). Tự động dọn dẹp các mục cũ để giữ cho hệ thống luôn gọn nhẹ.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Tìm kiếm tức thì</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Tìm thấy bất cứ đoạn mã hay tài liệu nào đã copy bằng công cụ tìm kiếm thời gian thực. Ít độ trễ, hiệu quả cao.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Mục yêu thích</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Ghim các snippet thường xuyên sử dụng vào một danh sách riêng biệt để không bao giờ bị xóa tự động.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Hỗ trợ hình ảnh</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Không chỉ có văn bản, ảnh chụp màn hình hay hình họa copy cũng được lưu lại và hiển thị ảnh thu nhỏ tiện lợi.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Chủ đề đa dạng</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Tùy chỉnh giao diện Sáng, Tối hoặc tự động theo hệ thống. Klipr tích hợp hoàn hảo với màn hình của bạn.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="glass-card p-8">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-primary mb-6">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-white">Tối ưu hiệu năng</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">Hoạt động im lặng trên thanh System Tray. Native 100% bằng Python & GTK4, dùng cực ít tài nguyên hệ thống.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview Images (Actual Screenshots) -->
+        <section class="mt-16 max-w-4xl mx-auto animate-fade-up delay-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <!-- Home Page Screen -->
+                <div class="mockup-window shadow-xl border border-white/5">
+                    <div class="mockup-header py-2 px-3">
+                        <div class="mockup-dot bg-[#ff5f56]"></div>
+                        <div class="mockup-dot bg-[#ffbd2e]"></div>
+                        <div class="mockup-dot bg-[#27c93f]"></div>
+                    </div>
+                    <div class="bg-[#0d1117] p-1.5">
+                        <img src="../assets/home_page.png" alt="Klipr Home Page" class="w-full h-auto rounded-md" />
+                    </div>
+                </div>
+
+                <!-- Settings Page Screen -->
+                <div class="mockup-window shadow-xl border border-white/5">
+                    <div class="mockup-header py-2 px-3">
+                        <div class="mockup-dot bg-[#ff5f56]"></div>
+                        <div class="mockup-dot bg-[#ffbd2e]"></div>
+                        <div class="mockup-dot bg-[#27c93f]"></div>
+                    </div>
+                    <div class="bg-[#0d1117] p-1.5">
+                        <img src="../assets/setting_page.png" alt="Klipr Settings Page" class="w-full h-auto rounded-md" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cài đặt -->
+        <section id="installation" class="mt-32 max-w-2xl mx-auto">
+            <div class="bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 rounded-3xl p-8 md:p-10 relative overflow-hidden">
+                <div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+                
+                <h2 class="text-2xl font-bold mb-6 text-white text-center">Hướng dẫn cài đặt</h2>
+                
+                <div class="space-y-6">
+                    <!-- Option 1 -->
+                    <div class="animate-fade-up">
+                        <p class="text-gray-400 text-sm mb-4 text-center">Tải file .deb và chạy lệnh sau trong thư mục chứa file để cài đặt:</p>
+                        
+                        <div class="code-block rounded-xl p-5 font-mono text-sm relative group overflow-x-auto text-center">
+                            <button class="absolute right-4 top-4 text-gray-500 hover:text-white transition-colors" onclick="navigator.clipboard.writeText('sudo apt install ./klipr_1.2.1_all.deb')">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>
+                            <span class="text-white">sudo apt install ./klipr_1.2.1_all.deb</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 bg-black/20 mt-20 relative z-10">
+        <div class="container mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <img src="../assets/logo.png" alt="Logo" class="w-6 h-6 opacity-80" />
+                <span class="text-gray-400 font-medium tracking-wide">Klipr</span>
+            </div>
+            <p class="text-gray-500 text-sm">Made with ❤️ for the Linux desktop</p>
+            <div class="flex gap-6 text-sm">
+                <a href="https://github.com/NguyenDuc2309/klipr" class="text-gray-400 hover:text-primary transition">Mã nguồn (GitHub)</a>
+                <a href="#" class="text-gray-400 hover:text-primary transition">Giấy phép MIT</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

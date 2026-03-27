@@ -37,3 +37,5 @@ log.txt
 
 # Settings (user-specific, created at runtime)
 settings.json
+
+.agent
