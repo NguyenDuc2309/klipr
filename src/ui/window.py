@@ -15,6 +15,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.db = db_interface
         self.on_copy_callback = on_copy
         self._toast_timeout_id = None
+        self._search_debounce_id = None
 
         # CSS
         self.css_provider = Gtk.CssProvider()
@@ -117,9 +118,19 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         tab_group.append(self.btn_fav)
 
         # ── Row 3: Search (revealed on demand) ──────────────────────
-        self.search_entry = Gtk.SearchEntry()
-        self.search_entry.set_property("placeholder-text", "Search clipboard...")
-        self.search_entry.connect('search-changed', self._on_search_changed)
+        # Use plain Gtk.Entry (NOT Gtk.SearchEntry) — SearchEntry has built-in
+        # GTK search delay, and its Enter/activate propagates to the ListBox
+        # causing rows to get "activated" (copy triggered) unexpectedly.
+        self.search_entry = Gtk.Entry()
+        self.search_entry.set_placeholder_text("Search clipboard...")
+        self.search_entry.set_icon_from_icon_name(
+            Gtk.EntryIconPosition.PRIMARY, "system-search-symbolic"
+        )
+        self.search_entry.set_icon_activatable(Gtk.EntryIconPosition.PRIMARY, False)
+        # 'changed' fires immediately on every character — no GTK internal delay
+        self.search_entry.connect('changed', self._on_search_changed)
+        # Block Enter from propagating to the ListBox
+        self.search_entry.connect('activate', lambda e: None)
         self.search_revealer = Gtk.Revealer()
         self.search_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
         self.search_revealer.set_transition_duration(160)
@@ -330,12 +341,10 @@ class ClipboardWindow(Gtk.ApplicationWindow):
              self.btn_delete_all.set_tooltip_text("Delete All History")
              self.btn_delete_all.set_sensitive(hist_count > 0)
 
-        child = self.listbox.get_first_child()
-        while child:
+        # Clear the listbox
+        while (child := self.listbox.get_first_child()):
             self.listbox.remove(child)
-            child = self.listbox.get_first_child()
 
-        items = []
         if self.active_filter == "favorites":
             items = self.db.get_favorites(search_query)
         else:
@@ -375,7 +384,18 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             self.refresh_list(self.search_entry.get_text())
 
     def _on_search_changed(self, entry):
-        self.refresh_list(entry.get_text())
+        """Called immediately on every character change. No GTK internal delay."""
+        if self._search_debounce_id:
+            GLib.source_remove(self._search_debounce_id)
+            self._search_debounce_id = None
+        query = entry.get_text()
+        # 30ms debounce only to coalesce rapid successive events (e.g. paste)
+        self._search_debounce_id = GLib.timeout_add(30, self._do_search, query)
+
+    def _do_search(self, query):
+        self._search_debounce_id = None
+        self.refresh_list(query)
+        return False
 
     def _on_search_toggled(self, btn):
         is_active = btn.get_active()

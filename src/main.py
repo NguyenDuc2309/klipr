@@ -99,6 +99,8 @@ class ClipboardApp(Gtk.Application):
 
         self._monitor_settings()
 
+        self._setup_shortcut()
+
         if not self._start_hidden:
             self.window.present()
 
@@ -124,6 +126,9 @@ class ClipboardApp(Gtk.Application):
         
         if self.window:
             self.window.update_from_settings()
+        
+        # Re-setup shortcut in case it changed
+        self._setup_shortcut()
         return False
 
     def do_shutdown(self):
@@ -153,6 +158,84 @@ class ClipboardApp(Gtk.Application):
             self.window.set_visible(True)
             self.window.present()
         return False
+
+    def _setup_shortcut(self):
+        """Register global hotkey via GNOME gsettings custom keybindings.
+        
+        This is the only reliable method that works on both X11 and Wayland.
+        It registers 'klipr --toggle' as a GNOME custom keyboard shortcut.
+        """
+        shortcut_str = settings.get("shortcut")
+        if not shortcut_str:
+            return
+
+        # Convert from "Ctrl+Alt+M" format to GNOME accelerator format "<Control><Alt>m"
+        raw = shortcut_str.strip()
+        parts = [p.strip() for p in raw.replace("-", "+").split("+") if p.strip()]
+
+        accel_parts = []
+        key_part = None
+        for p in parts:
+            pl = p.lower()
+            if pl in ("ctrl", "control"):
+                accel_parts.append("<Control>")
+            elif pl == "shift":
+                accel_parts.append("<Shift>")
+            elif pl == "alt":
+                accel_parts.append("<Alt>")
+            elif pl in ("super", "win", "cmd"):
+                accel_parts.append("<Super>")
+            else:
+                key_part = p.lower()
+
+        if not key_part:
+            print(f"Shortcut: no key part found in '{shortcut_str}'")
+            return
+
+        accel = "".join(accel_parts) + key_part
+
+        try:
+            import subprocess
+
+            BASE = "org.gnome.settings-daemon.plugins.media-keys"
+            CUSTOM_BASE = f"{BASE}.custom-keybinding"
+            PATH = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/klipr/"
+
+            # Read existing list
+            result = subprocess.run(
+                ["gsettings", "get", BASE, "custom-keybindings"],
+                capture_output=True, text=True, timeout=3
+            )
+            existing_raw = result.stdout.strip()
+            # Parse the GLib variant array string: ['path1', 'path2', ...]  or @as []
+            if existing_raw.startswith("@as"):
+                existing = []
+            else:
+                import ast
+                try:
+                    existing = ast.literal_eval(existing_raw)
+                except Exception:
+                    existing = []
+
+            # Add our path if not already present
+            if PATH not in existing:
+                existing.append(PATH)
+                new_list = "[" + ", ".join(f"'{p}'" for p in existing) + "]"
+                subprocess.run(
+                    ["gsettings", "set", BASE, "custom-keybindings", new_list],
+                    timeout=3
+                )
+
+            # Set the key binding properties
+            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "name", "Klipr Toggle"], timeout=3)
+            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "command", "klipr --toggle"], timeout=3)
+            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "binding", accel], timeout=3)
+
+            print(f"Global shortcut registered via GNOME: {shortcut_str} → {accel}")
+        except FileNotFoundError:
+            print("Shortcut: gsettings not found; shortcut not registered (non-GNOME desktop).")
+        except Exception as e:
+            print(f"Shortcut setup error: {e}")
 
 
     def _create_db_interface(self):
@@ -184,7 +267,9 @@ class ClipboardApp(Gtk.Application):
     def _on_clipboard_update(self, text):
         add_item(text)
         if self.window:
-            GLib.idle_add(self.window.refresh_list)
+            # Preserve current search query during background refresh
+            search_query = self.window.search_entry.get_text()
+            GLib.idle_add(self.window.refresh_list, search_query)
 
     def _on_user_copy(self, content):
         self.clipboard_manager.set_content(content)

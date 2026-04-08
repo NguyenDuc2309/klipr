@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gio
+from gi.repository import Gtk, Gdk, Gio
 import os
 import settings
 
@@ -90,6 +90,43 @@ class SettingsView(Gtk.Box):
         self.limit_dropdown.set_halign(Gtk.Align.END)
         self.limit_dropdown.set_hexpand(True)
         general_grid.attach(self.limit_dropdown, 1, 0, 1, 1)
+
+        self._add_section_header(vbox, "Shortcuts")
+        shortcut_grid = Gtk.Grid()
+        shortcut_grid.set_column_spacing(12)
+        shortcut_grid.set_row_spacing(12)
+        vbox.append(shortcut_grid)
+
+        shortcut_label = Gtk.Label(label="Global Toggle")
+        shortcut_label.set_halign(Gtk.Align.START)
+        shortcut_grid.attach(shortcut_label, 0, 0, 1, 1)
+
+        self._shortcut_capturing = False
+        self._captured_shortcut = None
+
+        shortcut_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        shortcut_btn_box.set_halign(Gtk.Align.END)
+        shortcut_btn_box.set_hexpand(True)
+
+        self.shortcut_capture_btn = Gtk.Button()
+        self.shortcut_capture_btn.set_halign(Gtk.Align.END)
+        self.shortcut_capture_btn.add_css_class("shortcut-capture-btn")
+        self.shortcut_capture_btn.connect("clicked", self._on_shortcut_capture_clicked)
+
+        self.shortcut_clear_btn = Gtk.Button(icon_name="edit-clear-symbolic")
+        self.shortcut_clear_btn.set_tooltip_text("Clear shortcut")
+        self.shortcut_clear_btn.add_css_class("icon-btn")
+        self.shortcut_clear_btn.connect("clicked", self._on_shortcut_clear_clicked)
+
+        shortcut_btn_box.append(self.shortcut_capture_btn)
+        shortcut_btn_box.append(self.shortcut_clear_btn)
+        shortcut_grid.attach(shortcut_btn_box, 1, 0, 1, 1)
+
+        shortcut_hint = Gtk.Label()
+        shortcut_hint.set_markup('<span size="small" alpha="70%">Click button, then press your desired key combo.</span>')
+        shortcut_hint.set_halign(Gtk.Align.START)
+        shortcut_hint.set_margin_top(2)
+        shortcut_grid.attach(shortcut_hint, 0, 1, 2, 1)
         
         self._add_section_header(vbox, "Behavior")
         
@@ -208,6 +245,110 @@ class SettingsView(Gtk.Box):
         if path:
             self.app_icon_widget.set_filename(path)
 
+    def _update_shortcut_btn_label(self, shortcut):
+        """Update the shortcut capture button text."""
+        if self._shortcut_capturing:
+            self.shortcut_capture_btn.set_label("⌨ Press keys...")
+        elif shortcut:
+            self.shortcut_capture_btn.set_label(shortcut)
+        else:
+            self.shortcut_capture_btn.set_label("Click to set shortcut")
+
+    def _on_shortcut_capture_clicked(self, btn):
+        """Enter capture mode — listen for next key combo on the window level."""
+        if self._shortcut_capturing:
+            # Second click cancels
+            self._shortcut_capturing = False
+            if hasattr(self, '_capture_controller') and self._capture_controller:
+                try:
+                    toplevel = self.get_root()
+                    if toplevel:
+                        toplevel.remove_controller(self._capture_controller)
+                except Exception:
+                    pass
+                self._capture_controller = None
+            self._update_shortcut_btn_label(self._captured_shortcut)
+            return
+
+        self._shortcut_capturing = True
+        self._update_shortcut_btn_label(None)
+
+        # Attach controller to window (not button): window always receives all key events
+        controller = Gtk.EventControllerKey()
+        controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        self._capture_controller = controller
+
+        def on_key_pressed(ctrl, keyval, keycode, state):
+            if not self._shortcut_capturing:
+                return False
+
+            # Ignore bare modifier-only presses (wait for actual key)
+            modifier_only = {
+                Gdk.KEY_Control_L, Gdk.KEY_Control_R,
+                Gdk.KEY_Shift_L, Gdk.KEY_Shift_R,
+                Gdk.KEY_Alt_L, Gdk.KEY_Alt_R,
+                Gdk.KEY_Super_L, Gdk.KEY_Super_R,
+                Gdk.KEY_Meta_L, Gdk.KEY_Meta_R,
+                Gdk.KEY_Escape,
+            }
+
+            # Escape = cancel
+            if keyval == Gdk.KEY_Escape:
+                self._shortcut_capturing = False
+                self._update_shortcut_btn_label(self._captured_shortcut)
+                toplevel = self.get_root()
+                if toplevel:
+                    toplevel.remove_controller(ctrl)
+                self._capture_controller = None
+                return True
+
+            if keyval in modifier_only:
+                return True
+
+            # Build human-readable combo: must have at least one modifier
+            parts = []
+            if state & Gdk.ModifierType.CONTROL_MASK:
+                parts.append("Ctrl")
+            if state & Gdk.ModifierType.ALT_MASK:
+                parts.append("Alt")
+            if state & Gdk.ModifierType.SHIFT_MASK:
+                parts.append("Shift")
+            if state & Gdk.ModifierType.SUPER_MASK:
+                parts.append("Super")
+
+            # Require at least one modifier for a valid global shortcut
+            if not parts:
+                return True
+
+            key_name = Gdk.keyval_name(keyval)
+            if key_name:
+                if len(key_name) == 1:
+                    key_name = key_name.upper()
+                parts.append(key_name)
+
+            combo = "+".join(parts)
+            self._captured_shortcut = combo
+            self._shortcut_capturing = False
+            self._update_shortcut_btn_label(combo)
+
+            # Remove controller from window — done capturing
+            toplevel = self.get_root()
+            if toplevel:
+                toplevel.remove_controller(ctrl)
+            self._capture_controller = None
+            return True
+
+        controller.connect("key-pressed", on_key_pressed)
+        toplevel = self.get_root()
+        if toplevel:
+            toplevel.add_controller(controller)
+
+    def _on_shortcut_clear_clicked(self, btn):
+        """Clear the set shortcut."""
+        self._captured_shortcut = ""
+        self._shortcut_capturing = False
+        self._update_shortcut_btn_label("")
+
     def _add_section_header(self, vbox, title):
         label = Gtk.Label()
         label.set_markup(f'<b>{title}</b>')
@@ -273,6 +414,11 @@ class SettingsView(Gtk.Box):
             
         self.autostart_check.set_active(s["autostart"])
         self.close_tray_check.set_active(s["closeToTray"])
+        
+        current_shortcut = s.get("shortcut", "Ctrl+Alt+M")
+        self._captured_shortcut = current_shortcut
+        self._shortcut_capturing = False
+        self._update_shortcut_btn_label(current_shortcut)
 
         t = s["theme"]
         self._update_theme_cards(t)
@@ -333,6 +479,8 @@ class SettingsView(Gtk.Box):
         self.pending_settings["autostart"] = new_autostart_state
 
         self.pending_settings["closeToTray"] = self.close_tray_check.get_active()
+        
+        self.pending_settings["shortcut"] = self._captured_shortcut or ""
 
         # theme is already set via card clicks in pending_settings
 

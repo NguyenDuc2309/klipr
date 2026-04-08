@@ -1,9 +1,10 @@
 {
     "name": "Klipr",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Clipboard Manager",
     "closeToTray": true,
     "autostart": false,
     "theme": "system",
-    "historyLimit": 50
+    "historyLimit": 50,
+    "shortcut": "Ctrl+Alt+M"
 }

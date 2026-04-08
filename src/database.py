@@ -66,6 +66,14 @@ def init_db():
         except Exception as e:
             print(f"Migration warning: {e}")
 
+        # Clean up any duplicates before creating unique index
+        conn.execute('''
+            DELETE FROM clipboard 
+            WHERE id NOT IN (
+                SELECT MAX(id) FROM clipboard GROUP BY content
+            )
+        ''')
+
         conn.execute(
             'CREATE UNIQUE INDEX IF NOT EXISTS idx_clipboard_content ON clipboard(content)'
         )
