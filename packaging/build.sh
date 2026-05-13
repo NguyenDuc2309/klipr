@@ -43,8 +43,8 @@ cp assets/light_logo.png    "$ROOT_DIR/usr/share/$PACKAGE_NAME/assets/"
 cp packaging/klipr "$ROOT_DIR/usr/bin/"
 chmod +x "$ROOT_DIR/usr/bin/klipr"
 
-# Copy desktop entry
-cp packaging/klipr.desktop "$ROOT_DIR/usr/share/applications/"
+# Copy desktop entry using the same ID as Gtk.Application
+cp packaging/klipr.desktop "$ROOT_DIR/usr/share/applications/io.github.nguyenduc2309.klipr.desktop"
 
 # Copy icon
 if [ -f "assets/logo.png" ]; then

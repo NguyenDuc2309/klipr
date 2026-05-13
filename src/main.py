@@ -1,10 +1,14 @@
 import sys
 import os
 os.environ["GDK_BACKEND"] = "x11"
+import ast
+import subprocess
 
 import gi
 gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, GLib, Gio
+
+Gtk.Window.set_default_icon_name("klipr")
 
 import settings
 from database import (
@@ -19,16 +23,23 @@ from ui.window import ClipboardWindow
 from tray import TrayIcon
 
 
+SHORTCUT_BASE = "org.gnome.settings-daemon.plugins.media-keys"
+SHORTCUT_CUSTOM_BASE = f"{SHORTCUT_BASE}.custom-keybinding"
+SHORTCUT_PATH = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/klipr/"
+
+
 class ClipboardApp(Gtk.Application):
     def __init__(self):
         super().__init__(
-            application_id="dev.klipr.app",
+            application_id="io.github.nguyenduc2309.klipr",
             flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE,
         )
         self.window = None
         self.clipboard_manager = None
         self.tray_icon = None
         self._start_hidden = False
+        self._pending_toggle = False
+        self._registered_shortcut = None
 
         self.add_main_option(
             "hidden",
@@ -58,7 +69,11 @@ class ClipboardApp(Gtk.Application):
             is_toggle = "--toggle" in argv or "-t" in argv
 
         if is_toggle:
-            self._toggle_window()
+            if self.window:
+                self._toggle_window()
+            else:
+                self._pending_toggle = True
+                self.activate()
             return 0
 
         try:
@@ -74,7 +89,11 @@ class ClipboardApp(Gtk.Application):
         settings.load()
         self.hold()
         if self.window:
-            self.window.present()
+            if self._pending_toggle:
+                self._pending_toggle = False
+                GLib.idle_add(self._toggle_window)
+            elif not self._start_hidden:
+                self.window.present()
             return
 
         try:
@@ -101,7 +120,10 @@ class ClipboardApp(Gtk.Application):
 
         self._setup_shortcut()
 
-        if not self._start_hidden:
+        if self._pending_toggle:
+            self._pending_toggle = False
+            GLib.idle_add(self._show_window)
+        elif not self._start_hidden:
             self.window.present()
 
     def _monitor_settings(self):
@@ -127,7 +149,6 @@ class ClipboardApp(Gtk.Application):
         if self.window:
             self.window.update_from_settings()
         
-        # Re-setup shortcut in case it changed
         self._setup_shortcut()
         return False
 
@@ -159,6 +180,12 @@ class ClipboardApp(Gtk.Application):
             self.window.present()
         return False
 
+    def _show_window(self):
+        if self.window:
+            self.window.set_visible(True)
+            self.window.present()
+        return False
+
     def _setup_shortcut(self):
         """Register global hotkey via GNOME gsettings custom keybindings.
         
@@ -166,10 +193,31 @@ class ClipboardApp(Gtk.Application):
         It registers 'klipr --toggle' as a GNOME custom keyboard shortcut.
         """
         shortcut_str = settings.get("shortcut")
-        if not shortcut_str:
+        if shortcut_str == self._registered_shortcut:
             return
 
-        # Convert from "Ctrl+Alt+M" format to GNOME accelerator format "<Control><Alt>m"
+        if not shortcut_str:
+            self._disable_shortcut()
+            self._registered_shortcut = shortcut_str
+            return
+
+        accel = self._shortcut_to_accel(shortcut_str)
+        if not accel:
+            return
+
+        try:
+            self._ensure_shortcut_path()
+            self._set_shortcut_property("name", "Klipr Toggle")
+            self._set_shortcut_property("command", "klipr --toggle")
+            self._set_shortcut_property("binding", accel)
+            self._registered_shortcut = shortcut_str
+            print(f"Global shortcut registered via GNOME: {shortcut_str} → {accel}")
+        except FileNotFoundError:
+            print("Shortcut: gsettings not found; shortcut not registered (non-GNOME desktop).")
+        except Exception as e:
+            print(f"Shortcut setup error: {e}")
+
+    def _shortcut_to_accel(self, shortcut_str):
         raw = shortcut_str.strip()
         parts = [p.strip() for p in raw.replace("-", "+").split("+") if p.strip()]
 
@@ -190,53 +238,47 @@ class ClipboardApp(Gtk.Application):
 
         if not key_part:
             print(f"Shortcut: no key part found in '{shortcut_str}'")
+            return None
+
+        return "".join(accel_parts) + key_part
+
+    def _ensure_shortcut_path(self):
+        result = subprocess.run(
+            ["gsettings", "get", SHORTCUT_BASE, "custom-keybindings"],
+            capture_output=True, text=True, timeout=3
+        )
+        existing_raw = result.stdout.strip()
+        if existing_raw.startswith("@as"):
+            existing = []
+        else:
+            try:
+                existing = ast.literal_eval(existing_raw)
+            except Exception:
+                existing = []
+
+        if SHORTCUT_PATH in existing:
             return
 
-        accel = "".join(accel_parts) + key_part
+        existing.append(SHORTCUT_PATH)
+        new_list = "[" + ", ".join(f"'{p}'" for p in existing) + "]"
+        subprocess.run(
+            ["gsettings", "set", SHORTCUT_BASE, "custom-keybindings", new_list],
+            timeout=3
+        )
 
+    def _set_shortcut_property(self, key, value):
+        subprocess.run(
+            ["gsettings", "set", f"{SHORTCUT_CUSTOM_BASE}:{SHORTCUT_PATH}", key, value],
+            timeout=3
+        )
+
+    def _disable_shortcut(self):
         try:
-            import subprocess
-
-            BASE = "org.gnome.settings-daemon.plugins.media-keys"
-            CUSTOM_BASE = f"{BASE}.custom-keybinding"
-            PATH = "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/klipr/"
-
-            # Read existing list
-            result = subprocess.run(
-                ["gsettings", "get", BASE, "custom-keybindings"],
-                capture_output=True, text=True, timeout=3
-            )
-            existing_raw = result.stdout.strip()
-            # Parse the GLib variant array string: ['path1', 'path2', ...]  or @as []
-            if existing_raw.startswith("@as"):
-                existing = []
-            else:
-                import ast
-                try:
-                    existing = ast.literal_eval(existing_raw)
-                except Exception:
-                    existing = []
-
-            # Add our path if not already present
-            if PATH not in existing:
-                existing.append(PATH)
-                new_list = "[" + ", ".join(f"'{p}'" for p in existing) + "]"
-                subprocess.run(
-                    ["gsettings", "set", BASE, "custom-keybindings", new_list],
-                    timeout=3
-                )
-
-            # Set the key binding properties
-            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "name", "Klipr Toggle"], timeout=3)
-            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "command", "klipr --toggle"], timeout=3)
-            subprocess.run(["gsettings", "set", f"{CUSTOM_BASE}:{PATH}", "binding", accel], timeout=3)
-
-            print(f"Global shortcut registered via GNOME: {shortcut_str} → {accel}")
+            self._set_shortcut_property("binding", "")
         except FileNotFoundError:
             print("Shortcut: gsettings not found; shortcut not registered (non-GNOME desktop).")
         except Exception as e:
-            print(f"Shortcut setup error: {e}")
-
+            print(f"Shortcut disable error: {e}")
 
     def _create_db_interface(self):
         class DBInterface:

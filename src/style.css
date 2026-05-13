@@ -402,3 +402,8 @@ button.shortcut-capture-btn:focus {
   color: #4cc2ff;
   outline: none;
 }
+
+button.shortcut-clear-btn {
+  min-width: 34px;
+  min-height: 30px;
+}

@@ -6,5 +6,5 @@ Exec=klipr
 Icon=klipr
 Terminal=false
 Categories=Utility;
-StartupNotify=false
-
+StartupNotify=true
+StartupWMClass=io.github.nguyenduc2309.klipr

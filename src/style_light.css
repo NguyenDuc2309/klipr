@@ -143,6 +143,11 @@ button.icon-btn.delete:hover {
   color: #FFFFFF;
 }
 
+button.shortcut-clear-btn {
+  min-width: 34px;
+  min-height: 30px;
+}
+
 .toast {
   background-color: #1E293B;
   color: #FFFFFF;

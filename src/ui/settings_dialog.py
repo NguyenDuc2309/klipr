@@ -116,6 +116,7 @@ class SettingsView(Gtk.Box):
         self.shortcut_clear_btn = Gtk.Button(icon_name="edit-clear-symbolic")
         self.shortcut_clear_btn.set_tooltip_text("Clear shortcut")
         self.shortcut_clear_btn.add_css_class("icon-btn")
+        self.shortcut_clear_btn.add_css_class("shortcut-clear-btn")
         self.shortcut_clear_btn.connect("clicked", self._on_shortcut_clear_clicked)
 
         shortcut_btn_box.append(self.shortcut_capture_btn)
@@ -528,6 +529,8 @@ Icon=klipr
 Terminal=false
 Categories=Utility;
 X-GNOME-Autostart-enabled=true
+StartupNotify=true
+StartupWMClass=io.github.nguyenduc2309.klipr
 """
             try:
                 with open(autostart_path, 'w') as f:

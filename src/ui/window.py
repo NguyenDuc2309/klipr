@@ -10,6 +10,7 @@ import settings
 class ClipboardWindow(Gtk.ApplicationWindow):
     def __init__(self, app, db_interface, on_copy):
         super().__init__(application=app, title="Klipr - Clipboard Manager")
+        self.set_icon_name("klipr")
         self.set_default_size(420, 600)
 
         self.db = db_interface
@@ -613,6 +614,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_settings_closed(self, saved):
         self.stack.set_visible_child_name("main")
         if saved:
+            app = self.get_application()
+            if app and hasattr(app, "_reload_settings"):
+                app._reload_settings()
             self._apply_theme()
             self.show_toast("Settings saved", "success")
 

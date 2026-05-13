@@ -14,21 +14,33 @@ def _ensure_dir():
 
 
 
+def _use_local_settings():
+    return (
+        LOCAL_SETTINGS.exists()
+        and (Path.cwd() / "src").is_dir()
+        and (Path.cwd() / "requirements.txt").exists()
+    )
+
+
 def get_base_settings_file():
-    # 1. Dev mode: setting.json in CWD
-    dev_file = Path("setting.json")
-    if dev_file.exists():
-        return dev_file
-    
-    # 2. Installed mode: setting.json next to settings.py
-    installed_file = Path(__file__).parent / "setting.json"
-    if installed_file.exists():
-        return installed_file
-        
+    if _use_local_settings():
+        return LOCAL_SETTINGS
+
+    candidates = [
+        Path(__file__).resolve().parent / "setting.json",
+        Path(__file__).resolve().parent.parent / "setting.json",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
     return None
+
 
 def get_settings_file():
     """Return the path to the user settings file."""
+    if _use_local_settings():
+        return LOCAL_SETTINGS
     return USER_SETTINGS_FILE
 
 
@@ -75,8 +87,7 @@ def load():
     except (json.JSONDecodeError, IOError) as e:
         raise RuntimeError(f"Failed to load base settings from {base_file}: {e}")
 
-    # If using local settings (Dev Mode), ignore user config
-    if base_file == LOCAL_SETTINGS:
+    if _use_local_settings():
         _settings_cache = config
         return _settings_cache
 
@@ -106,11 +117,9 @@ def save(data=None):
     """Save settings to JSON file."""
     global _settings_cache
     
-    if LOCAL_SETTINGS.exists():
-        target_file = LOCAL_SETTINGS
-    else:
+    target_file = get_settings_file()
+    if target_file == USER_SETTINGS_FILE:
         _ensure_dir()
-        target_file = USER_SETTINGS_FILE
 
     if data is None:
         if _settings_cache is None:

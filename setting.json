@@ -1,6 +1,6 @@
 {
     "name": "Klipr",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "Clipboard Manager",
     "closeToTray": true,
     "autostart": true,
