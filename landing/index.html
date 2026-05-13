@@ -329,7 +329,7 @@
         </p>
 
         <div class="hero-actions fade-up fade-up-d3">
-            <a href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" class="btn btn-primary">
+            <a id="download-btn" href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" class="btn btn-primary">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Download .deb
             </a>
@@ -433,8 +433,8 @@
             <h2>Get started in seconds</h2>
             <p class="sub">Ubuntu / Debian — download the .deb and run:</p>
 
-            <div class="code-block" onclick="navigator.clipboard.writeText('sudo apt install ./klipr_1.2.3_all.deb')">
-                <span class="prompt">$ </span>sudo apt install ./klipr_1.2.3_all.deb
+            <div id="install-cmd" class="code-block" onclick="navigator.clipboard.writeText(this.dataset.cmd)">
+                <span class="prompt">$ </span><span id="install-cmd-text">sudo apt install ./klipr_1.2.3_all.deb</span>
                 <button class="copy-btn" title="Copy">
                     <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 </button>
@@ -474,6 +474,27 @@
         el.style.animationPlayState = 'paused';
         observer.observe(el);
     });
+
+    fetch('https://api.github.com/repos/NguyenDuc2309/klipr/releases/latest')
+        .then(r => r.json())
+        .then(release => {
+            const deb = release.assets && release.assets.find(a => a.name.endsWith('.deb'));
+            if (deb) {
+                const btn = document.getElementById('download-btn');
+                btn.href = deb.browser_download_url;
+                btn.removeAttribute('target');
+                const cmd = 'sudo apt install ./' + deb.name;
+                const cmdBlock = document.getElementById('install-cmd');
+                const cmdText = document.getElementById('install-cmd-text');
+                if (cmdBlock) cmdBlock.dataset.cmd = cmd;
+                if (cmdText) cmdText.textContent = cmd;
+            }
+            const badge = document.querySelector('.badge');
+            if (badge && release.tag_name) {
+                badge.innerHTML = '<span class="badge-dot"></span>' + release.tag_name + ' — Latest Release';
+            }
+        })
+        .catch(() => {});
 </script>
 
 </body>
