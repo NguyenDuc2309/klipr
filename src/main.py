@@ -276,6 +276,18 @@ class ClipboardApp(Gtk.Application):
 
 
 if __name__ == "__main__":
-    app = ClipboardApp()
-    sys.exit(app.run(sys.argv))
+    try:
+        app = ClipboardApp()
+        sys.exit(app.run(sys.argv))
+    except BaseException as e:
+        import traceback
+        with open("/tmp/klipr_crash.log", "w") as f:
+            f.write(f"Type: {type(e).__name__}\n")
+            f.write(f"Error: {str(e)}\n\n")
+            f.write(traceback.format_exc())
+            f.flush()
+            os.fsync(f.fileno())
+        print(f"CRASH: {e}")
+        traceback.print_exc()
+        sys.exit(1)
 #

@@ -316,9 +316,10 @@ class SettingsView(Gtk.Box):
             if state & Gdk.ModifierType.SUPER_MASK:
                 parts.append("Super")
 
-            # Require at least one modifier for a valid global shortcut
+            # If no modifiers are pressed, don't capture this key as a shortcut
+            # and DON'T swallow it (let it propagate so user can still type)
             if not parts:
-                return True
+                return False
 
             key_name = Gdk.keyval_name(keyval)
             if key_name:
@@ -342,6 +343,11 @@ class SettingsView(Gtk.Box):
         toplevel = self.get_root()
         if toplevel:
             toplevel.add_controller(controller)
+        else:
+            # Fallback if root not yet available
+            self._shortcut_capturing = False
+            self._update_shortcut_btn_label(self._captured_shortcut)
+            self._capture_controller = None
 
     def _on_shortcut_clear_clicked(self, btn):
         """Clear the set shortcut."""
@@ -493,6 +499,19 @@ class SettingsView(Gtk.Box):
 
 
         self.on_close(True)
+
+    def deactivate_capture(self):
+        """Force-stop shortcut capture mode and remove controller from window."""
+        self._shortcut_capturing = False
+        if hasattr(self, '_capture_controller') and self._capture_controller:
+            try:
+                toplevel = self.get_root()
+                if toplevel:
+                    toplevel.remove_controller(self._capture_controller)
+            except Exception:
+                pass
+            self._capture_controller = None
+        self._update_shortcut_btn_label(self._captured_shortcut)
 
     def _apply_autostart(self, enable):
         autostart_dir = os.path.expanduser("~/.config/autostart")

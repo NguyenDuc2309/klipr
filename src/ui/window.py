@@ -424,7 +424,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         if self._search_debounce_id:
             GLib.source_remove(self._search_debounce_id)
             self._search_debounce_id = None
-        # 120ms absorbs the iBus 0ms double-fire burst; still fast enough for typing
         self._search_debounce_id = GLib.timeout_add(350, self._do_search, text)
 
     def _do_search(self, query):

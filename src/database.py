@@ -118,9 +118,9 @@ def get_history(search_query=None):
         query = "SELECT id, content, timestamp FROM clipboard"
         params = []
         
-        if search_query:
+        if search_query and search_query.strip():
             query += " WHERE content LIKE ?"
-            params.append(f"%{search_query}%")
+            params.append(f"%{search_query.strip()}%")
             
         query += " ORDER BY timestamp DESC"
         return conn.execute(query, params).fetchall()
@@ -132,9 +132,10 @@ def get_favorites(search_query=None):
         query = "SELECT id, content, timestamp, name FROM favorites"
         params = []
         
-        if search_query:
+        if search_query and search_query.strip():
+            s = search_query.strip()
             query += " WHERE (content LIKE ? OR (COALESCE(name,'') LIKE ?))"
-            params.extend([f"%{search_query}%", f"%{search_query}%"])
+            params.extend([f"%{s}%", f"%{s}%"])
             
         query += " ORDER BY timestamp DESC"
         return conn.execute(query, params).fetchall()

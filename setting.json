@@ -3,7 +3,7 @@
     "version": "1.2.2",
     "description": "Clipboard Manager",
     "closeToTray": true,
-    "autostart": false,
+    "autostart": true,
     "theme": "system",
     "historyLimit": 50,
     "shortcut": "Ctrl+Alt+M"

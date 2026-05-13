@@ -4,16 +4,16 @@ set -e
 # Build script for Klipr .deb package
 # Supports: fpm (if installed) or dpkg-deb (always available on Debian/Ubuntu)
 
-VERSION="${1:-1.0.0}"
+VERSION="${1:-$(python3 -c "import json; print(json.load(open('setting.json'))['version'])")}"
 PACKAGE_NAME="klipr"
 BUILD_DIR="build"
 ROOT_DIR="$BUILD_DIR/root"
 
 echo "Building Klipr version $VERSION..."
 
-# Clean previous build
+# Clean previous build artifacts for this specific version
 rm -rf "$BUILD_DIR"
-rm -f "${PACKAGE_NAME}"_*.deb
+rm -f "${PACKAGE_NAME}_${VERSION}_all.deb"
 
 # ── Create FHS directory structure ─────────────────────────────
 mkdir -p "$ROOT_DIR/usr/share/$PACKAGE_NAME"
