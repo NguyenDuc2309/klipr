@@ -16,6 +16,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.on_copy_callback = on_copy
         self._toast_timeout_id = None
         self._search_debounce_id = None
+        # iBus Ubuntu 22 workaround: track previous changed event to detect duplicate
+        self._last_change_text = ""
+        self._last_change_time = 0  # GLib monotonic microseconds
 
         # CSS
         self.css_provider = Gtk.CssProvider()
@@ -127,9 +130,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             Gtk.EntryIconPosition.PRIMARY, "system-search-symbolic"
         )
         self.search_entry.set_icon_activatable(Gtk.EntryIconPosition.PRIMARY, False)
-        # 'changed' fires immediately on every character — no GTK internal delay
-        self.search_entry.connect('changed', self._on_search_changed)
-        # Block Enter from propagating to the ListBox
+        # 'changed' fires on committed text; 'preedit-changed' fires on iBus buffer
+        self._changed_handler_id = self.search_entry.connect('changed', self._on_search_changed)
+        self.search_entry.get_delegate().connect('preedit-changed', self._on_preedit_changed)
         self.search_entry.connect('activate', lambda e: None)
         self.search_revealer = Gtk.Revealer()
         self.search_revealer.set_transition_type(Gtk.RevealerTransitionType.SLIDE_DOWN)
@@ -383,14 +386,46 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             self.active_filter = filter_name
             self.refresh_list(self.search_entry.get_text())
 
-    def _on_search_changed(self, entry):
-        """Called immediately on every character change. No GTK internal delay."""
+    def _on_preedit_changed(self, entry, preedit):
+        # iBus holds text in preedit buffer while composing — entry.get_text() won't
+        # include it, so 'changed' never fires. Combine committed + preedit for live search.
+        text = entry.get_text() + (preedit or "")
         if self._search_debounce_id:
             GLib.source_remove(self._search_debounce_id)
             self._search_debounce_id = None
-        query = entry.get_text()
-        # 30ms debounce only to coalesce rapid successive events (e.g. paste)
-        self._search_debounce_id = GLib.timeout_add(30, self._do_search, query)
+        self._search_debounce_id = GLib.timeout_add(350, self._do_search, text)
+
+    def _on_search_changed(self, entry):
+        """Called immediately on every character change. No GTK internal delay."""
+        now = GLib.get_monotonic_time()  # microseconds
+        text = entry.get_text()
+
+        # iBus Ubuntu 22 bug: committing a Vietnamese syllable fires `changed`
+        # twice in the same GLib iteration (0ms apart). The second fire appends
+        # the committed syllable again: "tái hiện" → "tái hiệnhiện".
+        #
+        # Detection: within a 10ms window (below any hardware key-repeat rate),
+        # new text = prev_text + suffix AND prev_text already ends with suffix.
+        # The 10ms bound avoids false positives from fast human typing.
+        elapsed_ms = (now - self._last_change_time) / 1000
+        if elapsed_ms < 10 and self._last_change_text:
+            prev = self._last_change_text
+            if text.startswith(prev) and len(text) > len(prev):
+                suffix = text[len(prev):]
+                if prev.endswith(suffix):
+                    self.search_entry.handler_block(self._changed_handler_id)
+                    entry.set_text(prev)
+                    self.search_entry.handler_unblock(self._changed_handler_id)
+                    text = prev
+
+        self._last_change_text = text
+        self._last_change_time = now
+
+        if self._search_debounce_id:
+            GLib.source_remove(self._search_debounce_id)
+            self._search_debounce_id = None
+        # 120ms absorbs the iBus 0ms double-fire burst; still fast enough for typing
+        self._search_debounce_id = GLib.timeout_add(350, self._do_search, text)
 
     def _do_search(self, query):
         self._search_debounce_id = None
