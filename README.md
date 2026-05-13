@@ -1,76 +1,59 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Klipr Logo" width="96" height="96" />
+  <img src="assets/logo.png" alt="Klipr" width="128" height="128" />
 </p>
 
 <h1 align="center">Klipr</h1>
 
 <p align="center">
-  <strong>A modern, fast clipboard manager for Linux</strong><br/>
-  Built with GTK4 &bull; Lightweight &bull; Beautiful
+  <b>A modern clipboard manager for Linux desktops</b><br/>
+  Lightweight, fast, and built natively with GTK4
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.1.0-blue" alt="Version" />
-  <img src="https://img.shields.io/badge/platform-Linux-green" alt="Platform" />
-  <img src="https://img.shields.io/badge/GTK-4.0-orange" alt="GTK4" />
-  <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="License" />
+  <a href="https://github.com/NguyenDuc2309/klipr/releases/latest"><img src="https://img.shields.io/badge/version-1.2.3-blue?style=flat-square" alt="Version" /></a>
+  <img src="https://img.shields.io/badge/platform-Linux_(X11)-green?style=flat-square" alt="Platform" />
+  <img src="https://img.shields.io/badge/GTK-4.0-orange?style=flat-square" alt="GTK4" />
+  <img src="https://img.shields.io/badge/python-3.10+-yellow?style=flat-square" alt="Python" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey?style=flat-square" alt="License" /></a>
+</p>
+
+<p align="center">
+  <a href="#installation">Install</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#features">Features</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#screenshots">Screenshots</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#configuration">Configuration</a>&nbsp;&nbsp;&bull;&nbsp;&nbsp;
+  <a href="#building-from-source">Build</a>
 </p>
 
 ---
 
-## What is Klipr?
+## About
 
-Klipr is a **lightweight clipboard history manager** designed for Linux desktops. It quietly runs in the background, saving everything you copy — text and images — so you never lose a copied snippet again.
-
-Built natively with **GTK4** and **Python**, Klipr integrates seamlessly with your desktop. No Electron, no bloat — just a fast, minimal, and beautiful clipboard tool.
-
----
-
-## Features
-
-### Clipboard History
-
-Automatically captures every text and image you copy. Configurable history limit keeps things lean — oldest items are pruned automatically.
-
-### Favorites
-
-Pin frequently used snippets to a separate favorites list. Favorites are never auto-deleted, so your important clips are always one click away.
-
-### Instant Search
-
-Real-time search across your entire clipboard history and favorites. Find any copied content in milliseconds.
-
-### Image Support
-
-Captures images from your clipboard — screenshots, copied graphics — and displays inline thumbnails. Paste images back to any app with one click.
-
-### Dark, Light & System Themes
-
-Sleek dark mode, clean light mode, or let Klipr follow your OS appearance automatically.
-
-### System Tray
-
-Runs silently in the system tray when closed. Always accessible, never in the way.
-
-### Global Shortcut
-
-Toggle the Klipr window from anywhere with `Alt + V`. Works system-wide, even when Klipr is hidden.
-
-### One-Click Actions
-
-Click any item to copy it back instantly. Hover to reveal copy, favorite, and delete actions.
-
-### Autostart
-
-Optionally start Klipr on login. Runs hidden in the background, ready when you need it.
+Klipr is a **clipboard history manager** that quietly runs in the background, saving everything you copy — text and images — so you never lose a copied snippet again. No Electron, no bloat — just a fast, minimal, and beautiful clipboard tool that integrates seamlessly with your Linux desktop.
 
 ---
 
 ## Screenshots
 
-|             Dark Mode              |              Light Mode              |
-| :--------------------------------: | :----------------------------------: |
-| ![Dark Mode](screenshots/dark.png) | ![Light Mode](screenshots/light.png) |
+<p align="center">
+  <img src="assets/home_page.png" alt="Klipr - Home" width="380" />&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="assets/setting_page.png" alt="Klipr - Settings" width="380" />
+</p>
+
+---
+
+## Features
+
+| | Feature | Description |
+|---|---|---|
+| **Clipboard History** | Auto-capture | Saves every text and image you copy. Oldest items pruned automatically based on your history limit. |
+| **Favorites** | Pin important clips | Pin frequently used snippets — favorites are never auto-deleted. |
+| **Search** | Instant search | Real-time fuzzy search across history and favorites with IME support. |
+| **Images** | Image support | Captures screenshots and copied graphics with inline thumbnails. One-click paste back. |
+| **Themes** | Dark / Light / System | Follows your OS appearance or pick manually. |
+| **Tray** | System tray integration | Runs silently in the tray. Always accessible, never in the way. |
+| **Shortcut** | Global hotkey | Toggle Klipr from anywhere with a configurable shortcut (default: `Ctrl+Alt+M`). |
+| **Autostart** | Launch on login | Starts hidden in the background, ready when you need it. |
 
 ---
 
@@ -78,29 +61,60 @@ Optionally start Klipr on login. Runs hidden in the background, ready when you n
 
 ### From `.deb` package (Ubuntu / Debian)
 
+Download the latest `.deb` from [Releases](https://github.com/NguyenDuc2309/klipr/releases/latest), then:
+
 ```bash
-sudo apt install ./klipr_1.2.1_all.deb
+sudo apt install ./klipr_1.2.3_all.deb
 ```
 
-### From source
+### Building from source
 
 ```bash
 git clone https://github.com/NguyenDuc2309/klipr.git
 cd klipr
-# Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
-# Install dependencies
 pip install -r requirements.txt
-# Run the application
 python3 src/main.py
 ```
+
+**Runtime dependencies:** `python3`, `python3-gi`, `python3-gi-cairo`, `gir1.2-gtk-4.0`, `python3-pil`
+
+---
+
+## Configuration
+
+Settings are accessible from the gear icon in the app, or edit `~/.config/klipr/settings.json` directly.
+
+| Setting | Default | Description |
+|---|---|---|
+| `historyLimit` | `50` | Max clipboard items to keep |
+| `theme` | `system` | `dark`, `light`, or `system` |
+| `closeToTray` | `true` | Minimize to tray instead of quitting |
+| `autostart` | `true` | Start on login |
+| `shortcut` | `Ctrl+Alt+M` | Global shortcut to toggle window |
+
+---
+
+## Tech Stack
+
+- **Language:** Python 3
+- **UI Framework:** GTK4 (via PyGObject)
+- **Database:** SQLite
+- **Tray:** D-Bus StatusNotifierItem (no AppIndicator dependency)
+- **Platform:** Linux (X11)
 
 ---
 
 ## License
 
-MIT License
+[MIT License](LICENSE)
+
+---
+
+## Author
+
+**Nguyen Duc** — [@NguyenDuc2309](https://github.com/NguyenDuc2309)
 
 ---
 
