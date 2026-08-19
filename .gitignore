@@ -39,3 +39,4 @@ log.txt
 settings.json
 
 .agent
+.claude/
