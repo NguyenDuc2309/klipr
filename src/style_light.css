@@ -77,8 +77,51 @@ stackpage,
   background-color: #F8FAFC;
 }
 
-row {
-  background-color: #F1F5F9;
+* {
+  outline: none;
+  outline-width: 0;
+  outline-color: transparent;
+}
+
+button,
+entry,
+list,
+listbox,
+row,
+listbox row,
+list > row,
+listview > row,
+row:focus,
+row:focus-visible,
+row:focus-within,
+row:selected,
+row:active,
+listbox row:focus,
+listbox row:focus-visible,
+listbox row:focus-within,
+listbox row:selected,
+listbox row:active,
+list > row:focus,
+list > row:focus-visible,
+list > row:selected {
+  outline: none;
+  outline-width: 0;
+  outline-style: none;
+  outline-color: transparent;
+  box-shadow: none;
+}
+
+row,
+listbox row,
+list > row {
+  background-color: transparent;
+  background: transparent;
+  border: none;
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
 }
 
 .clipboard-item {
@@ -87,7 +130,12 @@ row {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.clipboard-item:hover {
+.clipboard-item:hover,
+.clipboard-item.active,
+listbox row.active .clipboard-item,
+row.active .clipboard-item,
+listbox row:focus .clipboard-item,
+listbox row:focus-within .clipboard-item {
   border-color: #3B82F6;
   background-color: #FFFFFF;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.04);
@@ -103,7 +151,12 @@ row {
   margin-bottom: 4px;
 }
 
-.clipboard-item:hover .clipboard-item-name {
+.clipboard-item:hover .clipboard-item-name,
+.clipboard-item.active .clipboard-item-name,
+listbox row.active .clipboard-item-name,
+row.active .clipboard-item-name,
+listbox row:focus .clipboard-item-name,
+listbox row:focus-within .clipboard-item-name {
   color: #3B82F6;
 }
 
@@ -141,6 +194,21 @@ button.icon-btn.fav:hover {
 button.icon-btn.delete:hover {
   background-color: #EF4444;
   color: #FFFFFF;
+}
+
+.actions {
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+}
+
+listbox row:hover .actions,
+.clipboard-item:hover .actions,
+.clipboard-item.active .actions,
+listbox row.active .actions,
+row.active .actions,
+listbox row:focus .actions,
+listbox row:focus-within .actions {
+  opacity: 1;
 }
 
 button.shortcut-capture-btn {
@@ -283,4 +351,12 @@ popover listview > row:selected {
   background-color: #3B82F6;
   color: #FFFFFF;
   border-radius: 4px;
+}
+
+/* Keyboard focus reuses the hover look instead of GTK's default focus ring. */
+listbox row:focus,
+listbox row:focus-visible,
+listbox row:focus-within {
+  outline: none;
+  box-shadow: none;
 }

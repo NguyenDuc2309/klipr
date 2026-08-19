@@ -7,10 +7,37 @@ window overlay>box {
   font-size: 13px;
 }
 
+* {
+  outline: none;
+  outline-width: 0;
+  outline-color: transparent;
+}
+
 button,
 entry,
-listbox row {
+list,
+listbox,
+row,
+listbox row,
+list > row,
+listview > row,
+row:focus,
+row:focus-visible,
+row:focus-within,
+row:selected,
+row:active,
+listbox row:focus,
+listbox row:focus-visible,
+listbox row:focus-within,
+listbox row:selected,
+listbox row:active,
+list > row:focus,
+list > row:focus-visible,
+list > row:selected {
   outline: none;
+  outline-width: 0;
+  outline-style: none;
+  outline-color: transparent;
   box-shadow: none;
 }
 
@@ -140,8 +167,17 @@ stackpage,
   background-color: #1e1e1e;
 }
 
-row {
-  background-color: #1C1C1D;
+row,
+listbox row,
+list > row {
+  background-color: transparent;
+  background: transparent;
+  border: none;
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
 }
 
 .clipboard-item {
@@ -159,7 +195,12 @@ row {
   margin-top: 8px;
 }
 
-.clipboard-item:hover {
+.clipboard-item:hover,
+.clipboard-item.active,
+listbox row.active .clipboard-item,
+row.active .clipboard-item,
+listbox row:focus .clipboard-item,
+listbox row:focus-within .clipboard-item {
   border-color: #4cc2ff;
   background-color: #38383c;
 }
@@ -177,7 +218,12 @@ row {
   margin-bottom: 4px;
 }
 
-.clipboard-item:hover .clipboard-item-name {
+.clipboard-item:hover .clipboard-item-name,
+.clipboard-item.active .clipboard-item-name,
+listbox row.active .clipboard-item-name,
+row.active .clipboard-item-name,
+listbox row:focus .clipboard-item-name,
+listbox row:focus-within .clipboard-item-name {
   color: #4cc2ff;
 }
 
@@ -198,7 +244,12 @@ row {
 }
 
 listbox row:hover .actions,
-.clipboard-item:hover .actions {
+.clipboard-item:hover .actions,
+.clipboard-item.active .actions,
+listbox row.active .actions,
+row.active .actions,
+listbox row:focus .actions,
+listbox row:focus-within .actions {
   opacity: 1;
 }
 

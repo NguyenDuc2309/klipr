@@ -1,0 +1,16 @@
+Package: klipr
+Version: 1.2.4
+Architecture: all
+Maintainer: Klipr <klipr@dev>
+Depends: python3, python3-gi, python3-gi-cairo, gir1.2-gtk-4.0, python3-pil
+Filename: pool/main/k/klipr/klipr_1.2.4_all.deb
+Size: 64738
+MD5sum: 190d97aa9cfbc98bb6259eefe442af05
+SHA1: d492d1a48185ab12d4a401dcb5a1a5f4be7ee199
+SHA256: 70184808d27f5072718079ea365032298f3ba21c2463a1b73c61a9d74cb55b88
+Section: utils
+Priority: optional
+Description: Clipboard history manager for Linux (GTK4)
+ Klipr monitors your clipboard and saves text and image history.
+ Features: search, favorites, dark/light/system themes, system tray.
+

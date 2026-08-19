@@ -24,6 +24,9 @@ build/
 dist/
 *.egg-info/
 *.deb
+# ...except the apt repo pool, which GitHub Pages serves as-is (there's no
+# separate artifact host — the committed .deb IS the download).
+!landing/apt/pool/**/*.deb
 
 # Database (created at runtime, not shipped)
 *.db
@@ -40,3 +43,9 @@ settings.json
 
 .agent
 .claude/
+CLAUDE.md
+claude.md
+PUBLISH.md
+publish.md
+scripts/
+packaging/publish_apt.sh

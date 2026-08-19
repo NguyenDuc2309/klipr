@@ -1,0 +1,24 @@
+Origin: Klipr
+Label: Klipr
+Suite: stable
+Codename: stable
+Architectures: all
+Components: main
+Description: Klipr clipboard manager APT repository
+Date: Wed, 19 Aug 2026 09:24:16 +0000
+MD5Sum:
+ ff748f391215feb7d04f468ac70fca98              184 Release
+ 8ca522250693bb41f23b29ab198ec567              600 main/binary-all/Packages
+ 35745b9511376f1dba01e58c8b9d6419              443 main/binary-all/Packages.gz
+SHA1:
+ 00c71a855c9f20c0042e378ce17414c758b413eb              184 Release
+ 9377c5a870c714e68575a9a57f49fb5619a50de9              600 main/binary-all/Packages
+ b380c8e7c1946719b3aa791dd876904c3f8c3d97              443 main/binary-all/Packages.gz
+SHA256:
+ 0b37013b0dd0f02d03a8c2c8e347c6584017ff6c0e547b1a05d6422f9581bc1a              184 Release
+ 0a2796056f93d2fcd187a23d4207a1ea1a3f0692f1c5acb256de8aa24bb72b88              600 main/binary-all/Packages
+ b5e9e4768ec4f72b27cc7ccddb6331ba28b8606640c882d58844e264e386cc0d              443 main/binary-all/Packages.gz
+SHA512:
+ 78428b09cee581553f4fe5b7eef175356e7bf55e50a129085a128b20e77b7e53c8dfe4998732ae72892aca079c969eea7eab3999411e9e44fba7054d7311d8a9              184 Release
+ 0bbcb282186d49497abebdcfb629b6b21536e8cd9fa13b308e166999cc51501293a35224122b5e3390265920204d1c5bd794c6678596867449d8ce0e724aaa79              600 main/binary-all/Packages
+ 20edc8b5ea5eb99d92fd69905c526605230c41e985f777c966ff3fd3ebaa749e1135b72e2e9310254a5b0f6b0620a15288fdcff6ec2547147bf6b2d597b47e27              443 main/binary-all/Packages.gz

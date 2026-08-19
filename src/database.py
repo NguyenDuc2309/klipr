@@ -1,11 +1,14 @@
 import sqlite3
 import os
 import shutil
+import time
 from contextlib import contextmanager
 import settings
 
 DATA_DIR = os.path.expanduser("~/.local/share/klipr")
 DB_PATH = os.path.join(DATA_DIR, "clipboard.db")
+IMAGE_CACHE_DIR = os.path.expanduser("~/.cache/klipr/images")
+IMAGE_PREFIX = "IMAGE::"
 
 
 @contextmanager
@@ -88,6 +91,69 @@ def init_db():
             conn.execute("ALTER TABLE favorites ADD COLUMN name TEXT")
 
 
+def _is_cached_image(content):
+    """True for IMAGE:: rows whose file lives in our own cache directory."""
+    if not content or not content.startswith(IMAGE_PREFIX):
+        return False
+    path = os.path.realpath(content[len(IMAGE_PREFIX):])
+    return os.path.dirname(path) == os.path.realpath(IMAGE_CACHE_DIR)
+
+
+def _drop_unreferenced_images(conn, contents):
+    """Delete cache files for removed rows that nothing else points at.
+
+    Pruned/deleted history rows used to leave their PNG on disk forever, so
+    the cache grew without bound even though the history stayed capped. An
+    image is only removed once neither history nor favorites reference it.
+    """
+    for content in contents:
+        if not _is_cached_image(content):
+            continue
+        still_used = conn.execute(
+            "SELECT 1 FROM clipboard WHERE content = ? "
+            "UNION ALL SELECT 1 FROM favorites WHERE content = ? LIMIT 1",
+            (content, content)).fetchone()
+        if still_used:
+            continue
+        try:
+            os.remove(content[len(IMAGE_PREFIX):])
+        except OSError:
+            pass
+
+
+def prune_orphaned_images():
+    """Sweep cache files no row references. Returns how many were removed.
+
+    Run once at startup to reclaim what earlier versions leaked; steady-state
+    cleanup is handled inline by _drop_unreferenced_images.
+    """
+    if not os.path.isdir(IMAGE_CACHE_DIR):
+        return 0
+
+    with _get_connection() as conn:
+        referenced = {
+            row[0][len(IMAGE_PREFIX):]
+            for row in conn.execute(
+                "SELECT content FROM clipboard WHERE content LIKE 'IMAGE::%' "
+                "UNION SELECT content FROM favorites WHERE content LIKE 'IMAGE::%'")
+        }
+
+    removed = 0
+    cutoff = time.time() - 60  # leave in-flight saves alone
+    for name in os.listdir(IMAGE_CACHE_DIR):
+        path = os.path.join(IMAGE_CACHE_DIR, name)
+        if path in referenced or not os.path.isfile(path):
+            continue
+        try:
+            if os.path.getmtime(path) > cutoff:
+                continue
+            os.remove(path)
+            removed += 1
+        except OSError:
+            pass
+    return removed
+
+
 def add_item(content):
     """Add item to clipboard history. does NOT affect favorites."""
     with _get_connection() as conn:
@@ -102,6 +168,11 @@ def add_item(content):
         limit = settings.get("historyLimit")
         count = c.execute("SELECT COUNT(*) FROM clipboard").fetchone()[0]
         if count > limit:
+            evicted = [row[0] for row in c.execute("""
+                SELECT content FROM clipboard
+                ORDER BY timestamp ASC
+                LIMIT ?
+            """, (count - limit,)).fetchall()]
             c.execute("""
                 DELETE FROM clipboard
                 WHERE id IN (
@@ -110,6 +181,7 @@ def add_item(content):
                     LIMIT ?
                 )
             """, (count - limit,))
+            _drop_unreferenced_images(conn, evicted)
 
 
 def get_history(search_query=None):
@@ -152,13 +224,19 @@ def get_counts():
 def delete_history_item(item_id):
     """Delete from history."""
     with _get_connection() as conn:
+        row = conn.execute("SELECT content FROM clipboard WHERE id = ?", (item_id,)).fetchone()
         conn.execute("DELETE FROM clipboard WHERE id = ?", (item_id,))
+        if row:
+            _drop_unreferenced_images(conn, [row[0]])
 
 
 def delete_favorite_item(item_id):
     """Delete from favorites."""
     with _get_connection() as conn:
+        row = conn.execute("SELECT content FROM favorites WHERE id = ?", (item_id,)).fetchone()
         conn.execute("DELETE FROM favorites WHERE id = ?", (item_id,))
+        if row:
+            _drop_unreferenced_images(conn, [row[0]])
         
 
 def add_to_favorites(content):
@@ -197,13 +275,21 @@ def clear_history():
     """Delete ALL history items."""
     with _get_connection() as conn:
         c = conn.cursor()
+        images = [row[0] for row in
+                  c.execute("SELECT content FROM clipboard WHERE content LIKE 'IMAGE::%'").fetchall()]
         c.execute("DELETE FROM clipboard")
-        return c.rowcount
+        removed = c.rowcount
+        _drop_unreferenced_images(conn, images)
+        return removed
 
 
 def clear_favorites():
     """Delete ALL favorite items."""
     with _get_connection() as conn:
         c = conn.cursor()
+        images = [row[0] for row in
+                  c.execute("SELECT content FROM favorites WHERE content LIKE 'IMAGE::%'").fetchall()]
         c.execute("DELETE FROM favorites")
-        return c.rowcount
+        removed = c.rowcount
+        _drop_unreferenced_images(conn, images)
+        return removed

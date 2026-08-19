@@ -12,11 +12,12 @@ Gtk.Window.set_default_icon_name("klipr")
 
 import settings
 from database import (
-    init_db, add_item, get_history, get_favorites, 
-    delete_history_item, delete_favorite_item, 
+    init_db, add_item, get_history, get_favorites,
+    delete_history_item, delete_favorite_item,
     add_to_favorites, remove_from_favorites, is_favorite,
     update_favorite_name,
-    clear_history, clear_favorites, get_counts
+    clear_history, clear_favorites, get_counts,
+    prune_orphaned_images
 )
 from clipboard_manager import ClipboardManager
 from ui.window import ClipboardWindow
@@ -125,6 +126,18 @@ class ClipboardApp(Gtk.Application):
             GLib.idle_add(self._show_window)
         elif not self._start_hidden:
             self.window.present()
+
+        # Reclaim cache files left behind by older versions. Deferred so it
+        # never delays the first frame, which is what made a cold start after
+        # boot feel slow.
+        GLib.timeout_add_seconds(5, self._sweep_image_cache)
+
+    def _sweep_image_cache(self):
+        try:
+            prune_orphaned_images()
+        except Exception:
+            pass
+        return False  # one-shot
 
     def _monitor_settings(self):
         """Watch setting.json for changes and reload."""
@@ -309,9 +322,9 @@ class ClipboardApp(Gtk.Application):
     def _on_clipboard_update(self, text):
         add_item(text)
         if self.window:
-            # Preserve current search query during background refresh
-            search_query = self.window.search_entry.get_text()
-            GLib.idle_add(self.window.refresh_list, search_query)
+            # Rebuilds only when the window is actually on screen; otherwise
+            # the refresh is deferred to the next time it is shown.
+            GLib.idle_add(self.window.mark_history_dirty)
 
     def _on_user_copy(self, content):
         self.clipboard_manager.set_content(content)

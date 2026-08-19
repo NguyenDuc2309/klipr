@@ -19,7 +19,7 @@ src/
 ├── main.py              # Entry point — GtkApplication, lifecycle, tray init
 ├── clipboard_manager.py # Reads/writes system clipboard (text + images)
 ├── database.py          # SQLite storage (UPSERT, dedup, pruning)
-├── settings.py          # JSON config (~/.config/klipr/settings.json)
+├── settings.py          # JSON config (~/.config/klipr/setting.json)
 ├── tray.py              # System tray — pure D-Bus SNI + DBusMenu
 ├── utils.py             # Helpers (format_time)
 ├── style.css            # Dark theme
@@ -178,7 +178,7 @@ Klipr starts hidden on login and monitors clipboard in the background.
 |---|---|---|
 | Clipboard history DB | `~/.local/share/klipr/clipboard.db` | Yes |
 | Image cache | `~/.cache/klipr/images/` | Yes |
-| Settings | `~/.config/klipr/settings.json` | Yes |
+| Settings | `~/.config/klipr/setting.json` | Yes |
 
 All directories are created automatically on first run.
 

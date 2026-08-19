@@ -1,9 +1,19 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, Pango, GLib, Gio
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Gio
 import os
+from collections import OrderedDict
 import utils
 import settings
+
+# Largest a history row ever draws an image; nothing above this is worth
+# decoding, let alone keeping resident.
+THUMB_MAX_W = 370
+THUMB_MAX_H = 250
+# Each cached thumbnail costs at most THUMB_MAX_W * THUMB_MAX_H * 4 ≈ 370KB,
+# so the whole cache is bounded at roughly 15MB.
+THUMB_CACHE_SIZE = 40
 
 
 
@@ -17,6 +27,11 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.on_copy_callback = on_copy
         self._toast_timeout_id = None
         self._search_debounce_id = None
+        # path -> (mtime, texture), most-recently-used last
+        self._thumb_cache = OrderedDict()
+        # Set while the history changed but the window was hidden, so the
+        # rebuild happens once on show instead of on every copy.
+        self._history_dirty = False
         # iBus Ubuntu 22 workaround: track previous changed event to detect duplicate
         self._last_change_text = ""
         self._last_change_time = 0  # GLib monotonic microseconds
@@ -236,6 +251,16 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         # Close-to-background: hide window instead of destroying
         self.connect('close-request', self._on_close_request)
 
+        # Flush any refresh that was skipped while hidden
+        self.connect('map', self._on_map)
+
+        # Keyboard: Ctrl+F search, Up/Down through rows, Enter copy, Esc dismiss.
+        # Capture phase so these win before the focused widget consumes them.
+        key_controller = Gtk.EventControllerKey()
+        key_controller.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
+        key_controller.connect('key-pressed', self._on_key_pressed)
+        self.add_controller(key_controller)
+
         # Monitor system theme changes
         settings_default = Gtk.Settings.get_default()
         if settings_default:
@@ -333,7 +358,24 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     # ── Data & List ─────────────────────────────────────────────────
 
+    def mark_history_dirty(self):
+        """Note that stored history changed; rebuild only if the user can see it.
+
+        Klipr lives in the tray, so most clipboard events arrive while the
+        window is hidden. Rebuilding every row (and decoding every image)
+        for an invisible list was pure waste; the pending refresh is folded
+        into the next time the window is mapped.
+        """
+        self._history_dirty = True
+        if self.get_mapped():
+            self.refresh_list(self.search_entry.get_text())
+
+    def _on_map(self, *_args):
+        if self._history_dirty:
+            self.refresh_list(self.search_entry.get_text())
+
     def refresh_list(self, search_query=None):
+        self._history_dirty = False
         hist_count, fav_count = self.db.get_counts()
         self.btn_all.set_label(f"History ({hist_count})" if hist_count else "History")
         self.btn_fav.set_label(f"Favourite ({fav_count})" if fav_count else "Favourite")
@@ -359,8 +401,13 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             self.content_stack.set_visible_child_name("empty")
         else:
             self.content_stack.set_visible_child_name("list")
+            # One query for the whole list instead of an is_favorite() call
+            # per row, which made a full refresh O(rows) round trips.
+            pinned = None
+            if self.active_filter == "all":
+                pinned = {row[1] for row in self.db.get_favorites(None)}
             for item in items:
-                self.listbox.append(self._create_row(item))
+                self.listbox.append(self._create_row(item, pinned))
 
     def _update_empty_state_ui(self, search_query):
         if search_query:
@@ -568,6 +615,22 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.show_toast("Deleted", "success")
         self.refresh_list(self.search_entry.get_text())
 
+    def _on_key_pressed(self, controller, keyval, keycode, state):
+        ctrl = bool(state & Gdk.ModifierType.CONTROL_MASK)
+
+        if ctrl and keyval in (Gdk.KEY_f, Gdk.KEY_F):
+            self.btn_search.set_active(not self.btn_search.get_active())
+            return True
+
+        if keyval == Gdk.KEY_Escape:
+            if self.btn_search.get_active():
+                self.btn_search.set_active(False)
+                return True
+            self.close()
+            return True
+
+        return False
+
     def _on_row_activated(self, listbox, row):
         if not hasattr(row, 'item_data'):
             return
@@ -704,18 +767,59 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
     # ── Row Builder ─────────────────────────────────────────────────
 
-    def _create_row(self, item):
+    def _load_thumbnail(self, image_path):
+        """Decode an image straight to row size, cached and bounded.
+
+        Gdk.Texture.new_from_filename decodes at full resolution and keeps
+        every pixel resident: one 4K screenshot costs ~33MB, and the list
+        built a fresh texture per image row on every rebuild. Decoding at
+        thumbnail size is what stops a long image history from pinning
+        gigabytes of RAM.
+        """
+        try:
+            mtime = os.stat(image_path).st_mtime
+        except OSError:
+            return None
+
+        cached = self._thumb_cache.get(image_path)
+        if cached and cached[0] == mtime:
+            self._thumb_cache.move_to_end(image_path)
+            return cached[1]
+
+        # get_file_info reads only the header, so the target size is known
+        # before any pixels are decoded.
+        info = GdkPixbuf.Pixbuf.get_file_info(image_path)
+        width, height = (info[1], info[2]) if info and info[0] else (0, 0)
+        if width > 0 and height > 0:
+            # min(..., 1.0) keeps small images at native size instead of
+            # upscaling them to fill the box.
+            scale = min(THUMB_MAX_W / width, THUMB_MAX_H / height, 1.0)
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                image_path, max(1, int(width * scale)), max(1, int(height * scale)), True)
+        else:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                image_path, THUMB_MAX_W, THUMB_MAX_H, True)
+
+        texture = Gdk.Texture.new_for_pixbuf(pixbuf)
+        self._thumb_cache[image_path] = (mtime, texture)
+        self._thumb_cache.move_to_end(image_path)
+        while len(self._thumb_cache) > THUMB_CACHE_SIZE:
+            self._thumb_cache.popitem(last=False)
+        return texture
+
+    def _create_row(self, item, pinned=None):
         item_id, content, timestamp = item[0], item[1], item[2]
         name = (item[3] if len(item) > 3 else None) or None
 
         is_pinned = True
         if self.active_filter == "all":
-            is_pinned = self.db.is_favorite(content)
+            is_pinned = content in pinned if pinned is not None else self.db.is_favorite(content)
 
         row = Gtk.ListBoxRow()
         row.item_data = item
         row.set_selectable(False)
         row.set_activatable(True)
+        row.set_focusable(False)
         row.set_css_classes([])
 
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -740,19 +844,14 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             image_path = content.replace("IMAGE::", "")
             if os.path.exists(image_path):
                 try:
-                    texture = Gdk.Texture.new_from_filename(image_path)
+                    texture = self._load_thumbnail(image_path)
+                    if texture is None:
+                        raise ValueError("thumbnail unavailable")
                     picture = Gtk.Picture.new_for_paintable(texture)
                     picture.set_can_shrink(True)
                     picture.add_css_class("content-image")
-                    
-                    nat_w = texture.get_width()
-                    nat_h = texture.get_height()
-                    avail_w = 370
-                    if nat_w > avail_w:
-                        display_h = min(int(nat_h * avail_w / nat_w), 250)
-                    else:
-                        display_h = min(nat_h, 250)
-                    picture.set_size_request(-1, display_h)
+                    # Already fitted inside THUMB_MAX_W x THUMB_MAX_H on decode.
+                    picture.set_size_request(-1, texture.get_height())
 
                     img_box = Gtk.Box()
                     img_box.set_hexpand(True)
@@ -782,6 +881,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             top_row.append(actions)
 
         btn_copy = Gtk.Button(icon_name="edit-copy-symbolic")
+        btn_copy.set_focusable(False)
         btn_copy.add_css_class("icon-btn")
         btn_copy.add_css_class("copy")
         btn_copy.set_tooltip_text("Copy")
@@ -790,6 +890,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         if self.active_filter == "favorites":
             btn_edit = Gtk.Button(icon_name="document-edit-symbolic")
+            btn_edit.set_focusable(False)
             btn_edit.add_css_class("icon-btn")
             btn_edit.add_css_class("edit-name")
             btn_edit.set_tooltip_text("Edit name")
@@ -797,6 +898,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             actions.append(btn_edit)
         else:
             btn_fav = Gtk.Button(icon_name="emblem-favorite-symbolic")
+            btn_fav.set_focusable(False)
             btn_fav.add_css_class("icon-btn")
             btn_fav.add_css_class("fav")
             btn_fav.set_tooltip_text("Add to Favorites")
@@ -817,6 +919,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             actions.append(btn_fav)
 
         btn_del = Gtk.Button(icon_name="user-trash-symbolic")
+        btn_del.set_focusable(False)
         btn_del.add_css_class("icon-btn")
         btn_del.add_css_class("delete")
         btn_del.set_tooltip_text("Delete")

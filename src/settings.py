@@ -5,6 +5,12 @@ LOCAL_SETTINGS = Path("setting.json")
 USER_SETTINGS_DIR = Path.home() / ".config" / "klipr"
 USER_SETTINGS_FILE = USER_SETTINGS_DIR / "setting.json"
 
+# Identity of the installed build, not user preferences. These always come from
+# the bundled setting.json: a copy left in the user's config by an older install
+# would otherwise shadow the packaged value forever (upgrading to 1.2.4 while
+# the About screen still reported 1.2.2).
+APP_KEYS = ("name", "version", "description")
+
 _settings_cache = None
 
 
@@ -60,6 +66,11 @@ def load_base_defaults():
         raise RuntimeError(f"Failed to load base settings from {base_file}: {e}")
 
 
+def _user_subset(config):
+    """Drop the app-identity keys so only real preferences are read/written."""
+    return {k: v for k, v in config.items() if k not in APP_KEYS}
+
+
 def reload():
     """Force reload settings from disk."""
     global _settings_cache
@@ -98,14 +109,14 @@ def load():
         # Init user config from current base config
         try:
             with open(user_file, "w") as f:
-                json.dump(config, f, indent=4)
+                json.dump(_user_subset(config), f, indent=4)
         except IOError:
             pass
     else:
         try:
             with open(user_file, "r") as f:
                 user_config = json.load(f)
-                config.update(user_config)
+                config.update(_user_subset(user_config))
         except (json.JSONDecodeError, IOError):
             pass
 
@@ -131,9 +142,13 @@ def save(data=None):
     else:
         _settings_cache = data
 
+    # In dev mode the target IS the bundled file, which must keep its identity
+    # keys; the user config never should.
+    payload = data if target_file == LOCAL_SETTINGS else _user_subset(data)
+
     try:
         with open(target_file, "w") as f:
-            json.dump(data, f, indent=4)
+            json.dump(payload, f, indent=4)
     except IOError as e:
         print(f"Error saving settings: {e}")
 

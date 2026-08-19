@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nguyenduc2309.github.io/klipr/sitemap.xml

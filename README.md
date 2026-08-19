@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/NguyenDuc2309/klipr/releases/latest"><img src="https://img.shields.io/badge/version-1.2.3-blue?style=flat-square" alt="Version" /></a>
+  <a href="https://github.com/NguyenDuc2309/klipr/releases/latest"><img src="https://img.shields.io/badge/version-1.2.4-blue?style=flat-square" alt="Version" /></a>
   <img src="https://img.shields.io/badge/platform-Linux_(X11)-green?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/GTK-4.0-orange?style=flat-square" alt="GTK4" />
   <img src="https://img.shields.io/badge/python-3.10+-yellow?style=flat-square" alt="Python" />
@@ -59,12 +59,29 @@ Klipr is a **clipboard history manager** that quietly runs in the background, sa
 
 ## Installation
 
-### From `.deb` package (Ubuntu / Debian)
+### Via APT (Ubuntu / Debian) — recommended
+
+```bash
+curl -fsSL https://nguyenduc2309.github.io/klipr/apt/klipr-archive-keyring.asc \
+    | sudo gpg --dearmor -o /usr/share/keyrings/klipr-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/klipr-archive-keyring.gpg] \
+https://nguyenduc2309.github.io/klipr/apt stable main" \
+    | sudo tee /etc/apt/sources.list.d/klipr.list
+
+sudo apt update
+sudo apt install klipr
+```
+
+Future releases arrive through `sudo apt upgrade` like any other package.
+See [PUBLISH.md](PUBLISH.md) for how the repo itself is built and signed.
+
+### From a downloaded `.deb`
 
 Download the latest `.deb` from [Releases](https://github.com/NguyenDuc2309/klipr/releases/latest), then:
 
 ```bash
-sudo apt install ./klipr_1.2.3_all.deb
+sudo apt install ./klipr_1.2.4_all.deb
 ```
 
 ### Building from source
@@ -84,7 +101,7 @@ python3 src/main.py
 
 ## Configuration
 
-Settings are accessible from the gear icon in the app, or edit `~/.config/klipr/settings.json` directly.
+Settings are accessible from the gear icon in the app, or edit `~/.config/klipr/setting.json` directly.
 
 | Setting | Default | Description |
 |---|---|---|
