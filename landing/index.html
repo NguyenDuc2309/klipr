@@ -345,32 +345,14 @@
                     <div class="install-header">
                         <h3 data-i18n="install.title">Install Klipr in Seconds</h3>
                         <p data-i18n="install.subtitle">Choose your preferred installation method below:</p>
-                    </div>
-
-                    <div class="install-tabs">
-                        <button class="install-tab-btn active" data-install-target="install-deb" data-i18n="install.tab_deb">Ubuntu / Debian (.deb)</button>
-                        <button class="install-tab-btn" data-install-target="install-apt" data-i18n="install.tab_apt">APT Repository</button>
-                        <button class="install-tab-btn" data-install-target="install-source" data-i18n="install.tab_source">Build from Source</button>
-                        <button class="install-tab-btn" data-install-target="install-config" data-i18n="install.tab_config">Settings Config</button>
-                    </div>
-
-                    <!-- Panel 1: DEB (Primary) -->
-                    <div id="install-deb" class="install-panel active">
-                        <div id="install-code-box" class="code-box" data-copy="sudo apt install ./klipr_1.2.4_all.deb" title="Click to copy command">
-                            <div class="code-text">
-                                <span class="code-prompt">$</span><span id="install-cmd-text">sudo apt install ./klipr_1.2.4_all.deb</span>
-                            </div>
-                            <button class="copy-btn" aria-label="Copy install command">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                            </button>
+                        <div class="install-tabs">
+                            <button class="install-tab-btn active" data-install-target="install-apt" data-i18n="install.tab_apt">APT (Recommended)</button>
+                            <button class="install-tab-btn" data-install-target="install-deb" data-i18n="install.tab_deb">Download .deb Package</button>
                         </div>
-                        <p class="install-note"><span data-i18n="install.note_deb_prefix">Download the latest release package directly from</span> <a id="release-link" href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue);">GitHub Releases</a>.</p>
                     </div>
 
-                    <!-- Panel 2: APT repo -->
-                    <div id="install-apt" class="install-panel">
+                    <!-- Panel 1: APT repo (Primary) -->
+                    <div id="install-apt" class="install-panel active">
                         <div class="code-box" data-copy="curl -fsSL https://nguyenduc2309.github.io/klipr/apt/klipr-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/klipr-archive-keyring.gpg" title="Click to copy command">
                             <div class="code-text">
                                 <span class="code-prompt">$</span><span>curl -fsSL https://nguyenduc2309.github.io/klipr/apt/klipr-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/klipr-archive-keyring.gpg</span>
@@ -404,34 +386,19 @@
                         <p class="install-note" data-i18n="install.note_apt">Adds Klipr's self-hosted, signed APT repository. Future releases arrive through <code>sudo apt upgrade</code> like any other package.</p>
                     </div>
 
-                    <!-- Panel 2: Source -->
-                    <div id="install-source" class="install-panel">
-                        <div class="code-box" data-copy="git clone https://github.com/NguyenDuc2309/klipr.git &amp;&amp; cd klipr &amp;&amp; pip install -r requirements.txt &amp;&amp; python3 src/main.py" title="Click to copy command">
+                    <!-- Panel 2: DEB -->
+                    <div id="install-deb" class="install-panel">
+                        <div id="install-code-box" class="code-box" data-copy="sudo apt install ./klipr_1.2.4_all.deb" title="Click to copy command">
                             <div class="code-text">
-                                <span class="code-prompt">$</span><span>git clone https://github.com/NguyenDuc2309/klipr.git &amp;&amp; cd klipr &amp;&amp; python3 src/main.py</span>
+                                <span class="code-prompt">$</span><span id="install-cmd-text">sudo apt install ./klipr_1.2.4_all.deb</span>
                             </div>
-                            <button class="copy-btn" aria-label="Copy source command">
+                            <button class="copy-btn" aria-label="Copy install command">
                                 <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </button>
                         </div>
-                        <p class="install-note" data-i18n="install.note_source">Requires Python 3.10+, GTK4, and PyGObject (`gir1.2-gtk-4.0`).</p>
-                    </div>
-
-                    <!-- Panel 3: Config -->
-                    <div id="install-config" class="install-panel">
-                        <div class="code-box" data-copy="nano ~/.config/klipr/setting.json" title="Click to copy command">
-                            <div class="code-text">
-                                <span class="code-prompt">$</span><span>nano ~/.config/klipr/setting.json</span>
-                            </div>
-                            <button class="copy-btn" aria-label="Copy config command">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <p class="install-note" data-i18n="install.note_config">Configure `historyLimit`, `theme`, `autostart`, and custom `shortcut` keys.</p>
+                        <p class="install-note"><span data-i18n="install.note_deb_prefix">Download the latest release package directly from</span> <a id="release-link" href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue);">GitHub Releases</a>.</p>
                     </div>
                 </div>
             </div>

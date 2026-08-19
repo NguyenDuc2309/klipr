@@ -63,14 +63,10 @@ const translations = {
 
         'install.title': 'Install Klipr in Seconds',
         'install.subtitle': 'Choose your preferred installation method below:',
-        'install.tab_deb': 'Ubuntu / Debian (.deb) (Recommended)',
-        'install.tab_apt': 'APT Repository',
-        'install.tab_source': 'Build from Source',
-        'install.tab_config': 'Settings Config',
+        'install.tab_apt': 'APT (Recommended)',
+        'install.tab_deb': 'Download .deb Package',
         'install.note_apt': 'Adds Klipr\'s self-hosted, signed APT repository. Future releases arrive through `sudo apt upgrade` like any other package.',
         'install.note_deb_prefix': 'Download the latest release package directly from',
-        'install.note_source': 'Requires Python 3.10+, GTK4, and PyGObject (`gir1.2-gtk-4.0`).',
-        'install.note_config': 'Configure `historyLimit`, `theme`, `autostart`, and custom `shortcut` keys.',
 
         'faq.tag': 'FAQ',
         'faq.title': 'Frequently Asked Questions',
@@ -161,14 +157,10 @@ const translations = {
 
         'install.title': 'Cài đặt Klipr dễ dàng',
         'install.subtitle': 'Chọn phương thức cài đặt phù hợp với bạn bên dưới:',
-        'install.tab_deb': 'Ubuntu / Debian (.deb) (Khuyên dùng)',
-        'install.tab_apt': 'Kho APT',
-        'install.tab_source': 'Build từ mã nguồn',
-        'install.tab_config': 'Tùy chỉnh cài đặt',
+        'install.tab_apt': 'Cài qua APT (Khuyên dùng)',
+        'install.tab_deb': 'Tải gói .deb',
         'install.note_apt': 'Thêm kho APT tự lưu trữ, có ký số của Klipr. Các bản cập nhật sau này sẽ tới qua `sudo apt upgrade` như mọi package khác.',
         'install.note_deb_prefix': 'Tải gói phát hành trực tiếp từ',
-        'install.note_source': 'Yêu cầu Python 3.10+, GTK4 và PyGObject (`gir1.2-gtk-4.0`).',
-        'install.note_config': 'Tùy chỉnh `historyLimit`, `theme`, `autostart` và phím tắt `shortcut` theo ý muốn.',
 
         'faq.tag': 'Hỏi & Đáp',
         'faq.title': 'Câu hỏi thường gặp',
