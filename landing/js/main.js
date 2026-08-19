@@ -502,6 +502,8 @@ function initLightbox() {
 async function fetchLatestRelease() {
     const repo = 'NguyenDuc2309/klipr';
     const downloadBtn = document.getElementById('download-deb-btn');
+    const panelDebBtn = document.getElementById('panel-deb-btn');
+    const panelDebBtnText = document.getElementById('panel-deb-btn-text');
     const installCmdBlock = document.getElementById('install-code-box');
     const installCmdText = document.getElementById('install-cmd-text');
     const releaseLink = document.getElementById('release-link');
@@ -523,6 +525,13 @@ async function fetchLatestRelease() {
             if (downloadBtn) {
                 downloadBtn.href = debAsset.browser_download_url;
                 downloadBtn.setAttribute('title', `Download ${debAsset.name}`);
+            }
+            if (panelDebBtn) {
+                panelDebBtn.href = debAsset.browser_download_url;
+                panelDebBtn.setAttribute('title', `Download ${debAsset.name}`);
+            }
+            if (panelDebBtnText) {
+                panelDebBtnText.textContent = `Download ${debAsset.name}`;
             }
 
             const installCmd = `sudo apt install ./${debAsset.name}`;
