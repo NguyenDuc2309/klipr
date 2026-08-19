@@ -1,19 +1,276 @@
 /**
  * Klipr Landing Page JavaScript
- * Includes Interactive Clipboard Simulator, Release Fetching, Copy Toasts, Lightbox, and FAQ Accordions.
+ * Multi-language (EN / VI), Release Fetching, Copy Toasts, Lightbox, and FAQ Accordions.
  */
 
+// i18n Translations Dictionary
+const translations = {
+    en: {
+        'nav.features': 'Features',
+        'nav.screenshots': 'Screenshots',
+        'nav.comparison': 'Why Klipr',
+        'nav.install': 'Install',
+        'nav.faq': 'FAQ',
+        'nav.star': 'Star on GitHub',
+
+        'hero.release_suffix': '— Latest Release',
+        'hero.title': 'Clipboard history,<br><span class="gradient-text">made seamless for Linux.</span>',
+        'hero.desc': 'Klipr captures everything you copy — text, code, commands, and screenshots. Native GTK4 desktop integration, zero Electron bloat, and instant fuzzy search.',
+        'hero.download_deb': 'Download .deb',
+        'hero.install_guide': 'Install Guide',
+        'hero.pill_gtk': 'Native GTK4',
+        'hero.pill_ram': '< 35MB RAM Usage',
+        'hero.pill_privacy': '100% Offline & Private',
+        'hero.pill_mit': 'MIT Open Source',
+
+        'showcase.tag': 'App Showcase',
+        'showcase.title': 'Clean, focused GTK4 interface',
+        'showcase.subtitle': 'Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.',
+        'showcase.window1_title': 'Klipr — History & Favorites',
+        'showcase.window1_caption': 'Clipboard History with Thumbnail Previews',
+        'showcase.window2_title': 'Klipr — Settings & Customization',
+        'showcase.window2_caption': 'Themes, Global Hotkeys & Tray Settings',
+        'showcase.zoom': 'Click to Zoom',
+
+        'features.tag': 'Features',
+        'features.title': 'Built for daily developer productivity',
+        'features.subtitle': 'Everything you need to effortlessly manage clipboard history without bloat.',
+        'features.f1_title': 'Automatic History',
+        'features.f1_desc': 'Quietly records snippets and automatically prunes older items based on your configured limit.',
+        'features.f2_title': 'Instant Fuzzy Search',
+        'features.f2_desc': 'Search across your entire clipboard history with zero input latency and full multilingual IME support.',
+        'features.f3_title': 'Pinned Favorites',
+        'features.f3_desc': 'Bookmark recurring commands, passwords, or snippets. Pinned items are protected from auto-pruning.',
+        'features.f4_title': 'Image & Screenshot Capture',
+        'features.f4_desc': 'Preserves copied images and screenshots with instant thumbnail previews and one-click paste back.',
+        'features.f5_title': 'Dark, Light & System',
+        'features.f5_desc': 'Seamlessly synchronizes with your Linux desktop theme or choose your preferred look manually.',
+        'features.f6_title': 'Pure Native Performance',
+        'features.f6_desc': 'Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.',
+
+        'comparison.tag': 'Benchmark',
+        'comparison.title': 'Why Developers Choose Klipr',
+        'comparison.subtitle': 'Say goodbye to 400MB Electron clipboard utilities.',
+        'comparison.th_metric': 'Feature / Metric',
+        'comparison.th_klipr': 'Klipr (Native GTK4)',
+        'comparison.th_electron': 'Electron-Based Apps',
+        'comparison.th_standard': 'Standard Linux Clipboards',
+        'comparison.r1_metric': 'RAM Consumption',
+        'comparison.r2_metric': 'Launch & Hotkey Latency',
+        'comparison.r2_val1': '< 0.15s (Instant)',
+        'comparison.r3_metric': 'Image & Screenshot History',
+        'comparison.r3_val1': '✓ Full Thumbnails',
+        'comparison.r3_val2': '✓ Supported',
+        'comparison.r3_val3': '✕ Text Only (Mostly)',
+        'comparison.r4_metric': 'Pinned Favorites System',
+        'comparison.r4_val1': '✓ Permanent Pinning',
+        'comparison.r4_val2': '✓ Supported',
+        'comparison.r4_val3': '✕ Limited',
+        'comparison.r5_metric': 'Telemetry & Privacy',
+        'comparison.r5_val1': '✓ 100% Offline & Safe',
+        'comparison.r5_val2': 'Varies / Often Tracked',
+        'comparison.r5_val3': '✓ Offline',
+        'comparison.r6_metric': 'License',
+        'comparison.r6_val1': 'MIT Open Source',
+        'comparison.r6_val2': 'Proprietary / Open',
+        'comparison.r6_val3': 'Open Source',
+
+        'install.title': 'Install Klipr in Seconds',
+        'install.subtitle': 'Choose your preferred installation method below:',
+        'install.tab_deb': 'Ubuntu / Debian (.deb)',
+        'install.tab_source': 'Build from Source',
+        'install.tab_config': 'Settings Config',
+        'install.note_deb_prefix': 'Download the latest release package directly from',
+        'install.note_source': 'Requires Python 3.10+, GTK4, and PyGObject (`gir1.2-gtk-4.0`).',
+        'install.note_config': 'Configure `historyLimit`, `theme`, `autostart`, and custom `shortcut` keys.',
+
+        'faq.tag': 'FAQ',
+        'faq.title': 'Frequently Asked Questions',
+        'faq.subtitle': 'Quick answers to common questions about Klipr.',
+        'faq.q1': 'Does Klipr work on Ubuntu, Debian, and other Linux distros?',
+        'faq.a1': 'Yes! Klipr is packaged as a `.deb` for Ubuntu 22.04+, Debian 12+, Linux Mint, and Pop!_OS. It can also be run from source on Arch Linux, Fedora, or any distro with Python 3.10+ and GTK4.',
+        'faq.q2': 'Are passwords or copied credentials sent anywhere?',
+        'faq.a2': 'No. Klipr is 100% offline, privacy-first, and contains zero network telemetry or tracking. Your clipboard history stays strictly on your local disk at `~/.local/share/klipr`.',
+        'faq.q3': 'Can I change the global toggle shortcut?',
+        'faq.a3': 'Yes! You can change the global shortcut from the in-app Settings dialog or by editing the `"shortcut"` field in `~/.config/klipr/settings.json` (default: `Ctrl+Alt+M`).',
+        'faq.q4': 'How is image clipboard history stored?',
+        'faq.a4': 'When an image is copied (like from a screenshot tool or browser), Klipr saves an optimized image file with cached thumbnail generation, allowing one-click paste back to any application.',
+
+        'footer.crafted': 'Klipr &bull; Crafted with passion by',
+        'footer.repo': 'GitHub Repository',
+        'footer.releases': 'Releases',
+        'footer.license': 'MIT License',
+
+        'toast.copied': 'Copied to clipboard!',
+        'toast.failed': 'Failed to copy. Please copy manually.'
+    },
+    vi: {
+        'nav.features': 'Tính năng',
+        'nav.screenshots': 'Giao diện',
+        'nav.comparison': 'Tại sao chọn Klipr',
+        'nav.install': 'Cài đặt',
+        'nav.faq': 'Hỏi đáp',
+        'nav.star': 'Star trên GitHub',
+
+        'hero.release_suffix': '— Bản phát hành mới nhất',
+        'hero.title': 'Quản lý lịch sử clipboard,<br><span class="gradient-text">mượt mà cho Linux.</span>',
+        'hero.desc': 'Klipr tự động lưu lại mọi nội dung bạn sao chép — văn bản, mã nguồn, lệnh terminal và ảnh chụp màn hình. Tích hợp GTK4 native, không dùng Electron nặng nề, tìm kiếm siêu nhanh.',
+        'hero.download_deb': 'Tải gói .deb',
+        'hero.install_guide': 'Hướng dẫn cài đặt',
+        'hero.pill_gtk': 'GTK4 Native',
+        'hero.pill_ram': '< 35MB RAM tiêu thụ',
+        'hero.pill_privacy': '100% Offline & Bảo mật',
+        'hero.pill_mit': 'Mã nguồn mở MIT',
+
+        'showcase.tag': 'Giao diện',
+        'showcase.title': 'Thiết kế GTK4 tinh tế & gọn gàng',
+        'showcase.subtitle': 'Hoạt động hoàn hảo trên các môi trường desktop Linux hiện đại như GNOME, XFCE và KDE.',
+        'showcase.window1_title': 'Klipr — Lịch sử & Yêu thích',
+        'showcase.window1_caption': 'Lịch sử clipboard kèm hình ảnh thumbnail trực quan',
+        'showcase.window2_title': 'Klipr — Cài đặt & Tùy biến',
+        'showcase.window2_caption': 'Tùy biến giao diện Sáng/Tối, phím tắt & khay hệ thống',
+        'showcase.zoom': 'Bấm để phóng to',
+
+        'features.tag': 'Tính năng',
+        'features.title': 'Tối ưu cho hiệu suất làm việc mỗi ngày',
+        'features.subtitle': 'Mọi thứ bạn cần để quản lý nội dung clipboard mà không gây nặng máy.',
+        'features.f1_title': 'Lưu trữ tự động',
+        'features.f1_desc': 'Âm thầm ghi nhớ các đoạn văn bản, tự động dọn dẹp các mục cũ theo giới hạn bạn đặt.',
+        'features.f2_title': 'Tìm kiếm tức thì',
+        'features.f2_desc': 'Tìm kiếm nhanh chóng trong toàn bộ lịch sử với độ trễ bằng 0, hỗ trợ tốt gõ tiếng Việt (IME).',
+        'features.f3_title': 'Ghim mục yêu thích',
+        'features.f3_desc': 'Đánh dấu các lệnh hay dùng hoặc ghi chú quan trọng. Các mục ghim không bao giờ bị xóa tự động.',
+        'features.f4_title': 'Lưu ảnh & Ảnh chụp màn hình',
+        'features.f4_desc': 'Giữ lại các hình ảnh đã copy với thumbnail xem trước, dán lại chỉ với 1 click chuột.',
+        'features.f5_title': 'Dark, Light & Theo hệ thống',
+        'features.f5_desc': 'Tự động đồng bộ theo giao diện Sáng/Tối của Linux hoặc tùy chọn thủ công theo sở thích.',
+        'features.f6_title': 'Hiệu năng Native vượt trội',
+        'features.f6_desc': 'Viết bằng Python và GTK4. Chiếm cực ít bộ nhớ RAM và chạy ẩn trên khay hệ thống.',
+
+        'comparison.tag': 'So sánh hiệu năng',
+        'comparison.title': 'Vì sao nên chọn Klipr?',
+        'comparison.subtitle': 'Nói không với các ứng dụng clipboard cồng kềnh ngốn hàng trăm MB RAM.',
+        'comparison.th_metric': 'Tính năng / Tiêu chí',
+        'comparison.th_klipr': 'Klipr (Native GTK4)',
+        'comparison.th_electron': 'Ứng dụng nền Electron',
+        'comparison.th_standard': 'Clipboard Linux cơ bản',
+        'comparison.r1_metric': 'Mức tiêu thụ RAM',
+        'comparison.r2_metric': 'Độ trễ mở phím tắt',
+        'comparison.r2_val1': '< 0.15s (Tức thì)',
+        'comparison.r3_metric': 'Lưu ảnh & Screenshot',
+        'comparison.r3_val1': '✓ Đầy đủ Thumbnail',
+        'comparison.r3_val2': '✓ Có hỗ trợ',
+        'comparison.r3_val3': '✕ Thường chỉ lưu Text',
+        'comparison.r4_metric': 'Hệ thống ghim Yêu thích',
+        'comparison.r4_val1': '✓ Ghim vĩnh viễn',
+        'comparison.r4_val2': '✓ Có hỗ trợ',
+        'comparison.r4_val3': '✕ Hạn chế',
+        'comparison.r5_metric': 'Bảo mật & Quyền riêng tư',
+        'comparison.r5_val1': '✓ 100% Offline, không theo dõi',
+        'comparison.r5_val2': 'Tùy app / Thường có thu thập',
+        'comparison.r5_val3': '✓ Offline',
+        'comparison.r6_metric': 'Giấy phép',
+        'comparison.r6_val1': 'Mã nguồn mở MIT',
+        'comparison.r6_val2': 'Thương mại / Đóng mã',
+        'comparison.r6_val3': 'Mã nguồn mở',
+
+        'install.title': 'Cài đặt Klipr dễ dàng',
+        'install.subtitle': 'Chọn phương thức cài đặt phù hợp với bạn bên dưới:',
+        'install.tab_deb': 'Ubuntu / Debian (.deb)',
+        'install.tab_source': 'Build từ mã nguồn',
+        'install.tab_config': 'Tùy chỉnh cài đặt',
+        'install.note_deb_prefix': 'Tải gói phát hành trực tiếp từ',
+        'install.note_source': 'Yêu cầu Python 3.10+, GTK4 và PyGObject (`gir1.2-gtk-4.0`).',
+        'install.note_config': 'Tùy chỉnh `historyLimit`, `theme`, `autostart` và phím tắt `shortcut` theo ý muốn.',
+
+        'faq.tag': 'Hỏi & Đáp',
+        'faq.title': 'Câu hỏi thường gặp',
+        'faq.subtitle': 'Giải đáp nhanh các thắc mắc phổ biến về Klipr.',
+        'faq.q1': 'Klipr có chạy được trên Ubuntu, Debian và các bản Linux khác không?',
+        'faq.a1': 'Có! Klipr có sẵn file cài đặt .deb cho Ubuntu 22.04+, Debian 12+, Linux Mint và Pop!_OS. Ngoài ra bạn có thể chạy từ mã nguồn trên Arch Linux, Fedora hoặc bất kỳ bản distro nào có Python 3.10+ và GTK4.',
+        'faq.q2': 'Mật khẩu hoặc thông tin sao chép có bị gửi đi đâu không?',
+        'faq.a2': 'Tuyệt đối không. Klipr hoạt động 100% offline, tôn trọng quyền riêng tư và không chứa bất kỳ mã theo dõi hay gửi dữ liệu qua mạng. Lịch sử được lưu trữ hoàn toàn nội bộ trên máy bạn tại `~/.local/share/klipr`.',
+        'faq.q3': 'Tôi có thể đổi phím tắt mở ứng dụng không?',
+        'faq.a3': 'Có! Bạn có thể đổi phím tắt từ bảng Cài đặt (Settings) trong ứng dụng hoặc chỉnh sửa trường `"shortcut"` trong file `~/.config/klipr/settings.json` (mặc định là `Ctrl+Alt+M`).',
+        'faq.q4': 'Lịch sử ảnh được lưu trữ như thế nào?',
+        'faq.a4': 'Khi bạn copy một bức ảnh (từ trình duyệt hoặc công cụ chụp màn hình), Klipr sẽ tối ưu và lưu vào bộ nhớ đệm kèm thumbnail, cho phép bạn dán lại vào bất kỳ ứng dụng nào chỉ với 1 click.',
+
+        'footer.crafted': 'Klipr &bull; Phát triển bởi',
+        'footer.repo': 'Kho mã nguồn GitHub',
+        'footer.releases': 'Các bản phát hành',
+        'footer.license': 'Giấy phép MIT',
+
+        'toast.copied': 'Đã sao chép vào bộ nhớ tạm!',
+        'toast.failed': 'Không thể sao chép. Vui lòng sao chép thủ công.'
+    }
+};
+
+let currentLang = localStorage.getItem('klipr_lang') || 'en';
+let currentReleaseTag = 'v1.2.3';
+
 document.addEventListener('DOMContentLoaded', () => {
+    initI18n();
     initScrollReveal();
     initNavbarScroll();
     initCopyButtons();
     initLightbox();
-    initClipboardDemo();
     initInstallTabs();
     initFaqAccordion();
     initBackToTop();
     fetchLatestRelease();
 });
+
+/**
+ * Multi-Language (i18n) Engine
+ */
+function initI18n() {
+    setLanguage(currentLang);
+
+    const langBtns = document.querySelectorAll('.lang-btn');
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.getAttribute('data-lang');
+            if (lang && lang !== currentLang) {
+                setLanguage(lang);
+            }
+        });
+    });
+}
+
+function setLanguage(lang) {
+    if (!translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem('klipr_lang', lang);
+    document.documentElement.lang = lang;
+
+    // Update active button state
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        if (btn.getAttribute('data-lang') === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    // Translate all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang][key]) {
+            el.innerHTML = translations[lang][key];
+        }
+    });
+
+    // Update version badge
+    updateVersionBadge();
+}
+
+function updateVersionBadge() {
+    const badge = document.getElementById('latest-version-badge');
+    if (badge) {
+        const suffix = translations[currentLang]['hero.release_suffix'] || '— Latest Release';
+        badge.textContent = `${currentReleaseTag} ${suffix}`;
+    }
+}
 
 /**
  * Scroll Reveal Animations
@@ -66,14 +323,14 @@ function initCopyButtons() {
     
     copyBlocks.forEach(block => {
         block.addEventListener('click', async (e) => {
-            // Prevent duplicate triggers if clicking an inner button
             e.stopPropagation();
             const textToCopy = block.getAttribute('data-copy');
             if (!textToCopy) return;
 
             try {
                 await navigator.clipboard.writeText(textToCopy);
-                showToast('Copied to clipboard!');
+                const msg = translations[currentLang]['toast.copied'] || 'Copied to clipboard!';
+                showToast(msg);
                 
                 const btn = block.querySelector('.copy-btn');
                 if (btn) {
@@ -85,7 +342,8 @@ function initCopyButtons() {
                 }
             } catch (err) {
                 console.error('Failed to copy:', err);
-                showToast('Failed to copy. Please copy manually.');
+                const failMsg = translations[currentLang]['toast.failed'] || 'Failed to copy. Please copy manually.';
+                showToast(failMsg);
             }
         });
     });
@@ -119,188 +377,6 @@ function showToast(message) {
         toast.style.transform = 'translateY(10px)';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
-}
-
-/**
- * Interactive Clipboard Simulator / Live Demo
- */
-const mockClips = [
-    {
-        id: '1',
-        title: 'git commit -m "feat: enhance native GTK4 UI and memory performance"',
-        content: 'git commit -m "feat: enhance native GTK4 UI and memory performance"',
-        type: 'code',
-        tag: 'Bash',
-        time: 'Just now',
-        starred: true,
-        icon: 'terminal'
-    },
-    {
-        id: '2',
-        title: 'const options = { theme: "dark", autoPrune: true, limit: 100 };',
-        content: 'const options = { theme: "dark", autoPrune: true, limit: 100 };',
-        type: 'code',
-        tag: 'JavaScript',
-        time: '2m ago',
-        starred: false,
-        icon: 'code'
-    },
-    {
-        id: '3',
-        title: 'Screenshot_2026-08-19_Window_Capture.png (1920x1080)',
-        content: '[Image Binary Data: 1920x1080 Screenshot]',
-        type: 'image',
-        tag: 'Image',
-        time: '5m ago',
-        starred: true,
-        icon: 'image'
-    },
-    {
-        id: '4',
-        title: 'https://github.com/NguyenDuc2309/klipr/releases/latest',
-        content: 'https://github.com/NguyenDuc2309/klipr/releases/latest',
-        type: 'text',
-        tag: 'URL',
-        time: '12m ago',
-        starred: false,
-        icon: 'link'
-    },
-    {
-        id: '5',
-        title: 'sudo apt update && sudo apt install gir1.2-gtk-4.0 python3-pil',
-        content: 'sudo apt update && sudo apt install gir1.2-gtk-4.0 python3-pil',
-        type: 'code',
-        tag: 'Bash',
-        time: '25m ago',
-        starred: false,
-        icon: 'terminal'
-    },
-    {
-        id: '6',
-        title: '🎨 Primary Brand Palette: #58a6ff | #3fb950 | #a855f7',
-        content: '#58a6ff #3fb950 #a855f7',
-        type: 'text',
-        tag: 'Color',
-        time: '1h ago',
-        starred: true,
-        icon: 'color'
-    }
-];
-
-function initClipboardDemo() {
-    const listContainer = document.getElementById('demo-clips-container');
-    const searchInput = document.getElementById('demo-search');
-    const tabs = document.querySelectorAll('.demo-tab-btn');
-    if (!listContainer) return;
-
-    let currentFilter = 'all';
-    let searchQuery = '';
-
-    function renderClips() {
-        const filtered = mockClips.filter(clip => {
-            const matchesTab = currentFilter === 'all' || 
-                (currentFilter === 'starred' && clip.starred) || 
-                (currentFilter === clip.type);
-            const matchesSearch = clip.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                clip.tag.toLowerCase().includes(searchQuery.toLowerCase());
-            return matchesTab && matchesSearch;
-        });
-
-        if (filtered.length === 0) {
-            listContainer.innerHTML = `
-                <div style="text-align:center; padding: 36px 0; color: var(--text-muted);">
-                    <p style="font-size: 0.95rem;">No matching clips found in history.</p>
-                </div>
-            `;
-            return;
-        }
-
-        listContainer.innerHTML = filtered.map(clip => `
-            <div class="demo-clip-item" data-clip-content="${escapeHtml(clip.content)}" title="Click to copy">
-                <div class="demo-clip-left">
-                    <div class="demo-clip-icon">
-                        ${getClipIcon(clip.icon)}
-                    </div>
-                    <div class="demo-clip-info">
-                        <div class="demo-clip-title">${escapeHtml(clip.title)}</div>
-                        <div class="demo-clip-meta">
-                            <span class="demo-clip-tag">${clip.tag}</span>
-                            <span>&bull;</span>
-                            <span>${clip.time}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-clip-actions">
-                    <button class="demo-star-btn ${clip.starred ? 'starred' : ''}" data-star-id="${clip.id}" title="${clip.starred ? 'Unpin favorite' : 'Pin to favorites'}" onclick="event.stopPropagation(); toggleStar('${clip.id}')">
-                        <svg width="16" height="16" fill="${clip.starred ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                        </svg>
-                    </button>
-                    <span class="demo-copy-badge">Copy</span>
-                </div>
-            </div>
-        `).join('');
-
-        // Attach click to copy
-        listContainer.querySelectorAll('.demo-clip-item').forEach(item => {
-            item.addEventListener('click', async () => {
-                const text = item.getAttribute('data-clip-content');
-                if (text) {
-                    try {
-                        await navigator.clipboard.writeText(text);
-                        showToast('Copied snippet from Klipr!');
-                    } catch {
-                        showToast('Copied to clipboard!');
-                    }
-                }
-            });
-        });
-    }
-
-    window.toggleStar = function(id) {
-        const item = mockClips.find(c => c.id === id);
-        if (item) {
-            item.starred = !item.starred;
-            renderClips();
-        }
-    };
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            renderClips();
-        });
-    }
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            currentFilter = tab.getAttribute('data-tab');
-            renderClips();
-        });
-    });
-
-    renderClips();
-}
-
-function getClipIcon(type) {
-    switch (type) {
-        case 'terminal':
-            return `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
-        case 'code':
-            return `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>`;
-        case 'image':
-            return `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`;
-        case 'link':
-            return `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>`;
-        default:
-            return `<svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
-    }
-}
-
-function escapeHtml(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 /**
@@ -409,12 +485,11 @@ function initLightbox() {
 }
 
 /**
- * Dynamic GitHub Release & Stars Fetching
+ * Dynamic GitHub Release Fetching
  */
 async function fetchLatestRelease() {
     const repo = 'NguyenDuc2309/klipr';
     const downloadBtn = document.getElementById('download-deb-btn');
-    const badgeVersion = document.getElementById('latest-version-badge');
     const installCmdBlock = document.getElementById('install-code-box');
     const installCmdText = document.getElementById('install-cmd-text');
 
@@ -423,11 +498,8 @@ async function fetchLatestRelease() {
         if (!response.ok) return;
 
         const release = await response.json();
-        const tag = release.tag_name || 'v1.2.3';
-
-        if (badgeVersion) {
-            badgeVersion.textContent = `${tag} — Latest Release`;
-        }
+        currentReleaseTag = release.tag_name || 'v1.2.3';
+        updateVersionBadge();
 
         const debAsset = release.assets?.find(asset => asset.name.endsWith('.deb'));
         if (debAsset) {

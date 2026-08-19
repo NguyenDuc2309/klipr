@@ -35,9 +35,9 @@
     <!-- Ambient Glowing Background & Mesh Grid -->
     <div class="bg-ambient" aria-hidden="true">
         <div class="bg-grid-overlay"></div>
-        <div class="glow-orb glow-top-center"></div>
-        <div class="glow-orb glow-middle-right"></div>
-        <div class="glow-orb glow-bottom-left"></div>
+        <div class="glow-top-center glow-orb"></div>
+        <div class="glow-middle-right glow-orb"></div>
+        <div class="glow-bottom-left glow-orb"></div>
     </div>
 
     <!-- Navigation -->
@@ -49,19 +49,23 @@
             </a>
 
             <nav class="nav-links" aria-label="Primary Navigation">
-                <a href="#demo">Live Demo</a>
-                <a href="#screenshots">Screenshots</a>
-                <a href="#features">Features</a>
-                <a href="#comparison">Why Klipr</a>
-                <a href="#shortcuts">Shortcuts</a>
-                <a href="#install">Install</a>
-                <a href="#faq">FAQ</a>
+                <a href="#features" data-i18n="nav.features">Features</a>
+                <a href="#screenshots" data-i18n="nav.screenshots">Screenshots</a>
+                <a href="#comparison" data-i18n="nav.comparison">Why Klipr</a>
+                <a href="#install" data-i18n="nav.install">Install</a>
+                <a href="#faq" data-i18n="nav.faq">FAQ</a>
             </nav>
 
             <div class="nav-cta">
+                <!-- Language Switcher -->
+                <div class="lang-switcher" aria-label="Language Switcher">
+                    <button class="lang-btn active" data-lang="en" title="English">EN</button>
+                    <button class="lang-btn" data-lang="vi" title="Tiếng Việt">VI</button>
+                </div>
+
                 <a href="https://github.com/NguyenDuc2309/klipr" target="_blank" rel="noopener noreferrer" class="gh-btn" aria-label="Klipr on GitHub">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-                    <span>Star on GitHub</span>
+                    <span data-i18n="nav.star">Star on GitHub</span>
                 </a>
             </div>
         </div>
@@ -78,11 +82,11 @@
                     </a>
                 </div>
 
-                <h1 class="hero-title reveal delay-1">
+                <h1 class="hero-title reveal delay-1" data-i18n="hero.title">
                     Clipboard history,<br><span class="gradient-text">made seamless for Linux.</span>
                 </h1>
 
-                <p class="hero-description reveal delay-2">
+                <p class="hero-description reveal delay-2" data-i18n="hero.desc">
                     Klipr captures everything you copy — text, code, commands, and screenshots. Native GTK4 desktop integration, zero Electron bloat, and instant fuzzy search.
                 </p>
 
@@ -91,79 +95,93 @@
                         <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
-                        <span>Download .deb</span>
+                        <span data-i18n="hero.download_deb">Download .deb</span>
                     </a>
                     <a href="#install" class="btn btn-secondary">
                         <svg class="btn-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
-                        <span>Install Guide</span>
+                        <span data-i18n="hero.install_guide">Install Guide</span>
                     </a>
                 </div>
 
                 <div class="hero-pills reveal delay-3">
                     <div class="pill-item">
                         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        <span>Native GTK4</span>
+                        <span data-i18n="hero.pill_gtk">Native GTK4</span>
                     </div>
                     <div class="pill-item">
                         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        <span>&lt; 35MB RAM Usage</span>
+                        <span data-i18n="hero.pill_ram">&lt; 35MB RAM Usage</span>
                     </div>
                     <div class="pill-item">
                         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        <span>100% Offline &amp; Private</span>
+                        <span data-i18n="hero.pill_privacy">100% Offline &amp; Private</span>
                     </div>
                     <div class="pill-item">
                         <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        <span>MIT Open Source</span>
+                        <span data-i18n="hero.pill_mit">MIT Open Source</span>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Interactive Playground / Live Simulator -->
-        <section class="demo-section" id="demo">
+        <!-- Features Section -->
+        <section class="section" id="features">
             <div class="container">
                 <div class="section-header reveal">
-                    <span class="section-tag">Interactive Preview</span>
-                    <h2 class="section-title">Try the Klipr Experience</h2>
-                    <p class="section-subtitle">Test fuzzy searching, filter by type, pin favorites, and click any item to copy.</p>
+                    <span class="section-tag" data-i18n="features.tag">Features</span>
+                    <h2 class="section-title" data-i18n="features.title">Built for daily developer productivity</h2>
+                    <p class="section-subtitle" data-i18n="features.subtitle">Everything you need to effortlessly manage clipboard history without bloat.</p>
                 </div>
 
-                <div class="interactive-demo-card reveal">
-                    <div class="demo-header">
-                        <div class="window-controls">
-                            <span class="window-dot dot-close"></span>
-                            <span class="window-dot dot-min"></span>
-                            <span class="window-dot dot-max"></span>
+                <div class="features-grid">
+                    <div class="feature-card reveal">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
-                        <div class="demo-title-bar">
-                            <span>Klipr History Simulator</span>
-                            <span class="demo-live-badge">Live Demo</span>
-                        </div>
-                        <div style="width: 42px;"></div>
+                        <h3 data-i18n="features.f1_title">Automatic History</h3>
+                        <p data-i18n="features.f1_desc">Quietly records snippets and automatically prunes older items based on your configured limit.</p>
                     </div>
 
-                    <div class="demo-body">
-                        <div class="demo-search-bar">
-                            <svg class="demo-search-icon" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input type="text" id="demo-search" class="demo-search-input" placeholder="Type to search history in real-time (e.g. 'git', 'image', 'color')...">
+                    <div class="feature-card reveal delay-1">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                         </div>
+                        <h3 data-i18n="features.f2_title">Instant Fuzzy Search</h3>
+                        <p data-i18n="features.f2_desc">Search across your entire clipboard history with zero input latency and full multilingual IME support.</p>
+                    </div>
 
-                        <div class="demo-tabs">
-                            <button class="demo-tab-btn active" data-tab="all">All Clips (6)</button>
-                            <button class="demo-tab-btn" data-tab="code">Code &amp; Commands</button>
-                            <button class="demo-tab-btn" data-tab="image">Images</button>
-                            <button class="demo-tab-btn" data-tab="text">Text Snippets</button>
-                            <button class="demo-tab-btn" data-tab="starred">★ Favorites</button>
+                    <div class="feature-card reveal delay-2">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
                         </div>
+                        <h3 data-i18n="features.f3_title">Pinned Favorites</h3>
+                        <p data-i18n="features.f3_desc">Bookmark recurring commands, passwords, or snippets. Pinned items are protected from auto-pruning.</p>
+                    </div>
 
-                        <div id="demo-clips-container" class="demo-clips-list">
-                            <!-- Populated dynamically by main.js -->
+                    <div class="feature-card reveal">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
+                        <h3 data-i18n="features.f4_title">Image &amp; Screenshot Capture</h3>
+                        <p data-i18n="features.f4_desc">Preserves copied images and screenshots with instant thumbnail previews and one-click paste back.</p>
+                    </div>
+
+                    <div class="feature-card reveal delay-1">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                        </div>
+                        <h3 data-i18n="features.f5_title">Dark, Light &amp; System</h3>
+                        <p data-i18n="features.f5_desc">Seamlessly synchronizes with your Linux desktop theme or choose your preferred look manually.</p>
+                    </div>
+
+                    <div class="feature-card reveal delay-2">
+                        <div class="feature-icon-wrapper">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <h3 data-i18n="features.f6_title">Pure Native Performance</h3>
+                        <p data-i18n="features.f6_desc">Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.</p>
                     </div>
                 </div>
             </div>
@@ -173,9 +191,9 @@
         <section class="showcase" id="screenshots">
             <div class="container">
                 <div class="section-header reveal">
-                    <span class="section-tag">App Showcase</span>
-                    <h2 class="section-title">Clean, focused GTK4 interface</h2>
-                    <p class="section-subtitle">Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.</p>
+                    <span class="section-tag" data-i18n="showcase.tag">App Showcase</span>
+                    <h2 class="section-title" data-i18n="showcase.title">Clean, focused GTK4 interface</h2>
+                    <p class="section-subtitle" data-i18n="showcase.subtitle">Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.</p>
                 </div>
 
                 <div class="showcase-container">
@@ -186,15 +204,15 @@
                                 <span class="window-dot dot-min"></span>
                                 <span class="window-dot dot-max"></span>
                             </div>
-                            <span class="window-title">Klipr — History &amp; Favorites</span>
+                            <span class="window-title" data-i18n="showcase.window1_title">Klipr — History &amp; Favorites</span>
                             <div style="width: 42px;"></div>
                         </div>
                         <img src="./assets/home_page.png" alt="Klipr Clipboard History View" class="window-img" loading="lazy">
                         <div class="window-caption">
-                            <span>Clipboard History with Thumbnail Previews</span>
+                            <span data-i18n="showcase.window1_caption">Clipboard History with Thumbnail Previews</span>
                             <span class="zoom-hint">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                Click to Zoom
+                                <span data-i18n="showcase.zoom">Click to Zoom</span>
                             </span>
                         </div>
                     </div>
@@ -206,78 +224,17 @@
                                 <span class="window-dot dot-min"></span>
                                 <span class="window-dot dot-max"></span>
                             </div>
-                            <span class="window-title">Klipr — Settings &amp; Customization</span>
+                            <span class="window-title" data-i18n="showcase.window2_title">Klipr — Settings &amp; Customization</span>
                             <div style="width: 42px;"></div>
                         </div>
                         <img src="./assets/setting_page.png" alt="Klipr Settings View" class="window-img" loading="lazy">
                         <div class="window-caption">
-                            <span>Themes, Global Hotkeys &amp; Tray Settings</span>
+                            <span data-i18n="showcase.window2_caption">Themes, Global Hotkeys &amp; Tray Settings</span>
                             <span class="zoom-hint">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
-                                Click to Zoom
+                                <span data-i18n="showcase.zoom">Click to Zoom</span>
                             </span>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="section" id="features">
-            <div class="container">
-                <div class="section-header reveal">
-                    <span class="section-tag">Features</span>
-                    <h2 class="section-title">Built for daily developer productivity</h2>
-                    <p class="section-subtitle">Everything you need to effortlessly manage clipboard history without bloat.</p>
-                </div>
-
-                <div class="features-grid">
-                    <div class="feature-card reveal">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <h3>Automatic History</h3>
-                        <p>Quietly records snippets and automatically prunes older items based on your configured limit.</p>
-                    </div>
-
-                    <div class="feature-card reveal delay-1">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </div>
-                        <h3>Instant Fuzzy Search</h3>
-                        <p>Search across your entire clipboard history with zero input latency and full multilingual IME support.</p>
-                    </div>
-
-                    <div class="feature-card reveal delay-2">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
-                        </div>
-                        <h3>Pinned Favorites</h3>
-                        <p>Bookmark recurring commands, passwords, or snippets. Pinned items are protected from auto-pruning.</p>
-                    </div>
-
-                    <div class="feature-card reveal">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        </div>
-                        <h3>Image &amp; Screenshot Capture</h3>
-                        <p>Preserves copied images and screenshots with instant thumbnail previews and one-click paste back.</p>
-                    </div>
-
-                    <div class="feature-card reveal delay-1">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                        </div>
-                        <h3>Dark, Light &amp; System</h3>
-                        <p>Seamlessly synchronizes with your Linux desktop theme or choose your preferred look manually.</p>
-                    </div>
-
-                    <div class="feature-card reveal delay-2">
-                        <div class="feature-icon-wrapper">
-                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                        </div>
-                        <h3>Pure Native Performance</h3>
-                        <p>Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.</p>
                     </div>
                 </div>
             </div>
@@ -287,90 +244,60 @@
         <section class="section" id="comparison">
             <div class="container">
                 <div class="section-header reveal">
-                    <span class="section-tag">Benchmark</span>
-                    <h2 class="section-title">Why Developers Choose Klipr</h2>
-                    <p class="section-subtitle">Say goodbye to 400MB Electron clipboard utilities.</p>
+                    <span class="section-tag" data-i18n="comparison.tag">Benchmark</span>
+                    <h2 class="section-title" data-i18n="comparison.title">Why Developers Choose Klipr</h2>
+                    <p class="section-subtitle" data-i18n="comparison.subtitle">Say goodbye to 400MB Electron clipboard utilities.</p>
                 </div>
 
                 <div class="comparison-wrapper reveal">
                     <table class="comparison-table">
                         <thead>
                             <tr>
-                                <th>Feature / Metric</th>
-                                <th class="highlight">Klipr (Native GTK4)</th>
-                                <th>Electron-Based Apps</th>
-                                <th>Standard Linux Clipboards</th>
+                                <th data-i18n="comparison.th_metric">Feature / Metric</th>
+                                <th class="highlight" data-i18n="comparison.th_klipr">Klipr (Native GTK4)</th>
+                                <th data-i18n="comparison.th_electron">Electron-Based Apps</th>
+                                <th data-i18n="comparison.th_standard">Standard Linux Clipboards</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>RAM Consumption</strong></td>
+                                <td><strong data-i18n="comparison.r1_metric">RAM Consumption</strong></td>
                                 <td class="highlight"><span class="status-badge-good">~25 - 35 MB</span></td>
                                 <td>300 - 500 MB</td>
                                 <td>15 - 30 MB</td>
                             </tr>
                             <tr>
-                                <td><strong>Launch &amp; Hotkey Latency</strong></td>
-                                <td class="highlight"><span class="status-badge-good">&lt; 0.15s (Instant)</span></td>
+                                <td><strong data-i18n="comparison.r2_metric">Launch &amp; Hotkey Latency</strong></td>
+                                <td class="highlight"><span class="status-badge-good" data-i18n="comparison.r2_val1">&lt; 0.15s (Instant)</span></td>
                                 <td>0.8s - 2.5s</td>
                                 <td>0.2s</td>
                             </tr>
                             <tr>
-                                <td><strong>Image &amp; Screenshot History</strong></td>
-                                <td class="highlight"><span class="status-badge-good">✓ Full Thumbnails</span></td>
-                                <td>✓ Supported</td>
-                                <td><span class="status-badge-bad">✕ Text Only (Mostly)</span></td>
+                                <td><strong data-i18n="comparison.r3_metric">Image &amp; Screenshot History</strong></td>
+                                <td class="highlight"><span class="status-badge-good" data-i18n="comparison.r3_val1">✓ Full Thumbnails</span></td>
+                                <td data-i18n="comparison.r3_val2">✓ Supported</td>
+                                <td><span class="status-badge-bad" data-i18n="comparison.r3_val3">✕ Text Only (Mostly)</span></td>
                             </tr>
                             <tr>
-                                <td><strong>Pinned Favorites System</strong></td>
-                                <td class="highlight"><span class="status-badge-good">✓ Permanent Pinning</span></td>
-                                <td>✓ Supported</td>
-                                <td><span class="status-badge-bad">✕ Limited</span></td>
+                                <td><strong data-i18n="comparison.r4_metric">Pinned Favorites System</strong></td>
+                                <td class="highlight"><span class="status-badge-good" data-i18n="comparison.r4_val1">✓ Permanent Pinning</span></td>
+                                <td data-i18n="comparison.r4_val2">✓ Supported</td>
+                                <td><span class="status-badge-bad" data-i18n="comparison.r4_val3">✕ Limited</span></td>
                             </tr>
                             <tr>
-                                <td><strong>Telemetry &amp; Privacy</strong></td>
-                                <td class="highlight"><span class="status-badge-good">✓ 100% Offline &amp; Safe</span></td>
-                                <td>Varies / Often Tracked</td>
-                                <td>✓ Offline</td>
+                                <td><strong data-i18n="comparison.r5_metric">Telemetry &amp; Privacy</strong></td>
+                                <td class="highlight"><span class="status-badge-good" data-i18n="comparison.r5_val1">✓ 100% Offline &amp; Safe</span></td>
+                                <td data-i18n="comparison.r5_val2">Varies / Often Tracked</td>
+                                <td data-i18n="comparison.r5_val3">✓ Offline</td>
                             </tr>
                             <tr>
-                                <td><strong>License</strong></td>
-                                <td class="highlight"><span class="status-badge-good">MIT Open Source</span></td>
-                                <td>Proprietary / Open</td>
-                                <td>Open Source</td>
+                                <td><strong data-i18n="comparison.r6_metric">License</strong></td>
+                                <td class="highlight"><span class="status-badge-good" data-i18n="comparison.r6_val1">MIT Open Source</span></td>
+                                <td data-i18n="comparison.r6_val2">Proprietary / Open</td>
+                                <td data-i18n="comparison.r6_val3">Open Source</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- Shortcuts Section -->
-        <section class="section" id="shortcuts">
-            <div class="container">
-                <div class="section-header reveal">
-                    <span class="section-tag">Productivity</span>
-                    <h2 class="section-title">Keyboard-First Control</h2>
-                    <p class="section-subtitle">Navigate, search, and paste without lifting your hands from the keyboard.</p>
-                </div>
-
-                <div class="shortcuts-grid reveal">
-                    <div class="shortcut-card">
-                        <span class="shortcut-label">Toggle Klipr Window</span>
-                        <kbd class="kbd-badge">Ctrl + Alt + M</kbd>
-                    </div>
-                    <div class="shortcut-card">
-                        <span class="shortcut-label">Focus Instant Search</span>
-                        <kbd class="kbd-badge">Ctrl + F</kbd>
-                    </div>
-                    <div class="shortcut-card">
-                        <span class="shortcut-label">Navigate History</span>
-                        <kbd class="kbd-badge">↑ / ↓ Arrow Keys</kbd>
-                    </div>
-                    <div class="shortcut-card">
-                        <span class="shortcut-label">Copy &amp; Paste Item</span>
-                        <kbd class="kbd-badge">Enter</kbd>
-                    </div>
                 </div>
             </div>
         </section>
@@ -380,14 +307,14 @@
             <div class="container">
                 <div class="install-card reveal">
                     <div class="install-header">
-                        <h3>Install Klipr in Seconds</h3>
-                        <p>Choose your preferred installation method below:</p>
+                        <h3 data-i18n="install.title">Install Klipr in Seconds</h3>
+                        <p data-i18n="install.subtitle">Choose your preferred installation method below:</p>
                     </div>
 
                     <div class="install-tabs">
-                        <button class="install-tab-btn active" data-install-target="install-deb">Ubuntu / Debian (.deb)</button>
-                        <button class="install-tab-btn" data-install-target="install-source">Build from Source</button>
-                        <button class="install-tab-btn" data-install-target="install-config">Settings Config</button>
+                        <button class="install-tab-btn active" data-install-target="install-deb" data-i18n="install.tab_deb">Ubuntu / Debian (.deb)</button>
+                        <button class="install-tab-btn" data-install-target="install-source" data-i18n="install.tab_source">Build from Source</button>
+                        <button class="install-tab-btn" data-install-target="install-config" data-i18n="install.tab_config">Settings Config</button>
                     </div>
 
                     <!-- Panel 1: DEB -->
@@ -402,7 +329,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="install-note">Download the latest release package directly from <a href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue);">GitHub Releases</a>.</p>
+                        <p class="install-note"><span data-i18n="install.note_deb_prefix">Download the latest release package directly from</span> <a href="https://github.com/NguyenDuc2309/klipr/releases/latest" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue);">GitHub Releases</a>.</p>
                     </div>
 
                     <!-- Panel 2: Source -->
@@ -417,7 +344,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="install-note">Requires Python 3.10+, GTK4, and PyGObject (`gir1.2-gtk-4.0`).</p>
+                        <p class="install-note" data-i18n="install.note_source">Requires Python 3.10+, GTK4, and PyGObject (`gir1.2-gtk-4.0`).</p>
                     </div>
 
                     <!-- Panel 3: Config -->
@@ -432,7 +359,7 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="install-note">Configure `historyLimit`, `theme`, `autostart`, and custom `shortcut` keys.</p>
+                        <p class="install-note" data-i18n="install.note_config">Configure `historyLimit`, `theme`, `autostart`, and custom `shortcut` keys.</p>
                     </div>
                 </div>
             </div>
@@ -442,49 +369,49 @@
         <section class="section" id="faq">
             <div class="container">
                 <div class="section-header reveal">
-                    <span class="section-tag">FAQ</span>
-                    <h2 class="section-title">Frequently Asked Questions</h2>
-                    <p class="section-subtitle">Quick answers to common questions about Klipr.</p>
+                    <span class="section-tag" data-i18n="faq.tag">FAQ</span>
+                    <h2 class="section-title" data-i18n="faq.title">Frequently Asked Questions</h2>
+                    <p class="section-subtitle" data-i18n="faq.subtitle">Quick answers to common questions about Klipr.</p>
                 </div>
 
                 <div class="faq-list reveal">
                     <div class="faq-item active">
                         <button class="faq-question">
-                            <span>Does Klipr work on Ubuntu, Debian, and other Linux distros?</span>
+                            <span data-i18n="faq.q1">Does Klipr work on Ubuntu, Debian, and other Linux distros?</span>
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p>Yes! Klipr is packaged as a `.deb` for Ubuntu 22.04+, Debian 12+, Linux Mint, and Pop!_OS. It can also be run from source on Arch Linux, Fedora, or any distro with Python 3.10+ and GTK4.</p>
+                            <p data-i18n="faq.a1">Yes! Klipr is packaged as a `.deb` for Ubuntu 22.04+, Debian 12+, Linux Mint, and Pop!_OS. It can also be run from source on Arch Linux, Fedora, or any distro with Python 3.10+ and GTK4.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button class="faq-question">
-                            <span>Are passwords or copied credentials sent anywhere?</span>
+                            <span data-i18n="faq.q2">Are passwords or copied credentials sent anywhere?</span>
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p>No. Klipr is 100% offline, privacy-first, and contains zero network telemetry or tracking. Your clipboard history stays strictly on your local disk at `~/.local/share/klipr`.</p>
+                            <p data-i18n="faq.a2">No. Klipr is 100% offline, privacy-first, and contains zero network telemetry or tracking. Your clipboard history stays strictly on your local disk at `~/.local/share/klipr`.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button class="faq-question">
-                            <span>Can I change the global toggle shortcut?</span>
+                            <span data-i18n="faq.q3">Can I change the global toggle shortcut?</span>
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p>Yes! You can change the global shortcut from the in-app Settings dialog or by editing the `"shortcut"` field in `~/.config/klipr/settings.json` (default: `Ctrl+Alt+M`).</p>
+                            <p data-i18n="faq.a3">Yes! You can change the global shortcut from the in-app Settings dialog or by editing the `"shortcut"` field in `~/.config/klipr/settings.json` (default: `Ctrl+Alt+M`).</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
                         <button class="faq-question">
-                            <span>How is image clipboard history stored?</span>
+                            <span data-i18n="faq.q4">How is image clipboard history stored?</span>
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p>When an image is copied (like from a screenshot tool or browser), Klipr saves an optimized image file with cached thumbnail generation, allowing one-click paste back to any application.</p>
+                            <p data-i18n="faq.a4">When an image is copied (like from a screenshot tool or browser), Klipr saves an optimized image file with cached thumbnail generation, allowing one-click paste back to any application.</p>
                         </div>
                     </div>
                 </div>
@@ -515,13 +442,13 @@
         <div class="container footer-inner">
             <div class="footer-brand">
                 <img src="./assets/logo.png" alt="Klipr" width="22" height="22">
-                <span>Klipr &bull; Crafted with passion by <a href="https://github.com/NguyenDuc2309" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); font-weight: 600;">Nguyen Duc</a></span>
+                <span><span data-i18n="footer.crafted">Klipr &bull; Crafted with passion by</span> <a href="https://github.com/NguyenDuc2309" target="_blank" rel="noopener noreferrer" style="color: var(--accent-blue); font-weight: 600;">Nguyen Duc</a></span>
             </div>
 
             <div class="footer-links">
-                <a href="https://github.com/NguyenDuc2309/klipr" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-                <a href="https://github.com/NguyenDuc2309/klipr/releases" target="_blank" rel="noopener noreferrer">Releases</a>
-                <a href="https://github.com/NguyenDuc2309/klipr/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+                <a href="https://github.com/NguyenDuc2309/klipr" target="_blank" rel="noopener noreferrer" data-i18n="footer.repo">GitHub Repository</a>
+                <a href="https://github.com/NguyenDuc2309/klipr/releases" target="_blank" rel="noopener noreferrer" data-i18n="footer.releases">Releases</a>
+                <a href="https://github.com/NguyenDuc2309/klipr/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" data-i18n="footer.license">MIT License</a>
             </div>
         </div>
     </footer>

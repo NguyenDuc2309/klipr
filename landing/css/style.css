@@ -209,7 +209,39 @@ img {
 .nav-cta {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
+}
+
+/* Language Switcher */
+.lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-full);
+    padding: 3px;
+    gap: 2px;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.lang-btn:hover {
+    color: var(--text-primary);
+}
+
+.lang-btn.active {
+    background: var(--accent-blue);
+    color: #04080e;
 }
 
 .gh-btn {
@@ -233,21 +265,11 @@ img {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Mobile Toggle */
-.mobile-menu-btn {
-    display: none;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    cursor: pointer;
-    padding: 6px;
-}
-
 /* ── Hero Section ── */
 .hero {
     position: relative;
     z-index: 1;
-    padding: 96px 0 64px;
+    padding: 100px 0 70px;
     text-align: center;
 }
 
@@ -305,7 +327,7 @@ img {
 .hero-title {
     font-size: clamp(2.6rem, 5.5vw, 4.4rem);
     font-weight: 800;
-    line-height: 1.08;
+    line-height: 1.1;
     letter-spacing: -0.038em;
     margin-bottom: 24px;
 }
@@ -319,7 +341,7 @@ img {
 .hero-description {
     font-size: clamp(1.05rem, 2vw, 1.25rem);
     color: var(--text-secondary);
-    max-width: 640px;
+    max-width: 660px;
     margin: 0 auto 36px;
     line-height: 1.65;
 }
@@ -384,7 +406,7 @@ img {
 .hero-pills {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 18px;
     flex-wrap: wrap;
 }
 
@@ -406,231 +428,11 @@ img {
     color: var(--accent-blue);
 }
 
-/* ── Interactive Playground / Live Demo ── */
-.demo-section {
-    position: relative;
-    z-index: 1;
-    padding: 30px 0 70px;
-}
-
-.interactive-demo-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
-    max-width: 920px;
-    margin: 0 auto;
-}
-
-.demo-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.demo-title-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.demo-live-badge {
-    background: rgba(63, 185, 80, 0.12);
-    color: var(--accent-emerald);
-    border: 1px solid rgba(63, 185, 80, 0.3);
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.demo-body {
-    padding: 24px;
-    background: var(--bg-main);
-}
-
-.demo-search-bar {
-    position: relative;
-    margin-bottom: 18px;
-}
-
-.demo-search-input {
-    width: 100%;
-    padding: 13px 18px 13px 44px;
-    background: var(--bg-input);
-    border: 1px solid var(--border-medium);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    font-size: 0.95rem;
-    outline: none;
-    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.demo-search-input:focus {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.18);
-}
-
-.demo-search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.demo-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-
-.demo-tab-btn {
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
-    padding: 6px 14px;
-    border-radius: var(--radius-full);
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    white-space: nowrap;
-}
-
-.demo-tab-btn:hover {
-    color: var(--text-primary);
-    border-color: var(--border-medium);
-}
-
-.demo-tab-btn.active {
-    background: var(--accent-blue);
-    color: #050a10;
-    border-color: var(--accent-blue);
-    font-weight: 600;
-}
-
-.demo-clips-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 380px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.demo-clip-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
-    cursor: pointer;
-}
-
-.demo-clip-item:hover {
-    background: var(--bg-surface-elevated);
-    border-color: var(--border-accent);
-    transform: translateX(4px);
-}
-
-.demo-clip-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex: 1;
-    min-width: 0;
-}
-
-.demo-clip-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent-blue);
-    flex-shrink: 0;
-}
-
-.demo-clip-info {
-    overflow: hidden;
-}
-
-.demo-clip-title {
-    font-size: 0.92rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.demo-clip-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-.demo-clip-tag {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-family: var(--font-mono);
-}
-
-.demo-clip-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.demo-star-btn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    padding: 4px;
-    transition: color var(--transition-fast);
-}
-
-.demo-star-btn.starred {
-    color: var(--accent-amber);
-}
-
-.demo-copy-badge {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 4px;
-}
-
 /* ── Showcase / Screenshots ── */
 .showcase {
     position: relative;
     z-index: 1;
-    padding: 40px 0 80px;
+    padding: 30px 0 80px;
 }
 
 .showcase-container {
@@ -804,7 +606,7 @@ img {
 
 /* ── Comparison Section ── */
 .comparison-wrapper {
-    max-width: 900px;
+    max-width: 920px;
     margin: 0 auto;
     background: var(--bg-surface);
     border: 1px solid var(--border-subtle);
@@ -860,49 +662,6 @@ img {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-}
-
-/* ── Shortcuts Section ── */
-.shortcuts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 18px;
-    max-width: 960px;
-    margin: 0 auto;
-}
-
-.shortcut-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 18px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    transition: transform var(--transition-fast), border-color var(--transition-fast);
-}
-
-.shortcut-card:hover {
-    border-color: var(--border-accent);
-    transform: translateY(-2px);
-}
-
-.shortcut-label {
-    font-size: 0.92rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.kbd-badge {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid var(--border-medium);
-    border-radius: 6px;
-    padding: 5px 10px;
-    font-family: var(--font-mono);
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--accent-blue);
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
 }
 
 /* ── Install Section ── */
@@ -1104,7 +863,7 @@ img {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 200px;
+    max-height: 250px;
     padding-bottom: 20px;
 }
 
@@ -1300,9 +1059,6 @@ img {
 @media (max-width: 768px) {
     .navbar .nav-links {
         display: none;
-    }
-    .mobile-menu-btn {
-        display: block;
     }
     .hero {
         padding: 60px 0 40px;
