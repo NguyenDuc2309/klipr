@@ -10,12 +10,10 @@ The `debian/` directory in this repository is the packaging source. It was
 written against Debian Policy 4.7.4 and debhelper compat 13.
 
 **Build status.** The package builds cleanly in a Debian sid container and has
-been through lintian, installed, run, and purged. The only lintian warnings
-left are the two that cannot be resolved until the ITP bug exists:
+been through lintian, installed, run, and purged. Lintian reports no errors or
+warnings; what is left is deliberate:
 
 ```
-W: klipr: initial-upload-closes-no-bugs
-W: klipr: wrong-bug-number-in-closes #nnnnnn
 I: klipr source: older-debian-watch-file-standard 4
 P: klipr source: maintainer-manual-page
 P: klipr source: package-uses-old-debhelper-compat-version 13
@@ -33,32 +31,18 @@ module directory, the icon is scaled to a real 128x128, and
 
 ---
 
-## Blockers to clear before uploading
+## Status
 
-These will be raised in review.
-
-### 1. ITP bug number
-
-`debian/changelog` says `Closes: #nnnnnn`. File the Intent To Package bug
-first and substitute the real number:
-
-```bash
-reportbug --email nguyenminhduc230903@gmail.com wnpp
-```
-
-Choose `ITP`, package `klipr`. The bug number comes back by mail; put it in
-the changelog. Nothing can be uploaded to mentors before this exists, because
-the RFS has to reference it.
-
-The signing key is already in place and needs no change: it is
+The ITP is filed as [#1144904](https://bugs.debian.org/1144904) and
+`debian/changelog` closes it. The signing key is in place:
 `rsa4096/11C48069FB3AA8E8`, whose user ID
 `Nguyen Duc <nguyenminhduc230903@gmail.com>` matches the `Maintainer` field in
 both `debian/control` and `debian/changelog` exactly, which is what `debsign`
 and mentors check.
 
-### 2. X11-only is worth a sentence to your sponsor
+One thing worth mentioning to a sponsor rather than fixing quietly:
 
-`src/main.py` sets `GDK_BACKEND=x11` unconditionally, so on Wayland the app
+**X11 only.** `src/main.py` sets `GDK_BACKEND=x11` unconditionally, so on Wayland the app
 runs through XWayland. This is documented in the manpage under NOTES and is
 not a blocker, but expect to be asked about it.
 
