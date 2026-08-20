@@ -384,23 +384,6 @@ img {
     margin-bottom: 20px;
 }
 
-.hero-trust-text {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    margin-bottom: 36px;
-}
-
-.hero-trust-text svg {
-    color: var(--accent-emerald);
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-}
-
 /* ── Free Promise Section ── */
 .free-promise-grid {
     display: grid;
