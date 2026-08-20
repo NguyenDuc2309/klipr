@@ -34,25 +34,20 @@ These will be raised in review.
 first and substitute the real number:
 
 ```bash
-reportbug --email you@example.com wnpp
+reportbug --email nguyenminhduc230903@gmail.com wnpp
 ```
 
 Choose `ITP`, package `klipr`. The bug number comes back by mail; put it in
-the changelog.
+the changelog. Nothing can be uploaded to mentors before this exists, because
+the RFS has to reference it.
 
-### 2. Maintainer field must match your OpenPGP key
+The signing key is already in place and needs no change: it is
+`rsa4096/11C48069FB3AA8E8`, whose user ID
+`Nguyen Duc <nguyenminhduc230903@gmail.com>` matches the `Maintainer` field in
+both `debian/control` and `debian/changelog` exactly, which is what `debsign`
+and mentors check.
 
-`debian/control` and `debian/changelog` both say:
-
-```
-Nguyen Duc <nguyenminhduc230903@gmail.com>
-```
-
-This has to match the user ID on the key you sign the upload with, byte for
-byte — including the diacritics if your key says `Nguyễn Đức`. Check with
-`gpg --list-keys` and edit both files to agree.
-
-### 3. X11-only is worth a sentence to your sponsor
+### 2. X11-only is worth a sentence to your sponsor
 
 `src/main.py` sets `GDK_BACKEND=x11` unconditionally, so on Wayland the app
 runs through XWayland. This is documented in the manpage under NOTES and is
@@ -68,8 +63,12 @@ not ship at the required versions.
 
 ```bash
 sudo apt install devscripts dpkg-dev debhelper dh-python \
-                 desktop-file-utils lintian sbuild piuparts
+                 desktop-file-utils lintian sbuild piuparts \
+                 dput-ng reportbug
 ```
+
+`devscripts` is what provides `debuild`, `debsign` and `uscan`; `dput-ng`
+provides `dput` together with a ready-made mentors profile.
 
 The upstream tarball has to be repacked, because the GitHub tag tarball
 contains `landing/apt/` — the project's own APT repo, including a committed
@@ -82,12 +81,15 @@ that repack is why the version is `1.2.4+ds-1` rather than `1.2.4-1`.
 # fetch and repack the upstream tarball in one step
 uscan --verbose --download-current-version
 
-# build the source and binary package
+# build binaries locally to test that the package actually works
 dpkg-buildpackage -us -uc
 
 # or, the way it should really be checked, in a clean sid chroot
 sbuild -d unstable
 ```
+
+The binary build is for your own testing. What gets uploaded to mentors is the
+source-only build described below.
 
 Then look at the result critically:
 
@@ -110,18 +112,62 @@ uscan --verbose --dry-run
 
 ## Uploading to mentors and finding a sponsor
 
-1. Register at <https://mentors.debian.net> and add your GPG key.
-2. Sign and upload:
+There is no upload button on the website. mentors.debian.net takes packages
+only over `dput`/`dupload` from the command line, so an account with an empty
+"My packages" list is the expected state until the first upload goes through.
+
+Mentors keeps the *source* package, not binaries, so build source-only. `-sa`
+includes the `.orig.tar.xz`, which is required on a first upload:
+
+```bash
+debuild -S -sa
+```
+
+That produces the four files mentors wants, next to the source tree:
+`klipr_1.2.4+ds-1.dsc`, `klipr_1.2.4+ds.orig.tar.xz`,
+`klipr_1.2.4+ds-1.debian.tar.xz` and `klipr_1.2.4+ds-1_source.changes`.
+
+Then:
+
+1. Register at <https://mentors.debian.net> and paste your **public** key into
+   the control panel — the upload is rejected if the signature does not match
+   a key registered there. Export it with:
+
+   ```bash
+   gpg --armor --export 11C48069FB3AA8E8
+   ```
+
+   Also push it to a keyserver so a sponsor can find it:
+   `gpg --keyserver keys.openpgp.org --send-keys 11C48069FB3AA8E8`
+
+2. Configure the upload target. `dput-ng` already ships a `mentors` profile in
+   `/usr/share/dput-ng/profiles/`, so with it installed nothing needs writing.
+   Only the older `dput` needs `~/.dput.cf`:
+
+   ```ini
+   [mentors]
+   fqdn = mentors.debian.net
+   incoming = /upload
+   method = https
+   allow_unsigned_uploads = 0
+   progress_indicator = 2
+   allowed_distributions = .*
+   ```
+
+3. Sign and upload:
 
    ```bash
    debsign ../klipr_1.2.4+ds-1_source.changes
    dput mentors ../klipr_1.2.4+ds-1_source.changes
    ```
 
-3. On the package page, turn on **"Needs a sponsor"**.
-4. File an RFS (request for sponsorship) bug against the
-   `sponsorship-requests` pseudo-package, linking the mentors page and the ITP
-   number.
+   The importer runs roughly every 15 minutes; the package then appears under
+   "My packages" and you get mail.
+
+4. On the package page, turn on **"Needs a sponsor"**.
+5. File an RFS (request for sponsorship) bug against the
+   `sponsorship-requests` pseudo-package — the package page generates a
+   template — linking the mentors page and the ITP number.
 
 A Debian Developer then reviews it. Expect several rounds of comments; a
 lintian-clean package with a working autopkgtest is what makes a sponsor
