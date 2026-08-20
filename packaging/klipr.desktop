@@ -6,5 +6,6 @@ Exec=klipr
 Icon=klipr
 Terminal=false
 Categories=Utility;
+Keywords=clipboard;history;copy;paste;snippet;clipboard manager;
 StartupNotify=true
 StartupWMClass=io.github.nguyenduc2309.klipr

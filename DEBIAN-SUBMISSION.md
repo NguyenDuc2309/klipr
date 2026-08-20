@@ -9,18 +9,27 @@ next release cycle.
 The `debian/` directory in this repository is the packaging source. It was
 written against Debian Policy 4.7.4 and debhelper compat 13.
 
-**What has and has not been verified.** The machine this was written on is
-Ubuntu 22.04 with no root access, so `debhelper` and `dh-python` could not be
-installed and **the package has never actually been built or run through
-lintian.** What *was* checked, and passes: `desktop-file-validate` on the
-desktop entry, `dpkg-parsechangelog` on the changelog, DEP-5 parsing of
-`debian/copyright`, YAML parsing of `debian/upstream/metadata`, groff
-rendering of the manpage with `--warnings` (clean), `make -n` on every
-`debian/rules` override under both the default and `nocheck` profiles, and a
-staged replica of the install tree confirming that `setting.json`, both CSS
-files and both logos resolve from `/usr/share/klipr` exactly where the code
-looks for them. Treat the first real `sbuild` run as the point where unknown
-problems surface.
+**Build status.** The package builds cleanly in a Debian sid container and has
+been through lintian, installed, run, and purged. The only lintian warnings
+left are the two that cannot be resolved until the ITP bug exists:
+
+```
+W: klipr: initial-upload-closes-no-bugs
+W: klipr: wrong-bug-number-in-closes #nnnnnn
+I: klipr source: older-debian-watch-file-standard 4
+P: klipr source: maintainer-manual-page
+P: klipr source: package-uses-old-debhelper-compat-version 13
+```
+
+The `I:` and `P:` tags are deliberate. Watch format 5 is only documented in
+`devscripts` from experimental, so format 4 is what everything supports today.
+The manpage is maintained in `debian/` because upstream ships none. Compat 14
+only stabilised in August 2026 and is not worth the risk on a first upload.
+
+Verified along the way: the built `.deb` installs and purges without leaving
+anything behind, `klipr --help` runs, `dh_python3` byte-compiles the private
+module directory, the icon is scaled to a real 128x128, and
+`debian/tests/smoke` passes under `xvfb`.
 
 ---
 
@@ -57,9 +66,26 @@ not a blocker, but expect to be asked about it.
 
 ## Building the source package
 
-You need a Debian sid environment. On a non-Debian host use a container or a
-`sbuild`/`pbuilder` chroot; the packaging assumes tools that Ubuntu 22.04 does
-not ship at the required versions.
+You need a Debian sid environment; Ubuntu 22.04 does not ship these tools at
+the versions the packaging assumes. If Docker is available, this needs no root
+on the host and is how the build above was checked:
+
+```bash
+# from a clean export of HEAD, with landing/apt and __pycache__ stripped and
+# debian/ left in place, alongside klipr_1.2.4+ds.orig.tar.xz
+docker run --rm -v "$PWD":/src -w /src/klipr-1.2.4+ds debian:sid sh -c '
+  apt-get update -qq
+  apt-get install -y --no-install-recommends build-essential devscripts \
+      debhelper dh-python python3 python3-pil desktop-file-utils lintian
+  dpkg-buildpackage -us -uc
+  cd /src && lintian -I --pedantic --tag-display-limit 0 \
+      klipr_1.2.4+ds-1_amd64.changes'
+```
+
+The container runs as root, so `chown -R` the directory back afterwards or the
+next run cannot clean it.
+
+Natively, on a real sid system:
 
 ```bash
 sudo apt install devscripts dpkg-dev debhelper dh-python \
@@ -101,8 +127,7 @@ autopkgtest ../klipr_1.2.4+ds-1_all.deb -- null
 
 `debian/tests/smoke` is the autopkgtest: it imports the installed private
 modules under `xvfb`, builds the main window once, and asserts that the
-packaged `setting.json` is found. It has never been executed — expect to
-iterate on it.
+packaged `setting.json` is found. It passes against the built package.
 
 Also confirm the watch file actually resolves, since GitHub tag layouts vary:
 

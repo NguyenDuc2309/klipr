@@ -1,17 +1,16 @@
 Source: klipr
 Section: utils
-Priority: optional
 Maintainer: Nguyen Duc <nguyenminhduc230903@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
  dh-python,
  python3,
+ python3-pil,
  desktop-file-utils <!nocheck>,
 Standards-Version: 4.7.4
 Homepage: https://github.com/NguyenDuc2309/klipr
 Vcs-Browser: https://github.com/NguyenDuc2309/klipr
 Vcs-Git: https://github.com/NguyenDuc2309/klipr.git
-Rules-Requires-Root: no
 
 Package: klipr
 Architecture: all

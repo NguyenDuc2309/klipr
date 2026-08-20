@@ -25,9 +25,15 @@ endif
 # dh_install places everything listed in debian/install verbatim; the icon and
 # the desktop entry additionally have to be renamed on the way in, so they are
 # installed here rather than through debian/install.
+#
+# The source logo is 200x200, which is not one of the sizes hicolor's
+# index.theme declares, so it is scaled to 128x128 on the way in rather than
+# being dropped into a directory whose name does not match its real size.
 override_dh_install:
 	dh_install
-	install -D -m 0644 assets/logo.png \
-	  debian/klipr/usr/share/icons/hicolor/128x128/apps/klipr.png
+	install -d debian/klipr/usr/share/icons/hicolor/128x128/apps
+	python3 -c "from PIL import Image; \
+	  Image.open('assets/logo.png').resize((128, 128), Image.LANCZOS) \
+	  .save('debian/klipr/usr/share/icons/hicolor/128x128/apps/klipr.png')"
 	install -D -m 0644 packaging/klipr.desktop \
 	  debian/klipr/usr/share/applications/io.github.nguyenduc2309.klipr.desktop
