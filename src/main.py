@@ -336,13 +336,26 @@ if __name__ == "__main__":
         sys.exit(app.run(sys.argv))
     except BaseException as e:
         import traceback
-        with open("/tmp/klipr_crash.log", "w") as f:
-            f.write(f"Type: {type(e).__name__}\n")
-            f.write(f"Error: {str(e)}\n\n")
-            f.write(traceback.format_exc())
-            f.flush()
-            os.fsync(f.fileno())
+        # Report first: a problem writing the log must never end up hiding the
+        # crash that triggered it.
         print(f"CRASH: {e}")
         traceback.print_exc()
+        # The log goes under the user's own state directory rather than a fixed
+        # path in /tmp, which is writable by everyone: another local user could
+        # leave a symlink there and have this handler truncate a file for them.
+        try:
+            state_home = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+            crash_dir = os.path.join(state_home, "klipr")
+            os.makedirs(crash_dir, exist_ok=True)
+            crash_log = os.path.join(crash_dir, "crash.log")
+            with open(crash_log, "w") as f:
+                f.write(f"Type: {type(e).__name__}\n")
+                f.write(f"Error: {str(e)}\n\n")
+                f.write(traceback.format_exc())
+                f.flush()
+                os.fsync(f.fileno())
+            print(f"Crash log: {crash_log}")
+        except OSError as log_error:
+            print(f"Could not write crash log: {log_error}")
         sys.exit(1)
 #
