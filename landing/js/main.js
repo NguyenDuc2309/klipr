@@ -7,7 +7,7 @@
 const translations = {
     en: {
         'nav.features': 'Features',
-        'nav.screenshots': 'Screenshots',
+        'nav.screenshots': 'Demo',
         'nav.install': 'Install',
         'nav.faq': 'FAQ',
         'nav.star': 'Star on GitHub',
@@ -15,8 +15,8 @@ const translations = {
         'hero.release_suffix': '— Latest Release',
         'hero.title': 'Clipboard history,<br><span class="gradient-text">made seamless for Linux.</span>',
         'hero.desc': 'Klipr captures everything you copy — text, code, commands, and screenshots. Native GTK4 desktop integration, zero Electron bloat, and instant fuzzy search.',
+        'hero.install_guide': 'Install Now',
         'hero.download_deb': 'Download .deb',
-        'hero.install_guide': 'Install Guide',
         'hero.trust_free': '100% Free Forever &bull; No Ads &bull; No Subscriptions &bull; Zero Telemetry',
         'hero.pill_free': '100% Free & Open Source',
         'hero.pill_gtk': 'Native GTK4 (~41MB RAM idle)',
@@ -35,7 +35,7 @@ const translations = {
         'promise.c4_title': 'Permissive MIT License',
         'promise.c4_desc': 'Free for both personal and commercial use. Inspect, modify, or fork the full codebase on GitHub.',
 
-        'showcase.tag': 'App Showcase',
+        'showcase.tag': 'Demo',
         'showcase.title': 'Clean, focused GTK4 interface',
         'showcase.subtitle': 'Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.',
         'showcase.window1_title': 'Klipr — History & Favorites',
@@ -62,11 +62,8 @@ const translations = {
 
 
         'install.title': 'Install Klipr in Seconds',
-        'install.subtitle': 'Choose your preferred installation method below:',
-        'install.tab_apt': 'APT (Recommended)',
-        'install.tab_deb': 'Download .deb Package',
-        'install.note_apt': 'Adds Klipr\'s self-hosted, signed APT repository. Future releases arrive through `sudo apt upgrade` like any other package.',
-        'install.note_deb_prefix': 'Download the latest release package directly from',
+        'install.subtitle': 'Copy, paste, run. That\'s it.',
+        'install.note_apt': 'One command adds Klipr\'s signed APT repo and installs it. Future updates then arrive through `sudo apt upgrade` like any other package.',
 
         'faq.tag': 'FAQ',
         'faq.title': 'Frequently Asked Questions',
@@ -101,7 +98,7 @@ const translations = {
     },
     vi: {
         'nav.features': 'Tính năng',
-        'nav.screenshots': 'Giao diện',
+        'nav.screenshots': 'Demo',
         'nav.install': 'Cài đặt',
         'nav.faq': 'Hỏi đáp',
         'nav.star': 'Star trên GitHub',
@@ -109,8 +106,8 @@ const translations = {
         'hero.release_suffix': '— Bản phát hành mới nhất',
         'hero.title': 'Quản lý lịch sử clipboard,<br><span class="gradient-text">mượt mà cho Linux.</span>',
         'hero.desc': 'Klipr tự động lưu lại mọi nội dung bạn sao chép — văn bản, mã nguồn, lệnh terminal và ảnh chụp màn hình. Tích hợp GTK4 native, không dùng Electron nặng nề, tìm kiếm siêu nhanh.',
+        'hero.install_guide': 'Cài đặt ngay',
         'hero.download_deb': 'Tải gói .deb',
-        'hero.install_guide': 'Hướng dẫn cài đặt',
         'hero.trust_free': '100% Miễn phí vĩnh viễn &bull; Không quảng cáo &bull; Không gói trả phí &bull; Không thu thập dữ liệu',
         'hero.pill_free': '100% Miễn phí & Mã nguồn mở',
         'hero.pill_gtk': 'GTK4 Native (~41MB RAM khi rảnh)',
@@ -129,7 +126,7 @@ const translations = {
         'promise.c4_title': 'Mã nguồn mở MIT',
         'promise.c4_desc': 'Hoàn toàn tự do sử dụng cho cá nhân lẫn thương mại. Thoải mái kiểm tra, chỉnh sửa mã nguồn trên GitHub.',
 
-        'showcase.tag': 'Giao diện',
+        'showcase.tag': 'Demo',
         'showcase.title': 'Thiết kế GTK4 tinh tế & gọn gàng',
         'showcase.subtitle': 'Hoạt động hoàn hảo trên các môi trường desktop Linux hiện đại như GNOME, XFCE và KDE.',
         'showcase.window1_title': 'Klipr — Lịch sử & Yêu thích',
@@ -156,11 +153,8 @@ const translations = {
 
 
         'install.title': 'Cài đặt Klipr dễ dàng',
-        'install.subtitle': 'Chọn phương thức cài đặt phù hợp với bạn bên dưới:',
-        'install.tab_apt': 'Cài qua APT (Khuyên dùng)',
-        'install.tab_deb': 'Tải gói .deb',
-        'install.note_apt': 'Thêm kho APT tự lưu trữ, có ký số của Klipr. Các bản cập nhật sau này sẽ tới qua `sudo apt upgrade` như mọi package khác.',
-        'install.note_deb_prefix': 'Tải gói phát hành trực tiếp từ',
+        'install.subtitle': 'Copy, dán, chạy. Vậy là xong.',
+        'install.note_apt': 'Một lệnh duy nhất thêm kho APT có ký số của Klipr và cài đặt luôn. Các bản cập nhật sau đó sẽ tới qua `sudo apt upgrade` như mọi package khác.',
 
         'faq.tag': 'Hỏi & Đáp',
         'faq.title': 'Câu hỏi thường gặp',
@@ -263,7 +257,6 @@ function init() {
     initNavbarScroll();
     initCopyButtons();
     initLightbox();
-    initInstallTabs();
     initFaqAccordion();
     initBackToTop();
     fetchLatestRelease();
@@ -392,28 +385,6 @@ function showToast(message) {
 }
 
 /**
- * Installation Options Tab Switcher
- */
-function initInstallTabs() {
-    const tabBtns = document.querySelectorAll('.install-tab-btn');
-    const panels = document.querySelectorAll('.install-panel');
-
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            tabBtns.forEach(b => b.classList.remove('active'));
-            panels.forEach(p => p.classList.remove('active'));
-
-            btn.classList.add('active');
-            const targetId = btn.getAttribute('data-install-target');
-            const targetPanel = document.getElementById(targetId);
-            if (targetPanel) {
-                targetPanel.classList.add('active');
-            }
-        });
-    });
-}
-
-/**
  * FAQ Accordion Handlers
  */
 function initFaqAccordion() {
@@ -502,11 +473,6 @@ function initLightbox() {
 async function fetchLatestRelease() {
     const repo = 'NguyenDuc2309/klipr';
     const downloadBtn = document.getElementById('download-deb-btn');
-    const panelDebBtn = document.getElementById('panel-deb-btn');
-    const panelDebBtnText = document.getElementById('panel-deb-btn-text');
-    const installCmdBlock = document.getElementById('install-code-box');
-    const installCmdText = document.getElementById('install-cmd-text');
-    const releaseLink = document.getElementById('release-link');
 
     try {
         const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`);
@@ -516,31 +482,10 @@ async function fetchLatestRelease() {
         currentReleaseTag = release.tag_name || 'v1.2.4';
         updateVersionBadge();
 
-        if (releaseLink && release.html_url) {
-            releaseLink.href = release.html_url;
-        }
-
         const debAsset = release.assets?.find(asset => asset.name.endsWith('.deb'));
-        if (debAsset) {
-            if (downloadBtn) {
-                downloadBtn.href = debAsset.browser_download_url;
-                downloadBtn.setAttribute('title', `Download ${debAsset.name}`);
-            }
-            if (panelDebBtn) {
-                panelDebBtn.href = debAsset.browser_download_url;
-                panelDebBtn.setAttribute('title', `Download ${debAsset.name}`);
-            }
-            if (panelDebBtnText) {
-                panelDebBtnText.textContent = `Download ${debAsset.name}`;
-            }
-
-            const installCmd = `sudo apt install ./${debAsset.name}`;
-            if (installCmdBlock) {
-                installCmdBlock.setAttribute('data-copy', installCmd);
-            }
-            if (installCmdText) {
-                installCmdText.textContent = installCmd;
-            }
+        if (debAsset && downloadBtn) {
+            downloadBtn.href = debAsset.browser_download_url;
+            downloadBtn.setAttribute('title', `Download ${debAsset.name}`);
         }
     } catch (error) {
         console.info('Using fallback release metadata:', error);
