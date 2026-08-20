@@ -352,9 +352,9 @@
                             <span class="window-title">bash</span>
                             <div style="width: 42px;"></div>
                         </div>
-                        <div class="code-box terminal-code-box" data-copy="curl -fsSL https://nguyenduc2309.github.io/klipr/apt/klipr-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/klipr-archive-keyring.gpg &amp;&amp; echo &quot;deb [signed-by=/usr/share/keyrings/klipr-archive-keyring.gpg] https://nguyenduc2309.github.io/klipr/apt stable main&quot; | sudo tee /etc/apt/sources.list.d/klipr.list > /dev/null &amp;&amp; sudo apt update &amp;&amp; sudo apt install -y klipr" title="Click to copy command">
+                        <div class="code-box terminal-code-box" data-copy="sudo snap install klipr" title="Click to copy command">
                             <div class="code-text">
-                                <span class="code-prompt">$</span><span>curl -fsSL https://nguyenduc2309.github.io/klipr/apt/klipr-archive-keyring.asc | sudo gpg --dearmor -o /usr/share/keyrings/klipr-archive-keyring.gpg &amp;&amp; echo "deb [signed-by=/usr/share/keyrings/klipr-archive-keyring.gpg] https://nguyenduc2309.github.io/klipr/apt stable main" | sudo tee /etc/apt/sources.list.d/klipr.list > /dev/null &amp;&amp; sudo apt update &amp;&amp; sudo apt install -y klipr</span>
+                                <span class="code-prompt">$</span><span>sudo snap install klipr</span>
                             </div>
                             <button class="copy-btn" aria-label="Copy install command">
                                 <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -363,7 +363,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="install-note" data-i18n="install.note_apt">One command adds Klipr's signed APT repo and installs it. Future updates then arrive through <code>sudo apt upgrade</code> like any other package.</p>
+                    <p class="install-note" data-i18n="install.note_apt">Works on any Ubuntu system out of the box. Future updates then arrive through <code>sudo snap refresh</code> automatically.</p>
                 </div>
             </div>
         </section>

@@ -62,7 +62,7 @@ const translations = {
 
         'install.title': 'Install Klipr in Seconds',
         'install.subtitle': 'Copy, paste, run. That\'s it.',
-        'install.note_apt': 'One command adds Klipr\'s signed APT repo and installs it. Future updates then arrive through `sudo apt upgrade` like any other package.',
+        'install.note_apt': 'Works on any Ubuntu system out of the box. Future updates then arrive through `sudo snap refresh` automatically.',
 
         'faq.tag': 'FAQ',
         'faq.title': 'Frequently Asked Questions',
@@ -152,7 +152,7 @@ const translations = {
 
         'install.title': 'Cài đặt Klipr dễ dàng',
         'install.subtitle': 'Copy, dán, chạy. Vậy là xong.',
-        'install.note_apt': 'Một lệnh duy nhất thêm kho APT có ký số của Klipr và cài đặt luôn. Các bản cập nhật sau đó sẽ tới qua `sudo apt upgrade` như mọi package khác.',
+        'install.note_apt': 'Chạy được ngay trên mọi máy Ubuntu. Các bản cập nhật sau đó sẽ tự động tới qua `sudo snap refresh`.',
 
         'faq.tag': 'Hỏi & Đáp',
         'faq.title': 'Câu hỏi thường gặp',
