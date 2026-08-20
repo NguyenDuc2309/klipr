@@ -1,0 +1,47 @@
+Source: klipr
+Section: utils
+Priority: optional
+Maintainer: Nguyen Duc <nguyenminhduc230903@gmail.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ dh-python,
+ python3,
+ desktop-file-utils <!nocheck>,
+Standards-Version: 4.7.4
+Homepage: https://github.com/NguyenDuc2309/klipr
+Vcs-Browser: https://github.com/NguyenDuc2309/klipr
+Vcs-Git: https://github.com/NguyenDuc2309/klipr.git
+Rules-Requires-Root: no
+
+Package: klipr
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${python3:Depends},
+ gir1.2-gtk-4.0,
+ python3-gi,
+ python3-gi-cairo,
+ python3-pil,
+Recommends:
+ libglib2.0-bin,
+Description: clipboard history manager for the GTK4 desktop
+ Klipr watches the system clipboard and keeps a searchable history of the
+ text and images that have been copied, so that an earlier entry can be
+ pasted again without having to reproduce it.
+ .
+ Features:
+  * automatic history with a configurable size limit and pruning;
+  * search across the whole history, usable with input methods;
+  * pinned favourites, which automatic pruning never removes;
+  * capture of copied images and screenshots, shown as thumbnails and
+    de-duplicated by content hash;
+  * dark, light and desktop-following themes;
+  * a StatusNotifierItem tray icon and a global show/hide shortcut.
+ .
+ The history is kept in a local SQLite database. The program contains no
+ networking code and collects no telemetry.
+ .
+ libglib2.0-bin is recommended because the global keyboard shortcut and
+ the desktop colour-scheme check are registered by running gsettings;
+ without it Klipr still runs, but the shortcut has to be bound by hand in
+ the desktop's own keyboard settings.

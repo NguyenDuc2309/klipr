@@ -1,0 +1,4 @@
+# Byte-compiled caches appear in the working tree whenever the program is run
+# from a checkout; they are excluded from the tarball (see debian/copyright,
+# Files-Excluded) and must not resurface as spurious diff hunks on rebuild.
+extend-diff-ignore = "(^|/)(__pycache__|.*\.pyc)$"

@@ -1,0 +1,3 @@
+src/__pycache__/*
+src/ui/__pycache__/*
+scripts/__pycache__/*

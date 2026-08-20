@@ -1,0 +1,78 @@
+.TH KLIPR 1 "2026-08-20" "klipr 1.2.4" "User Commands"
+.SH NAME
+klipr \- clipboard history manager for the GTK4 desktop
+.SH SYNOPSIS
+.B klipr
+.RI [ OPTION ]
+.SH DESCRIPTION
+.B Klipr
+watches the system clipboard and records what is copied, both text and
+images, so that an earlier entry can be pasted again later. The history is
+searchable, entries can be pinned as favourites, and the program keeps
+running in the system tray once its window is closed.
+.PP
+Running
+.B klipr
+while an instance is already running does not start a second copy: the
+options below are handed to the running instance instead.
+.SH OPTIONS
+.TP
+.B \-\-hidden
+Start without presenting the window. Klipr goes straight to the system tray
+and begins recording. This is what the autostart entry uses.
+.TP
+.B \-t ", " \-\-toggle
+Show the window if it is hidden, hide it if it is visible. This is the
+command that the global keyboard shortcut is bound to.
+.TP
+.B \-\-help
+Show a summary of the available options and exit.
+.SH FILES
+.TP
+.I ~/.local/share/klipr/clipboard.db
+Clipboard history and favourites, stored as an SQLite database. The file is
+not encrypted; it should be treated as carefully as any other file in the
+home directory, because whatever has passed through the clipboard, including
+passwords, may be in it.
+.TP
+.I ~/.cache/klipr/images/
+Copied images, written as PNG files and de\-duplicated by content hash. A
+file is removed once no history entry or favourite refers to it.
+.TP
+.I ~/.config/klipr/setting.json
+User preferences: theme, history limit, close\-to\-tray, autostart and the
+global shortcut. Created on first run from the packaged defaults in
+.IR /usr/share/klipr/setting.json .
+.TP
+.I ~/.config/autostart/klipr.desktop
+Autostart entry, written and removed by the autostart option in Klipr's own
+settings.
+.TP
+.I ~/.local/state/klipr/crash.log
+Written only if Klipr terminates with an unhandled exception, and overwritten
+by the next such failure. Honours
+.B $XDG_STATE_HOME
+when that is set.
+.SH NOTES
+.SS Display server
+Klipr requests the X11 GDK backend. On a Wayland session it therefore runs
+through XWayland rather than natively.
+.SS System tray
+The tray icon uses the StatusNotifierItem protocol, which needs a tray host
+to be present. KDE Plasma, Xfce, Cinnamon and MATE provide one; on GNOME the
+AppIndicator shell extension has to be installed and enabled. Without a tray
+host the program still runs, and its window can be reached with
+.B klipr \-\-toggle
+or the global shortcut.
+.SS Global shortcut
+The shortcut is registered as a GNOME custom keybinding by running
+.BR gsettings (1),
+from
+.BR libglib2.0-bin .
+On desktops that do not use GNOME's keybinding settings, bind
+.B klipr \-\-toggle
+in the desktop's own keyboard configuration instead.
+.SH SEE ALSO
+.BR gsettings (1)
+.SH AUTHOR
+Nguyen Duc <nguyenminhduc230903@gmail.com>

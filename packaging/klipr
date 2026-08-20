@@ -1,4 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
+# Run from the install directory so that main.py's sibling modules, CSS and
+# assets resolve, and so that a stray setting.json in the caller's working
+# directory can never be mistaken for a source checkout (see settings.py).
 cd /usr/share/klipr
 exec /usr/bin/python3 main.py "$@"
-

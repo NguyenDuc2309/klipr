@@ -1,0 +1,7 @@
+klipr (1.2.4+ds-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #nnnnnn)
+  * Repack the upstream tarball to drop the committed APT repository under
+    landing/apt, which carries prebuilt binaries; hence the +ds suffix.
+
+ -- Nguyen Duc <nguyenminhduc230903@gmail.com>  Thu, 20 Aug 2026 09:14:44 +0700

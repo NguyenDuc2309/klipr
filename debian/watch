@@ -1,0 +1,7 @@
+version=4
+opts=\
+filenamemangle=s%(?:.*?)?v?@ANY_VERSION@@ARCHIVE_EXT@%@PACKAGE@-$1.tar.gz%,\
+dversionmangle=s/\+ds\d*$//,\
+repacksuffix=+ds \
+ https://github.com/NguyenDuc2309/klipr/tags \
+ (?:.*?/)?v?@ANY_VERSION@@ARCHIVE_EXT@ debian uupdate

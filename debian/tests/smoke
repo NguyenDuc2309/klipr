@@ -1,0 +1,33 @@
+#!/bin/sh
+# Import the installed private modules under a throwaway X server and build the
+# main window once. This is deliberately shallow: it proves the package layout
+# is right (modules, CSS and logos are found where the code looks for them,
+# relative to /usr/share/klipr) rather than exercising clipboard behaviour,
+# which would need a real session.
+set -e
+
+test -x /usr/bin/klipr
+test -f /usr/share/applications/io.github.nguyenduc2309.klipr.desktop
+test -f /usr/share/icons/hicolor/128x128/apps/klipr.png
+
+xvfb-run -a python3 - <<'PY'
+import sys
+
+sys.path.insert(0, "/usr/share/klipr")
+
+import gi
+
+gi.require_version("Gtk", "4.0")
+from gi.repository import Gtk  # noqa: F401
+
+import settings
+import database  # noqa: F401
+import utils  # noqa: F401
+from ui.window import ClipboardWindow  # noqa: F401
+
+# The packaged defaults must be found next to the installed modules; if they
+# are not, load_base_defaults() raises instead of silently guessing.
+defaults = settings.load_base_defaults()
+assert defaults["name"] == "Klipr", defaults
+print("klipr smoke test OK:", defaults["version"])
+PY

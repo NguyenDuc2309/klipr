@@ -1,0 +1,33 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --with python3
+
+# Klipr is a pure-Python application, not a library: its modules are private
+# to the program and are installed into /usr/share/klipr, which is where
+# Debian Python Policy puts private modules for architecture-independent
+# packages. dh_python3 is therefore pointed at that directory explicitly so
+# that it still byte-compiles the modules and computes ${python3:Depends}.
+override_dh_python3:
+	dh_python3 /usr/share/klipr
+
+# desktop-file-utils is Build-Depends: <!nocheck>, so the validation has to be
+# skipped under that profile rather than failing on a missing tool.
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	desktop-file-validate packaging/klipr.desktop
+else
+	:
+endif
+
+# dh_install places everything listed in debian/install verbatim; the icon and
+# the desktop entry additionally have to be renamed on the way in, so they are
+# installed here rather than through debian/install.
+override_dh_install:
+	dh_install
+	install -D -m 0644 assets/logo.png \
+	  debian/klipr/usr/share/icons/hicolor/128x128/apps/klipr.png
+	install -D -m 0644 packaging/klipr.desktop \
+	  debian/klipr/usr/share/applications/io.github.nguyenduc2309.klipr.desktop
