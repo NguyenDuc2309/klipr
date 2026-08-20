@@ -1,7 +1,14 @@
 version=4
 opts=\
 filenamemangle=s%(?:.*?)?v?@ANY_VERSION@@ARCHIVE_EXT@%@PACKAGE@-$1.tar.gz%,\
+pgpmode=none,\
 dversionmangle=s/\+ds\d*$//,\
 repacksuffix=+ds \
  https://github.com/NguyenDuc2309/klipr/tags \
  (?:.*?/)?v?@ANY_VERSION@@ARCHIVE_EXT@ debian uupdate
+
+# filenamemangle is kept deliberately, despite lintian's experimental
+# prefer-uscan-symlink tag: GitHub names every tag tarball v<version>.tar.gz,
+# so without the mangle uscan cannot tell releases apart. The alternative the
+# tag suggests, USCAN_SYMLINK=rename, is a per-developer ~/.devscripts setting
+# and would not travel with the package.

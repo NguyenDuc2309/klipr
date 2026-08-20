@@ -3,15 +3,15 @@ Upstream-Name: klipr
 Upstream-Contact: Nguyen Duc <nguyenminhduc230903@gmail.com>
 Source: https://github.com/NguyenDuc2309/klipr
 Comment:
- The upstream git tree carries a self-hosted APT repository under landing/apt,
- used to serve the project's own .deb builds from GitHub Pages. It is committed
- to git and so appears in the tarball GitHub generates for a tag, but it holds
- prebuilt binaries (a .deb pool, a dearmoured keyring and signed index files)
- that have no place in a Debian source package. The whole directory is dropped,
- along with any byte-compiled Python caches and stray build output; this is why
- the upstream version carries a +ds suffix.
+ The upstream git tree carries the project's marketing website under landing/,
+ which is no part of the packaged program: nothing in it is built, installed or
+ run by this package. It also embeds a self-hosted APT repository holding
+ prebuilt binaries (a .deb pool, a dearmoured keyring and signed index files),
+ which must not appear in a Debian source package at all. The whole directory
+ is dropped, along with byte-compiled Python caches and stray build output;
+ this is why the upstream version carries a +ds suffix.
 Files-Excluded:
- landing/apt
+ landing
  */__pycache__
  *.pyc
  klipr_*.deb

@@ -17,12 +17,24 @@ warnings; what is left is deliberate:
 I: klipr source: older-debian-watch-file-standard 4
 P: klipr source: maintainer-manual-page
 P: klipr source: package-uses-old-debhelper-compat-version 13
+P: klipr source: redundant-priority-optional-field
+X: klipr source: debian-watch-does-not-check-openpgp-signature
 ```
 
-The `I:` and `P:` tags are deliberate. Watch format 5 is only documented in
-`devscripts` from experimental, so format 4 is what everything supports today.
-The manpage is maintained in `debian/` because upstream ships none. Compat 14
-only stabilised in August 2026 and is not worth the risk on a first upload.
+All of these are deliberate. Watch format 5 is only documented in `devscripts`
+from experimental, so format 4 is what everything supports today. The manpage
+is maintained in `debian/` because upstream ships none. Compat 14 only
+stabilised in August 2026 and is not worth the risk on a first upload.
+`Priority` is kept even though sid's lintian calls it redundant, because the
+lintian running on mentors reports its absence as a `W: recommended-field`,
+and a warning there is worse than a pedantic tag here. GitHub generates tag
+tarballs itself and never signs them, so there is no OpenPGP signature for
+uscan to check; `pgpmode=none` states that explicitly even though it does not
+silence the tag.
+
+Note that lintian only shows the last of these with `-E`; mentors displays
+experimental tags, so check with `lintian -E -I --pedantic` to see what a
+sponsor will see.
 
 Verified along the way: the built `.deb` installs and purges without leaving
 anything behind, `klipr --help` runs, `dh_python3` byte-compiles the private

@@ -1,5 +1,6 @@
 Source: klipr
 Section: utils
+Priority: optional
 Maintainer: Nguyen Duc <nguyenminhduc230903@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
