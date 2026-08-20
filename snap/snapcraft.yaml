@@ -1,6 +1,6 @@
 name: klipr
 base: core24
-version: '1.2.4'
+version: '1.2.5'
 summary: Clipboard history manager for Linux (GTK4)
 description: |
   Klipr captures everything you copy — text, code, commands, and screenshots.

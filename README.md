@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/NguyenDuc2309/klipr/releases/latest"><img src="https://img.shields.io/badge/version-1.2.4-blue?style=flat-square" alt="Version" /></a>
+  <a href="https://github.com/NguyenDuc2309/klipr/releases/latest"><img src="https://img.shields.io/badge/version-1.2.5-blue?style=flat-square" alt="Version" /></a>
   <img src="https://img.shields.io/badge/platform-Linux_(X11)-green?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/GTK-4.0-orange?style=flat-square" alt="GTK4" />
   <img src="https://img.shields.io/badge/python-3.10+-yellow?style=flat-square" alt="Python" />
@@ -81,7 +81,7 @@ See [PUBLISH.md](PUBLISH.md) for how the repo itself is built and signed.
 Download the latest `.deb` from [Releases](https://github.com/NguyenDuc2309/klipr/releases/latest), then:
 
 ```bash
-sudo apt install ./klipr_1.2.4_all.deb
+sudo apt install ./klipr_1.2.5_all.deb
 ```
 
 ### Building from source

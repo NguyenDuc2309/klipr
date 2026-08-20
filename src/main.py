@@ -334,6 +334,11 @@ if __name__ == "__main__":
     try:
         app = ClipboardApp()
         sys.exit(app.run(sys.argv))
+    except SystemExit:
+        # sys.exit() above raises SystemExit on every ordinary exit, success
+        # included — it must pass through untouched, or the handler below
+        # logs a "crash" and prints one to the terminal on every normal run.
+        raise
     except BaseException as e:
         import traceback
         # Report first: a problem writing the log must never end up hiding the
