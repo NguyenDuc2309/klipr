@@ -8,36 +8,36 @@ Codename: stable
 Architectures: all
 Components: main
 Description: Klipr clipboard manager APT repository
-Date: Wed, 19 Aug 2026 09:24:16 +0000
+Date: Thu, 20 Aug 2026 09:47:15 +0000
 MD5Sum:
- ff748f391215feb7d04f468ac70fca98              184 Release
- 8ca522250693bb41f23b29ab198ec567              600 main/binary-all/Packages
- 35745b9511376f1dba01e58c8b9d6419              443 main/binary-all/Packages.gz
+ b786bcfcc4caa591173a7d2671c92b97              184 Release
+ aaca8d7f9c63bfb6a2015fd25b22bd1a              600 main/binary-all/Packages
+ 791f673ad4e7ac4b62a80684451149e6              442 main/binary-all/Packages.gz
 SHA1:
- 00c71a855c9f20c0042e378ce17414c758b413eb              184 Release
- 9377c5a870c714e68575a9a57f49fb5619a50de9              600 main/binary-all/Packages
- b380c8e7c1946719b3aa791dd876904c3f8c3d97              443 main/binary-all/Packages.gz
+ cfa51b493e479ca8c5cf038d936dfc02b4920f93              184 Release
+ 4d967fd2c2a0a67158633a844e0dc8e7e360a9fa              600 main/binary-all/Packages
+ f51df7ca5545748fb18a86998b0338cb073c1447              442 main/binary-all/Packages.gz
 SHA256:
- 0b37013b0dd0f02d03a8c2c8e347c6584017ff6c0e547b1a05d6422f9581bc1a              184 Release
- 0a2796056f93d2fcd187a23d4207a1ea1a3f0692f1c5acb256de8aa24bb72b88              600 main/binary-all/Packages
- b5e9e4768ec4f72b27cc7ccddb6331ba28b8606640c882d58844e264e386cc0d              443 main/binary-all/Packages.gz
+ 453f60895d239e56fdf1cca333b880764abc336f37d47aa62e95db4c9339e434              184 Release
+ ee82bfd91f665919713ba1436586d1dc76bca0790d37bbda75d4e5224943f466              600 main/binary-all/Packages
+ a4c5fa42f027f322ba9363d11eafc7f8b1a3512fc9319e87f7535b47e13116c9              442 main/binary-all/Packages.gz
 SHA512:
- 78428b09cee581553f4fe5b7eef175356e7bf55e50a129085a128b20e77b7e53c8dfe4998732ae72892aca079c969eea7eab3999411e9e44fba7054d7311d8a9              184 Release
- 0bbcb282186d49497abebdcfb629b6b21536e8cd9fa13b308e166999cc51501293a35224122b5e3390265920204d1c5bd794c6678596867449d8ce0e724aaa79              600 main/binary-all/Packages
- 20edc8b5ea5eb99d92fd69905c526605230c41e985f777c966ff3fd3ebaa749e1135b72e2e9310254a5b0f6b0620a15288fdcff6ec2547147bf6b2d597b47e27              443 main/binary-all/Packages.gz
+ 1d90ecfaecddfaeddff51fc5395e9df0ac11da4a8ea000c366e93c875ca60e2e994711a16c7205e4e0b95ee3b8619f00de33c5d5900616018803741cf0a8d8b8              184 Release
+ cd4a21598eb285c81e7dba4030142d3d697c09f831154605745da95332eb357f493362fbf646ed4e8b920f66b792f3c7afa7ccea22dbd97ff89a04cadf2a2a22              600 main/binary-all/Packages
+ 9122041698e38825102ba9b207e923e5df62173bfe4c620b3ab36155221c7f2ee5f97e595db4659c936e62980992e8034112baa14f6ccab97391e4c464d27d27              442 main/binary-all/Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEEEQZ1TRZPrEc6JL76epLVvn91DPMFAmqFdkAACgkQepLVvn91
-DPP1QhAAqqLK85y2KkTWDLDYfalodBv2dkXNNhdyWYKIGNJUnZSaTpHMCOU9Pq3F
-9WoL4obdXasbnlJqJ1E5qvFrAR/xFeqXgUCCiuDOljhT/XrEiEeWeHQ2w9Zl9tkn
-8NATjUAlsepsDHEpbaa+G5U2i528c6petKp0zbBd9mED+a4UV7tlj5PhL1OAsIuk
-rgP3/IgZTMykg17AUjyESFhM3PjPvEUa7L+kFo0eBw3ISGA70mcXIPu31A4FLkc8
-zdRiU+9WIAensLQKDGcRLBu/oGfO7sf7bhYb82/rnGGxMhAlCkixn5bWfUzsrwN7
-bix7n+Gr1j2y2r/2AuhWa4w483ZPvyI8AS7uIvZqMsLLaccMaVdlnkKjzbenv6t8
-BAeGmYjilTldZvUJUiDmoAJkoXSFg/Q8pdFYffW/upm/xjfCmBCoN8Hqj989gkgp
-duOjzrN027XKfoUqlm7jgupVo7PeXEkFNHNlwFK0pAEVwEYbpGNAoeA9SnQTMD7t
-jhQvtt3m7NIzZybCyUobdRAadZpdZelCHzYO/81zDCGA/C9+XW9mEfoZEFfyjqsD
-xm6Xs2HIPfDqkz2d+EEHkzewOyjzvUluoPhvDyJBfPx/Ii18erGBC6eumchF4AsL
-qG1RPkY2JQlOsgu+OxNAcQhoZKzVRCO/BCLlbyvNVAKtIKNM530=
-=6cu7
+iQIzBAEBCgAdFiEEEQZ1TRZPrEc6JL76epLVvn91DPMFAmqGzSMACgkQepLVvn91
+DPPh/A//bIR1hyYfPPrjy0Qv53jGzo6WMtylWp9WT2ZQffUmhcrrixzHxgaYTRFt
+T0w4ukE7eTDeFCd/c7ssLvaV6y+YGBZnInPfJ54DGhZtXeQ/SwAz7Ow7QhIsgW7f
+rpY/rfFCZw7A/kP4w0V3NTjNkqRxMpiJ8JUUan5htds167zzZyQiCq3dVAJXjvQY
+EPl6RuJgiZEL0BBV0+xgvYeEkys4O8tay7Z15CcawqottvvNtwQp8qm+CVC9E0Fk
+EyG8cSH1bjyksIaMPd4nnjeX53YiYVLGcfkrVxLTHbFCSpnX41yN+b/SWaqEPFvz
+XNOiD8IsqGqa9P+x0uIbQ9d78OuxD7GYTy4bXI6aXFKyPZRdX54+X79nxI0L/bvL
+TBPXsNrejFq5B9PGIaobbzf/qbQQQWSK/0RLoR4S0k+p/LFgF+Thn4lrm9S1LVkt
+RbqhWBDFXTCHMVbFqauOIAZRKHR3i3Xq/EhjCXwc9ATNKBmpvVVksCDMqRUAW6H5
+XVRbQhm/2OeSbycSSGJ2GugOQ7Rq6WnTqemGqXtilpfw8cU+pDNuW7TPTJlhNNv0
+zTaIVuvtziJsgLyoZiuCgTT2F9tmhp0uTVDKenrz89fSA2vWCwBVfwjfHRiQLjty
+9lFZTiZdNVq9aF2BFAk28TEu50aSnAJ9NVxsoydkNxUIyLkxO1o=
+=lUil
 -----END PGP SIGNATURE-----
