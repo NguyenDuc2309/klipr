@@ -1,0 +1,69 @@
+name: klipr
+base: core24
+version: '1.2.4'
+summary: Clipboard history manager for Linux (GTK4)
+description: |
+  Klipr captures everything you copy — text, code, commands, and screenshots.
+  Instant fuzzy search, pinned favourites, dark/light/system themes, and a
+  native GTK4 system tray. 100% offline: no networking code, no telemetry,
+  no ads, no subscriptions.
+grade: stable
+confinement: strict
+license: MIT
+icon: assets/logo.png
+
+apps:
+  klipr:
+    command: bin/klipr
+    extensions: [gnome]
+    desktop: usr/share/applications/io.github.nguyenduc2309.klipr.desktop
+    plugs:
+      # desktop, desktop-legacy, wayland, x11, gsettings are already added by
+      # the gnome extension above — unity7 is what a StatusNotifierItem tray
+      # icon additionally needs on strict confinement.
+      - unity7
+
+parts:
+  klipr:
+    plugin: nil
+    source: .
+    build-packages:
+      - python3-pil
+    stage-packages:
+      - python3
+      - python3-gi
+      - python3-gi-cairo
+      - gir1.2-gtk-4.0
+      - python3-pil
+    override-build: |
+      set -eu
+      craftctl default
+
+      DEST="$CRAFT_PART_INSTALL/usr/share/klipr"
+      mkdir -p "$DEST/ui" "$DEST/assets"
+      cp "$CRAFT_PART_SRC"/src/*.py "$DEST/"
+      cp "$CRAFT_PART_SRC"/src/*.css "$DEST/"
+      cp "$CRAFT_PART_SRC"/src/ui/*.py "$DEST/ui/"
+      cp "$CRAFT_PART_SRC"/setting.json "$DEST/"
+      cp "$CRAFT_PART_SRC"/assets/logo.png "$CRAFT_PART_SRC"/assets/light_logo.png "$DEST/assets/"
+
+      mkdir -p "$CRAFT_PART_INSTALL/bin"
+      cat > "$CRAFT_PART_INSTALL/bin/klipr" <<'LAUNCHER'
+      #!/bin/sh
+      cd "$SNAP/usr/share/klipr"
+      exec python3 main.py "$@"
+      LAUNCHER
+      chmod +x "$CRAFT_PART_INSTALL/bin/klipr"
+
+      mkdir -p "$CRAFT_PART_INSTALL/usr/share/applications"
+      cp "$CRAFT_PART_SRC/packaging/klipr.desktop" \
+        "$CRAFT_PART_INSTALL/usr/share/applications/io.github.nguyenduc2309.klipr.desktop"
+
+      # assets/logo.png is 200x200, not one of the sizes hicolor's index.theme
+      # declares (learned the hard way while packaging the .deb for Debian:
+      # a 200x200 file dropped into a 128x128-named directory fails icon
+      # lookup at that size) — scale it to a real 128x128 on the way in.
+      mkdir -p "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/128x128/apps"
+      python3 -c "from PIL import Image; \
+        Image.open('$CRAFT_PART_SRC/assets/logo.png').resize((128, 128), Image.LANCZOS) \
+        .save('$CRAFT_PART_INSTALL/usr/share/icons/hicolor/128x128/apps/klipr.png')"
