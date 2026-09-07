@@ -181,6 +181,11 @@ button.icon-btn.edit-name:hover {
   color: #FFFFFF;
 }
 
+button.icon-btn.ocr:hover {
+  background-color: #0D9488;
+  color: #FFFFFF;
+}
+
 button.icon-btn.copy:hover {
   background-color: #3B82F6;
   color: #FFFFFF;
@@ -241,6 +246,12 @@ button.shortcut-clear-btn {
   color: #FFFFFF;
   border-color: #334155;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toast-error {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
 }
 
 dialog,

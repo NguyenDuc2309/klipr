@@ -152,6 +152,93 @@ class SettingsView(Gtk.Box):
         self.close_tray_check = Gtk.CheckButton(label="Close to system tray")
         behavior_box.append(self.close_tray_check)
 
+        self._add_section_header(vbox, "AI OCR")
+
+        ocr_grid = Gtk.Grid()
+        ocr_grid.set_column_spacing(12)
+        ocr_grid.set_row_spacing(10)
+        vbox.append(ocr_grid)
+
+        provider_label = Gtk.Label(label="Provider")
+        provider_label.set_halign(Gtk.Align.START)
+        ocr_grid.attach(provider_label, 0, 0, 1, 1)
+
+        self.ocr_provider_dropdown = Gtk.DropDown.new_from_strings(["Gemini", "OpenAI"])
+        self.ocr_provider_dropdown.set_halign(Gtk.Align.END)
+        self.ocr_provider_dropdown.set_hexpand(True)
+        self.ocr_provider_dropdown.connect("notify::selected", self._on_ocr_provider_changed)
+        ocr_grid.attach(self.ocr_provider_dropdown, 1, 0, 1, 1)
+
+        self.ocr_fields_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        vbox.append(self.ocr_fields_box)
+
+        # Gemini configuration
+        self.gemini_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        gemini_grid = Gtk.Grid()
+        gemini_grid.set_column_spacing(12)
+        gemini_grid.set_row_spacing(8)
+        self.gemini_box.append(gemini_grid)
+
+        gemini_key_lbl = Gtk.Label(label="Gemini API Key")
+        gemini_key_lbl.set_halign(Gtk.Align.START)
+        gemini_grid.attach(gemini_key_lbl, 0, 0, 1, 1)
+
+        self.ocr_gemini_key_entry = Gtk.PasswordEntry()
+        self.ocr_gemini_key_entry.set_show_peek_icon(True)
+        self.ocr_gemini_key_entry.set_hexpand(True)
+        gemini_grid.attach(self.ocr_gemini_key_entry, 1, 0, 1, 1)
+
+        gemini_model_lbl = Gtk.Label(label="Gemini Model")
+        gemini_model_lbl.set_halign(Gtk.Align.START)
+        gemini_grid.attach(gemini_model_lbl, 0, 1, 1, 1)
+
+        self.ocr_gemini_model_entry = Gtk.Entry()
+        self.ocr_gemini_model_entry.set_placeholder_text("gemini-3.1-flash-lite")
+        self.ocr_gemini_model_entry.set_hexpand(True)
+        gemini_grid.attach(self.ocr_gemini_model_entry, 1, 1, 1, 1)
+
+        self.ocr_fields_box.append(self.gemini_box)
+
+        # OpenAI configuration
+        self.openai_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        openai_grid = Gtk.Grid()
+        openai_grid.set_column_spacing(12)
+        openai_grid.set_row_spacing(8)
+        self.openai_box.append(openai_grid)
+
+        openai_key_lbl = Gtk.Label(label="OpenAI API Key")
+        openai_key_lbl.set_halign(Gtk.Align.START)
+        openai_grid.attach(openai_key_lbl, 0, 0, 1, 1)
+
+        self.ocr_openai_key_entry = Gtk.PasswordEntry()
+        self.ocr_openai_key_entry.set_show_peek_icon(True)
+        self.ocr_openai_key_entry.set_hexpand(True)
+        openai_grid.attach(self.ocr_openai_key_entry, 1, 0, 1, 1)
+
+        openai_model_lbl = Gtk.Label(label="OpenAI Model")
+        openai_model_lbl.set_halign(Gtk.Align.START)
+        openai_grid.attach(openai_model_lbl, 0, 1, 1, 1)
+
+        self.ocr_openai_model_entry = Gtk.Entry()
+        self.ocr_openai_model_entry.set_placeholder_text("gpt-4o-mini")
+        self.ocr_openai_model_entry.set_hexpand(True)
+        openai_grid.attach(self.ocr_openai_model_entry, 1, 1, 1, 1)
+
+        openai_url_lbl = Gtk.Label(label="OpenAI Base URL")
+        openai_url_lbl.set_halign(Gtk.Align.START)
+        openai_grid.attach(openai_url_lbl, 0, 2, 1, 1)
+
+        self.ocr_openai_url_entry = Gtk.Entry()
+        self.ocr_openai_url_entry.set_placeholder_text("https://api.openai.com/v1")
+        self.ocr_openai_url_entry.set_hexpand(True)
+        openai_grid.attach(self.ocr_openai_url_entry, 1, 2, 1, 1)
+
+        self.ocr_fields_box.append(self.openai_box)
+
+        self.ocr_notify_screenshot_check = Gtk.CheckButton(label="Show quick OCR notification when screenshot is copied")
+        self.ocr_notify_screenshot_check.set_margin_top(4)
+        vbox.append(self.ocr_notify_screenshot_check)
+
         self._add_section_header(vbox, "Appearance")
 
         theme_cards_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -411,6 +498,12 @@ class SettingsView(Gtk.Box):
             else:
                 btn.remove_css_class("theme-card-active")
 
+    def _on_ocr_provider_changed(self, dropdown, param=None):
+        selected = dropdown.get_selected()
+        is_gemini = (selected == 0)
+        self.gemini_box.set_visible(is_gemini)
+        self.openai_box.set_visible(not is_gemini)
+
     def _refresh_ui(self):
         """Update all UI widgets to match self.pending_settings."""
         s = self.pending_settings
@@ -437,6 +530,20 @@ class SettingsView(Gtk.Box):
         self._captured_shortcut = current_shortcut
         self._shortcut_capturing = False
         self._update_shortcut_btn_label(current_shortcut)
+
+        # AI OCR settings
+        provider = s.get("ocrProvider", "gemini").lower()
+        provider_idx = 1 if provider == "openai" else 0
+        self.ocr_provider_dropdown.set_selected(provider_idx)
+        self.gemini_box.set_visible(provider_idx == 0)
+        self.openai_box.set_visible(provider_idx == 1)
+
+        self.ocr_gemini_key_entry.set_text(s.get("ocrGeminiKey", ""))
+        self.ocr_gemini_model_entry.set_text(s.get("ocrGeminiModel", "gemini-3.1-flash-lite"))
+        self.ocr_openai_key_entry.set_text(s.get("ocrOpenAIKey", ""))
+        self.ocr_openai_model_entry.set_text(s.get("ocrOpenAIModel", "gpt-4o-mini"))
+        self.ocr_openai_url_entry.set_text(s.get("ocrOpenAIBaseUrl", "https://api.openai.com/v1"))
+        self.ocr_notify_screenshot_check.set_active(s.get("ocrNotifyOnScreenshot", True))
 
         t = s["theme"]
         self._update_theme_cards(t)
@@ -498,6 +605,15 @@ class SettingsView(Gtk.Box):
         self.pending_settings["closeToTray"] = self.close_tray_check.get_active()
         
         self.pending_settings["shortcut"] = self._captured_shortcut or ""
+
+        # AI OCR
+        self.pending_settings["ocrProvider"] = "openai" if self.ocr_provider_dropdown.get_selected() == 1 else "gemini"
+        self.pending_settings["ocrGeminiKey"] = self.ocr_gemini_key_entry.get_text().strip()
+        self.pending_settings["ocrGeminiModel"] = self.ocr_gemini_model_entry.get_text().strip() or "gemini-3.1-flash-lite"
+        self.pending_settings["ocrOpenAIKey"] = self.ocr_openai_key_entry.get_text().strip()
+        self.pending_settings["ocrOpenAIModel"] = self.ocr_openai_model_entry.get_text().strip() or "gpt-4o-mini"
+        self.pending_settings["ocrOpenAIBaseUrl"] = self.ocr_openai_url_entry.get_text().strip() or "https://api.openai.com/v1"
+        self.pending_settings["ocrNotifyOnScreenshot"] = self.ocr_notify_screenshot_check.get_active()
 
         # theme is already set via card clicks in pending_settings
 

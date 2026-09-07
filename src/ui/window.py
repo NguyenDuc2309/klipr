@@ -3,6 +3,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, Pango, GLib, Gio
 import os
+import threading
 from collections import OrderedDict
 import utils
 import settings
@@ -343,18 +344,21 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             "success": "object-select-symbolic",
             "info": "dialog-information-symbolic",
             "warning": "dialog-warning-symbolic",
+            "error": "dialog-error-symbolic",
         }
         self.toast_icon.set_from_icon_name(
             icons.get(toast_type, "dialog-information-symbolic")
         )
 
-        for cls in ("toast-success", "toast-info", "toast-warning"):
+        for cls in ("toast-success", "toast-info", "toast-warning", "toast-error"):
             self.toast_box.remove_css_class(cls)
         self.toast_box.add_css_class(f"toast-{toast_type}")
 
         self.toast_label.set_label(message)
         self.toast_revealer.set_reveal_child(True)
-        self._toast_timeout_id = GLib.timeout_add(2000, self._hide_toast)
+        # Give error toasts 4.5s so users can read the message
+        duration = 4500 if toast_type == "error" else 2000
+        self._toast_timeout_id = GLib.timeout_add(duration, self._hide_toast)
 
     def _hide_toast(self):
         self.toast_revealer.set_reveal_child(False)
@@ -566,6 +570,80 @@ class ClipboardWindow(Gtk.ApplicationWindow):
     def _on_copy_clicked(self, content):
         self.on_copy_callback(content)
         self.show_toast("Copied to clipboard", "success")
+
+    def _send_desktop_notification(self, title, message):
+        """Send a native Linux desktop notification."""
+        try:
+            app = self.get_application()
+            if app:
+                notif = Gio.Notification.new(title)
+                notif.set_body(message)
+                notif.set_icon(Gio.ThemedIcon.new("klipr"))
+                app.send_notification("klipr-ocr", notif)
+                return
+        except Exception:
+            pass
+
+        try:
+            import subprocess
+            subprocess.Popen(["notify-send", "-a", "Klipr", "-i", "klipr", title, message])
+        except Exception:
+            pass
+
+    def _on_ocr_clicked(self, btn, content):
+        """Extract text from image using configured AI provider."""
+        image_path = content
+        if image_path.startswith("IMAGE::"):
+            image_path = image_path[len("IMAGE::"):].strip()
+
+        print(f"[Klipr OCR] User triggered OCR for image: {image_path}")
+
+        if not os.path.exists(image_path):
+            print(f"[Klipr OCR Error] Image file not found: {image_path}")
+            self.show_toast("Image file not found", "error")
+            return
+
+        btn.set_sensitive(False)
+        self.show_toast("Extracting text with AI...", "info")
+
+        def worker():
+            try:
+                from ocr import OCRService
+                extracted_text = OCRService.extract(image_path)
+                if not extracted_text or not extracted_text.strip():
+                    print("[Klipr OCR] No text found in image")
+                    GLib.idle_add(self._on_ocr_finish, btn, None, "No text detected in image")
+                else:
+                    print(f"[Klipr OCR Success] Extracted {len(extracted_text)} characters:\n---\n{extracted_text}\n---")
+                    GLib.idle_add(self._on_ocr_finish, btn, extracted_text.strip(), None)
+            except Exception as e:
+                import traceback
+                print("[Klipr OCR Exception]")
+                traceback.print_exc()
+                GLib.idle_add(self._on_ocr_finish, btn, None, str(e))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_ocr_finish(self, btn, text, error_msg):
+        btn.set_sensitive(True)
+        if error_msg:
+            print(f"[Klipr OCR] Finished with error: {error_msg}")
+            self.show_toast(f"OCR: {error_msg}", "error")
+            self._send_desktop_notification("Klipr OCR Failed", error_msg)
+            return False
+
+        if text:
+            self.on_copy_callback(text)
+            if hasattr(self.db, "add_item"):
+                try:
+                    self.db.add_item(text)
+                    self.refresh_list(self.search_entry.get_text())
+                except Exception as e:
+                    print(f"[Klipr OCR Warning] Could not save to DB: {e}")
+            snippet = text[:60].replace("\n", " ") + ("..." if len(text) > 60 else "")
+            self.show_toast("OCR text copied to clipboard!", "success")
+            self._send_desktop_notification("Klipr OCR Copied", snippet)
+        return False
 
     def _on_pin_clicked(self, row, item_id, content):
         """Toggle favorite status."""
@@ -937,6 +1015,15 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         btn_copy.set_tooltip_text("Copy")
         btn_copy.connect('clicked', lambda b: self._on_copy_clicked(content))
         actions.append(btn_copy)
+
+        if content.startswith("IMAGE::"):
+            btn_ocr = Gtk.Button(icon_name="insert-text-symbolic")
+            btn_ocr.set_focusable(False)
+            btn_ocr.add_css_class("icon-btn")
+            btn_ocr.add_css_class("ocr")
+            btn_ocr.set_tooltip_text("Extract text (AI OCR)")
+            btn_ocr.connect('clicked', lambda b: self._on_ocr_clicked(btn_ocr, content))
+            actions.append(btn_ocr)
 
         if self.active_filter == "favorites":
             btn_edit = Gtk.Button(icon_name="document-edit-symbolic")

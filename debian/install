@@ -1,6 +1,7 @@
 src/*.py                usr/share/klipr
 src/*.css               usr/share/klipr
 src/ui/*.py             usr/share/klipr/ui
+src/ocr/*.py            usr/share/klipr/ocr
 setting.json            usr/share/klipr
 assets/logo.png         usr/share/klipr/assets
 assets/light_logo.png   usr/share/klipr/assets

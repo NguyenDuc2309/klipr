@@ -153,11 +153,11 @@ def save(data=None):
         print(f"Error saving settings: {e}")
 
 
-def get(key):
+def get(key, default=None):
     """Get a setting value by key."""
     settings = load()
-    # Do not inject hidden defaults here; if a key is missing from config,
-    # that's a bug in the JSON and should be fixed there.
+    if default is not None:
+        return settings.get(key, default)
     return settings[key]
 
 

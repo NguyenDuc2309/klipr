@@ -6,5 +6,12 @@
     "autostart": true,
     "theme": "system",
     "historyLimit": 50,
-    "shortcut": "Ctrl+Alt+M"
+    "shortcut": "Ctrl+Alt+M",
+    "ocrProvider": "gemini",
+    "ocrGeminiKey": "",
+    "ocrGeminiModel": "gemini-3.1-flash-lite",
+    "ocrOpenAIKey": "",
+    "ocrOpenAIModel": "gpt-4o-mini",
+    "ocrOpenAIBaseUrl": "https://api.openai.com/v1",
+    "ocrNotifyOnScreenshot": true
 }

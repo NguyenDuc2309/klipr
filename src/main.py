@@ -3,6 +3,7 @@ import os
 os.environ["GDK_BACKEND"] = "x11"
 import ast
 import subprocess
+import threading
 
 import gi
 gi.require_version('Gtk', '4.0')
@@ -92,6 +93,10 @@ class ClipboardApp(Gtk.Application):
         toggle_action = Gio.SimpleAction.new("toggle-window", None)
         toggle_action.connect("activate", lambda action, param: self._toggle_window())
         self.add_action(toggle_action)
+
+        ocr_action = Gio.SimpleAction.new("ocr-image", GLib.VariantType.new("s"))
+        ocr_action.connect("activate", self._on_ocr_action)
+        self.add_action(ocr_action)
 
     def do_command_line(self, command_line: Gio.ApplicationCommandLine):
         options = command_line.get_options_dict()
@@ -331,6 +336,8 @@ class ClipboardApp(Gtk.Application):
 
     def _create_db_interface(self):
         class DBInterface:
+            def add_item(self, content):
+                return add_item(content)
             def get_history(self, query=None):
                 return get_history(query)
             def get_favorites(self, query=None):
@@ -355,12 +362,93 @@ class ClipboardApp(Gtk.Application):
                 return clear_favorites()
         return DBInterface()
 
+    def _notify(self, title, body):
+        """Send desktop notification (pops up on Linux desktop)."""
+        try:
+            notif = Gio.Notification.new(title)
+            notif.set_body(body)
+            notif.set_icon(Gio.ThemedIcon.new("klipr"))
+            self.send_notification("klipr-status", notif)
+            return
+        except Exception:
+            pass
+
+        try:
+            subprocess.Popen(["notify-send", "-a", "Klipr", "-i", "klipr", title, body])
+        except Exception:
+            pass
+
+    def _send_screenshot_notification(self, image_path):
+        """Send notification with quick OCR action button when an image/screenshot is copied."""
+        try:
+            notif = Gio.Notification.new("Screenshot Copied")
+            notif.set_body("Click to extract text via AI OCR")
+            notif.set_icon(Gio.ThemedIcon.new("klipr"))
+            notif.add_button_with_target(
+                "Extract Text (OCR)",
+                "app.ocr-image",
+                GLib.Variant.new_string(image_path),
+            )
+            notif.set_default_action_and_target(
+                "app.ocr-image",
+                GLib.Variant.new_string(image_path),
+            )
+            self.send_notification("klipr-screenshot", notif)
+            print(f"[Klipr Notification] Sent screenshot quick OCR notification for: {image_path}")
+        except Exception as e:
+            print(f"[Klipr Notification Error] Could not send screenshot notification: {e}")
+
+    def _on_ocr_action(self, action, param):
+        """Executed when user clicks the notification or 'Extract Text (OCR)' button."""
+        if not param:
+            return
+        image_path = param.get_string()
+        if not image_path or not os.path.exists(image_path):
+            print(f"[Klipr OCR Error] Image path invalid from notification: {image_path}")
+            return
+
+        print(f"[Klipr OCR] Background OCR triggered from notification for: {image_path}")
+        self._notify("Klipr OCR", "Extracting text with AI...")
+
+        def worker():
+            try:
+                from ocr import OCRService
+                extracted_text = OCRService.extract(image_path)
+                if not extracted_text or not extracted_text.strip():
+                    print("[Klipr OCR] No text found in image")
+                    GLib.idle_add(self._notify, "Klipr OCR", "No text detected in image")
+                else:
+                    print(f"[Klipr OCR Success] Background OCR extracted {len(extracted_text)} chars:\n---\n{extracted_text}\n---")
+                    GLib.idle_add(self._on_background_ocr_success, extracted_text.strip())
+            except Exception as e:
+                import traceback
+                print("[Klipr OCR Exception in background action]")
+                traceback.print_exc()
+                GLib.idle_add(self._notify, "Klipr OCR Error", str(e))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _on_background_ocr_success(self, text):
+        """Save extracted text into clipboard & history, then notify user."""
+        self.clipboard_manager.set_content(text)
+        add_item(text)
+        if self.window:
+            self.window.mark_history_dirty()
+        snippet = text[:60].replace("\n", " ") + ("..." if len(text) > 60 else "")
+        self._notify("OCR Text Copied!", snippet)
+
     def _on_clipboard_update(self, text):
         add_item(text)
         if self.window:
             # Rebuilds only when the window is actually on screen; otherwise
             # the refresh is deferred to the next time it is shown.
             GLib.idle_add(self.window.mark_history_dirty)
+
+        # If user copied a screenshot/image and quick notification is enabled
+        if text.startswith("IMAGE::"):
+            image_path = text[len("IMAGE::"):].strip()
+            if settings.get("ocrNotifyOnScreenshot", True):
+                self._send_screenshot_notification(image_path)
 
     def _on_user_copy(self, content):
         self.clipboard_manager.set_content(content)
