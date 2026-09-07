@@ -1,12 +1,14 @@
 import gi
 gi.require_version('Gtk', '4.0')
-from gi.repository import Gtk, Gdk, Gio
+from gi.repository import Gtk, Gdk, Gio, GLib
 import os
 import settings
 
 
 
 class SettingsView(Gtk.Box):
+    HISTORY_LIMIT_VALUES = [50, 100, 150, 200]
+
     def __init__(self, on_close_callback, on_theme_changed=None, on_show_confirm=None, on_show_toast=None):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         
@@ -19,6 +21,9 @@ class SettingsView(Gtk.Box):
         self.set_margin_bottom(0)
         self.set_margin_start(0)
         self.set_margin_end(0)
+
+        self._inactive_timeout_id = None
+        self.connect("unmap", lambda w: self._close_dropdown_popover())
 
         self.pending_settings = settings.load().copy()
 
@@ -81,25 +86,13 @@ class SettingsView(Gtk.Box):
         limit_label.set_halign(Gtk.Align.START)
         general_grid.attach(limit_label, 0, 0, 1, 1)
 
-        limit_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-        limit_box.add_css_class("limit-pill-group")
-        limit_box.set_halign(Gtk.Align.END)
-        limit_box.set_hexpand(True)
+        self.history_limit_dropdown = Gtk.DropDown.new_from_strings(["50", "100", "150", "200"])
+        self.history_limit_dropdown.set_halign(Gtk.Align.END)
+        self.history_limit_dropdown.set_hexpand(True)
+        self.history_limit_dropdown.connect("notify::selected", self._on_history_limit_changed)
+        general_grid.attach(self.history_limit_dropdown, 1, 0, 1, 1)
 
-        self.btn_limit_50 = Gtk.ToggleButton(label="50")
-        self.btn_limit_50.add_css_class("limit-pill")
-        self.btn_limit_100 = Gtk.ToggleButton(label="100")
-        self.btn_limit_100.add_css_class("limit-pill")
-        self.btn_limit_150 = Gtk.ToggleButton(label="150")
-        self.btn_limit_150.add_css_class("limit-pill")
-
-        self.btn_limit_100.set_group(self.btn_limit_50)
-        self.btn_limit_150.set_group(self.btn_limit_50)
-
-        limit_box.append(self.btn_limit_50)
-        limit_box.append(self.btn_limit_100)
-        limit_box.append(self.btn_limit_150)
-        general_grid.attach(limit_box, 1, 0, 1, 1)
+        self._configure_dropdown_popover(self.history_limit_dropdown)
 
         self._add_section_header(vbox, "Shortcuts")
         shortcut_grid = Gtk.Grid()
@@ -152,7 +145,7 @@ class SettingsView(Gtk.Box):
         self.close_tray_check = Gtk.CheckButton(label="Close to system tray")
         behavior_box.append(self.close_tray_check)
 
-        self._add_section_header(vbox, "AI OCR")
+        self._add_section_header(vbox, "AI Features")
 
         ocr_grid = Gtk.Grid()
         ocr_grid.set_column_spacing(12)
@@ -168,6 +161,9 @@ class SettingsView(Gtk.Box):
         self.ocr_provider_dropdown.set_hexpand(True)
         self.ocr_provider_dropdown.connect("notify::selected", self._on_ocr_provider_changed)
         ocr_grid.attach(self.ocr_provider_dropdown, 1, 0, 1, 1)
+
+        self._configure_dropdown_popover(self.ocr_provider_dropdown)
+        self.connect("notify::root", self._on_root_changed)
 
         self.ocr_fields_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         vbox.append(self.ocr_fields_box)
@@ -235,9 +231,9 @@ class SettingsView(Gtk.Box):
 
         self.ocr_fields_box.append(self.openai_box)
 
-        self.ocr_notify_screenshot_check = Gtk.CheckButton(label="Show quick OCR notification when screenshot is copied")
-        self.ocr_notify_screenshot_check.set_margin_top(4)
-        vbox.append(self.ocr_notify_screenshot_check)
+        self.ocr_notify_check = Gtk.CheckButton(label="Show notification when text is extracted from image")
+        self.ocr_notify_check.set_margin_top(4)
+        vbox.append(self.ocr_notify_check)
 
         self._add_section_header(vbox, "Appearance")
 
@@ -498,11 +494,84 @@ class SettingsView(Gtk.Box):
             else:
                 btn.remove_css_class("theme-card-active")
 
+    def _configure_dropdown_popover(self, dropdown):
+        child = dropdown.get_first_child()
+        while child:
+            if isinstance(child, Gtk.Popover):
+                child.set_has_arrow(False)
+                child.set_autohide(True)
+                break
+            child = child.get_next_sibling()
+
+    def _close_dropdown_popover(self):
+        if hasattr(self, "_inactive_timeout_id") and self._inactive_timeout_id is not None:
+            GLib.source_remove(self._inactive_timeout_id)
+            self._inactive_timeout_id = None
+        for dd_name in ("ocr_provider_dropdown", "history_limit_dropdown"):
+            if hasattr(self, dd_name):
+                child = getattr(self, dd_name).get_first_child()
+                while child:
+                    if isinstance(child, Gtk.Popover):
+                        child.popdown()
+                        break
+                    child = child.get_next_sibling()
+
+    def _on_root_changed(self, widget, param):
+        root = self.get_root()
+        if isinstance(root, Gtk.Window):
+            # 1. Wayland compositor surface state: FOCUSED flag is cleared when Alt+Tabbing to any app
+            def attach_surface(w, p=None):
+                surface = w.get_surface()
+                if surface:
+                    def on_surface_state(s, p):
+                        try:
+                            if not (s.get_state() & Gdk.ToplevelState.FOCUSED):
+                                self._close_dropdown_popover()
+                        except Exception:
+                            pass
+                    surface.connect("notify::state", on_surface_state)
+
+            if root.get_surface():
+                attach_surface(root)
+            else:
+                root.connect("realize", attach_surface)
+
+            # 2. Window visibility changes (when window is hidden via shortcut or close)
+            root.connect("notify::visible", lambda win, p: self._close_dropdown_popover() if not win.get_visible() else None)
+            root.connect("hide", lambda win: self._close_dropdown_popover())
+
+            # 3. Focus leave on window
+            focus_ctrl = Gtk.EventControllerFocus()
+            focus_ctrl.connect("leave", lambda c: self._close_dropdown_popover())
+            root.add_controller(focus_ctrl)
+
+            def on_active_notify(win, p):
+                if not win.is_active():
+                    def check_inactive():
+                        self._inactive_timeout_id = None
+                        if not win.is_active():
+                            self._close_dropdown_popover()
+                        return False
+                    if self._inactive_timeout_id is None:
+                        self._inactive_timeout_id = GLib.timeout_add(50, check_inactive)
+                else:
+                    if self._inactive_timeout_id is not None:
+                        GLib.source_remove(self._inactive_timeout_id)
+                        self._inactive_timeout_id = None
+
+            root.connect("notify::is-active", on_active_notify)
+
+    def _on_history_limit_changed(self, dropdown, param=None):
+        selected = dropdown.get_selected()
+        if 0 <= selected < len(self.HISTORY_LIMIT_VALUES):
+            self.pending_settings["historyLimit"] = self.HISTORY_LIMIT_VALUES[selected]
+
     def _on_ocr_provider_changed(self, dropdown, param=None):
         selected = dropdown.get_selected()
-        is_gemini = (selected == 0)
-        self.gemini_box.set_visible(is_gemini)
-        self.openai_box.set_visible(not is_gemini)
+        is_openai = (selected == 1)
+        self.pending_settings["ocrProvider"] = "openai" if is_openai else "gemini"
+        self.gemini_box.set_visible(not is_openai)
+        self.openai_box.set_visible(is_openai)
 
     def _refresh_ui(self):
         """Update all UI widgets to match self.pending_settings."""
@@ -516,12 +585,11 @@ class SettingsView(Gtk.Box):
         self.app_desc.set_label(f"{desc}\nVersion {version}")
 
         limit = int(s.get("historyLimit", 50))
-        if limit == 100:
-            self.btn_limit_100.set_active(True)
-        elif limit == 150:
-            self.btn_limit_150.set_active(True)
+        if limit in self.HISTORY_LIMIT_VALUES:
+            limit_idx = self.HISTORY_LIMIT_VALUES.index(limit)
         else:
-            self.btn_limit_50.set_active(True)
+            limit_idx = 0
+        self.history_limit_dropdown.set_selected(limit_idx)
             
         self.autostart_check.set_active(s["autostart"])
         self.close_tray_check.set_active(s["closeToTray"])
@@ -531,7 +599,7 @@ class SettingsView(Gtk.Box):
         self._shortcut_capturing = False
         self._update_shortcut_btn_label(current_shortcut)
 
-        # AI OCR settings
+        # AI Features settings
         provider = s.get("ocrProvider", "gemini").lower()
         provider_idx = 1 if provider == "openai" else 0
         self.ocr_provider_dropdown.set_selected(provider_idx)
@@ -543,7 +611,7 @@ class SettingsView(Gtk.Box):
         self.ocr_openai_key_entry.set_text(s.get("ocrOpenAIKey", ""))
         self.ocr_openai_model_entry.set_text(s.get("ocrOpenAIModel", "gpt-4o-mini"))
         self.ocr_openai_url_entry.set_text(s.get("ocrOpenAIBaseUrl", "https://api.openai.com/v1"))
-        self.ocr_notify_screenshot_check.set_active(s.get("ocrNotifyOnScreenshot", True))
+        self.ocr_notify_check.set_active(s.get("ocrNotifyOnExtract", True))
 
         t = s["theme"]
         self._update_theme_cards(t)
@@ -588,15 +656,13 @@ class SettingsView(Gtk.Box):
         self._refresh_ui()
 
     def _on_cancel(self, btn):
+        self._close_dropdown_popover()
         self.on_close(False)
 
     def _on_save(self, btn):
-        if self.btn_limit_100.get_active():
-            limit = 100
-        elif self.btn_limit_150.get_active():
-            limit = 150
-        else:
-            limit = 50
+        self._close_dropdown_popover()
+        selected_limit = self.history_limit_dropdown.get_selected()
+        limit = self.HISTORY_LIMIT_VALUES[selected_limit] if 0 <= selected_limit < len(self.HISTORY_LIMIT_VALUES) else 50
         self.pending_settings["historyLimit"] = limit
         
         new_autostart_state = self.autostart_check.get_active()
@@ -606,14 +672,14 @@ class SettingsView(Gtk.Box):
         
         self.pending_settings["shortcut"] = self._captured_shortcut or ""
 
-        # AI OCR
+        # AI Features
         self.pending_settings["ocrProvider"] = "openai" if self.ocr_provider_dropdown.get_selected() == 1 else "gemini"
         self.pending_settings["ocrGeminiKey"] = self.ocr_gemini_key_entry.get_text().strip()
         self.pending_settings["ocrGeminiModel"] = self.ocr_gemini_model_entry.get_text().strip() or "gemini-3.1-flash-lite"
         self.pending_settings["ocrOpenAIKey"] = self.ocr_openai_key_entry.get_text().strip()
         self.pending_settings["ocrOpenAIModel"] = self.ocr_openai_model_entry.get_text().strip() or "gpt-4o-mini"
         self.pending_settings["ocrOpenAIBaseUrl"] = self.ocr_openai_url_entry.get_text().strip() or "https://api.openai.com/v1"
-        self.pending_settings["ocrNotifyOnScreenshot"] = self.ocr_notify_screenshot_check.get_active()
+        self.pending_settings["ocrNotifyOnExtract"] = self.ocr_notify_check.get_active()
 
         # theme is already set via card clicks in pending_settings
 

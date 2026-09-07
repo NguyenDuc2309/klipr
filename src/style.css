@@ -427,49 +427,98 @@ button.limit-pill:checked {
   font-weight: 600;
 }
 
-/* Dropdown & Combobox Styles - Force consistency */
-dropdown, 
-dropdown > button {
-  background-color: #1C1C1D;
-  color: #ffffff;
-  border-radius: 6px;
-}
-
+/* ── Modern Dropdown & Menu Styles ── */
 dropdown {
-  border: 1px solid #3e3e42;
-  padding: 0;
-}
-
-dropdown > button {
+  background: transparent;
   border: none;
-  min-height: 32px;
-  padding: 0 8px;
+  padding: 0;
   box-shadow: none;
 }
 
-dropdown:hover {
+dropdown > button.toggle {
+  background-color: #252528;
+  color: #ffffff;
+  border: 1px solid #3e3e42;
+  border-radius: 6px;
+  padding: 4px 10px;
+  min-height: 28px;
+  min-width: 120px;
+  box-shadow: none;
+  transition: all 0.15s ease;
+}
+
+dropdown > button.toggle:hover {
+  background-color: #2d2d30;
   border-color: #5a5a5f;
 }
 
-/* Popover & Dropdown Menu Styles */
-popover {
-  box-shadow: none;
+dropdown > button.toggle:checked,
+dropdown > button.toggle:active {
+  background-color: #252528;
+  border-color: #1d7cf2;
 }
 
-popover > contents {
+dropdown > button.toggle box {
+  background: transparent;
+}
+
+dropdown > button.toggle box stack,
+dropdown > button.toggle box stack label {
+  background: transparent;
+  color: #ffffff;
+}
+
+dropdown > button.toggle arrow {
+  color: #a0a0a0;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+dropdown popover.menu {
+  background: transparent;
+  padding: 0;
+  margin-top: 4px;
+}
+
+dropdown popover.menu > contents {
+  background-color: #252528;
+  color: #ffffff;
   border: 1px solid #3e3e42;
   border-radius: 8px;
+  padding: 2px 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-popover listview {
+dropdown popover.menu listview {
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+
+dropdown popover.menu listview > row {
+  padding: 2px 12px;
+  border-radius: 6px;
   color: #ffffff;
-  margin: 0px;
+  min-height: 24px;
+  margin: 1px 0;
 }
 
-popover row:selected,
-popover listview > row:selected {
+dropdown popover.menu listview > row:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+dropdown popover.menu listview > row:selected {
   background-color: #1d7cf2;
   color: #ffffff;
+  font-weight: 600;
+}
+
+dropdown popover.menu listview > row:selected:hover {
+  background-color: #2583f7;
+}
+
+dropdown popover.menu listview > row image {
+  margin-left: 12px;
 }
 
 button.shortcut-capture-btn {

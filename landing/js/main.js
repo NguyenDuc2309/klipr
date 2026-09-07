@@ -7,6 +7,7 @@
 const translations = {
     en: {
         'nav.features': 'Features',
+        'nav.ai_features': 'AI Features',
         'nav.screenshots': 'Demo',
         'nav.install': 'Install',
         'nav.faq': 'FAQ',
@@ -53,12 +54,32 @@ const translations = {
         'features.f3_title': 'Pinned Favorites',
         'features.f3_desc': 'Bookmark recurring commands, passwords, or snippets. Pinned items are protected from auto-pruning.',
         'features.f4_title': 'Image & Screenshot Capture',
-        'features.f4_desc': 'Preserves copied images and screenshots with instant thumbnail previews and one-click paste back.',
+        'features.f4_desc': 'Preserves copied images and screenshots with thumbnail previews, one-click paste back, and AI OCR text extraction.',
         'features.f5_title': 'Dark, Light & System',
         'features.f5_desc': 'Seamlessly synchronizes with your Linux desktop theme or choose your preferred look manually.',
         'features.f6_title': 'Pure Native Performance',
         'features.f6_desc': 'Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.',
 
+        'ai.tag': 'AI Features',
+        'ai.title': 'Smarter clipboard with Next-Gen AI',
+        'ai.subtitle': 'Boost your productivity with seamless AI capabilities built directly into your desktop workflow.',
+        'ai.ocr_badge': 'AI OCR &bull; Instant Text Extraction',
+        'ai.ocr_title': 'Extract text from copied images in one click',
+        'ai.ocr_desc': 'Copy any screenshot or image to your clipboard. Klipr can immediately send a desktop notification to extract text using AI, or click the OCR button on any image entry in your history to instantly copy detected text to your clipboard.',
+        'ai.feat1_title': '1-Click Desktop Notification',
+        'ai.feat1_desc': 'Detects when screenshots are copied and shows a quick action notification to transcribe text immediately.',
+        'ai.feat2_title': 'Gemini & OpenAI Integration',
+        'ai.feat2_desc': 'Choose between Google Gemini or OpenAI. Use custom models like gemini-3.1-flash-lite or gpt-4o-mini.',
+        'ai.feat3_title': 'Bring Your Own Key (BYOK)',
+        'ai.feat3_desc': '100% private. Your API keys are stored locally on your device with direct API calls and zero third-party proxy.',
+        'ai.step1_label': 'Copy Screenshot',
+        'ai.step1_detail': 'Press PrtScn or copy any image',
+        'ai.step2_label': 'AI Extraction',
+        'ai.step2_detail': 'Gemini / OpenAI extracts high-precision text',
+        'ai.step3_label': 'Auto-Copied & Ready',
+        'ai.step3_detail': 'Text added to history, ready to paste',
+        'ai.future_tag': 'Future AI Features',
+        'ai.future_desc': 'Designed for future expansion: intelligent text summarization, instant code translation, and contextual helpers are on the roadmap.',
 
         'install.title': 'Install Klipr in Seconds',
         'install.subtitle': 'Copy, paste, run. That\'s it.',
@@ -79,6 +100,8 @@ const translations = {
         'faq.a4': 'Never. Pinned favorites are stored separately and protected from automatic pruning. They remain safely pinned until you explicitly remove them.',
         'faq.q5': 'How are copied images stored?',
         'faq.a5': 'Copied images and screenshots are saved as optimized PNG files in your local cache directory (~/.cache/klipr/images/) with instant thumbnail previews. Deduplication ensures identical images are not saved twice.',
+        'faq.q6': 'How does the AI OCR text extraction work? Is my data private?',
+        'faq.a6': 'Klipr uses Bring Your Own Key (BYOK) for Google Gemini and OpenAI. Your API keys are stored locally on your device. When you extract text, images are sent directly to the official AI provider endpoint with zero telemetry or middleman servers. If you don\'t configure an API key, Klipr remains 100% offline.',
 
         'footer.crafted': 'Klipr &bull; Created by',
         'footer.free_note': 'Open Source under the MIT License.',
@@ -91,6 +114,7 @@ const translations = {
     },
     vi: {
         'nav.features': 'Tính năng',
+        'nav.ai_features': 'Tính năng AI',
         'nav.screenshots': 'Demo',
         'nav.install': 'Cài đặt',
         'nav.faq': 'Hỏi đáp',
@@ -137,12 +161,32 @@ const translations = {
         'features.f3_title': 'Ghim mục yêu thích',
         'features.f3_desc': 'Đánh dấu các lệnh hay dùng hoặc ghi chú quan trọng. Các mục ghim không bao giờ bị xóa tự động.',
         'features.f4_title': 'Lưu ảnh & Ảnh chụp màn hình',
-        'features.f4_desc': 'Giữ lại các hình ảnh đã copy với thumbnail xem trước, dán lại chỉ với 1 click chuột.',
+        'features.f4_desc': 'Giữ lại các hình ảnh đã copy với thumbnail xem trước, dán lại nhanh chóng và trích xuất chữ bằng AI OCR.',
         'features.f5_title': 'Dark, Light & Theo hệ thống',
         'features.f5_desc': 'Tự động đồng bộ theo giao diện Sáng/Tối của Linux hoặc tùy chọn thủ công theo sở thích.',
         'features.f6_title': 'Hiệu năng Native vượt trội',
         'features.f6_desc': 'Viết bằng Python và GTK4. Chiếm cực ít bộ nhớ RAM và chạy ẩn trên khay hệ thống.',
 
+        'ai.tag': 'Tính năng AI',
+        'ai.title': 'Quản lý clipboard thông minh cùng AI thế hệ mới',
+        'ai.subtitle': 'Nâng tầm hiệu suất làm việc với các khả năng AI mạnh mẽ được tích hợp trực tiếp vào quy trình máy tính của bạn.',
+        'ai.ocr_badge': 'AI OCR &bull; Trích xuất văn bản tức thì',
+        'ai.ocr_title': 'Trích xuất văn bản từ hình ảnh sao chép chỉ với 1 click',
+        'ai.ocr_desc': 'Bất cứ khi nào bạn chụp màn hình hoặc sao chép hình ảnh, Klipr có thể gửi thông báo desktop để bạn trích xuất chữ tức thì bằng AI, hoặc bấm nút OCR trên ảnh trong lịch sử để sao chép văn bản vào clipboard ngay lập tức.',
+        'ai.feat1_title': 'Thông báo Desktop 1-Click',
+        'ai.feat1_desc': 'Tự nhận diện khi chụp ảnh màn hình và hiện thông báo thao tác nhanh để chuyển ảnh thành văn bản ngay.',
+        'ai.feat2_title': 'Tích hợp Gemini & OpenAI',
+        'ai.feat2_desc': 'Linh hoạt chọn giữa Google Gemini hoặc OpenAI. Tùy biến các model như gemini-3.1-flash-lite hay gpt-4o-mini.',
+        'ai.feat3_title': 'Dùng API Key của bạn (BYOK)',
+        'ai.feat3_desc': 'Hoàn toàn bảo mật. API key lưu cục bộ trên máy, gửi trực tiếp đến nhà cung cấp AI mà không qua bất kỳ máy chủ trung gian nào.',
+        'ai.step1_label': 'Chụp / Copy hình ảnh',
+        'ai.step1_detail': 'Bấm phím chụp màn hình hoặc copy ảnh',
+        'ai.step2_label': 'AI trích xuất chữ',
+        'ai.step2_detail': 'Gemini / OpenAI nhận diện chữ chuẩn xác',
+        'ai.step3_label': 'Tự động sao chép',
+        'ai.step3_detail': 'Lưu vào lịch sử, sẵn sàng dán mọi nơi',
+        'ai.future_tag': 'Mở rộng tính năng AI trong tương lai',
+        'ai.future_desc': 'Kiến trúc module sẵn sàng cho nhiều tính năng mới: tóm tắt văn bản thông minh, dịch thuật ngôn ngữ, giải thích code...',
 
         'install.title': 'Cài đặt Klipr dễ dàng',
         'install.subtitle': 'Copy, dán, chạy. Vậy là xong.',
@@ -163,6 +207,8 @@ const translations = {
         'faq.a4': 'Tuyệt đối không. Các mục yêu thích đã ghim được bảo vệ và tách biệt khỏi cơ chế tự động dọn dẹp. Chúng sẽ luôn được giữ an toàn cho đến khi bạn tự tay bỏ ghim.',
         'faq.q5': 'Hình ảnh sao chép được lưu trữ như thế nào?',
         'faq.a5': 'Hình ảnh và ảnh chụp màn hình được lưu dưới dạng file PNG tối ưu trong thư mục bộ nhớ đệm cục bộ (~/.cache/klipr/images/) kèm thumbnail xem trước. Cơ chế lọc trùng giúp không lưu lặp lại cùng một ảnh.',
+        'faq.q6': 'Tính năng AI OCR trích xuất chữ hoạt động ra sao? Dữ liệu có bảo mật không?',
+        'faq.a6': 'Klipr áp dụng cơ chế Bring Your Own Key (BYOK) với Google Gemini và OpenAI. Khóa API lưu hoàn toàn cục bộ trên máy bạn. Khi bạn trích xuất chữ, hình ảnh được gửi thẳng đến API chính thức của nhà cung cấp AI, không qua máy chủ trung gian. Nếu bạn không cài đặt API key, Klipr tiếp tục hoạt động 100% offline.',
 
         'footer.crafted': 'Klipr &bull; Phát triển bởi',
         'footer.free_note': 'Mã nguồn mở theo giấy phép MIT.',
@@ -190,7 +236,7 @@ function safeSetStorage(key, val) {
 }
 
 let currentLang = safeGetStorage('klipr_lang', 'en');
-let currentReleaseTag = 'v1.2.5';
+let currentReleaseTag = 'v1.2.7';
 
 /**
  * Public function to set language

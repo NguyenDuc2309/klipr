@@ -347,53 +347,98 @@ button.limit-pill:checked {
   font-weight: 600;
 }
 
-/* Dropdown & Combobox Styles */
-dropdown, 
-dropdown > button {
-  background-color: #f1f5f9;
-  border-radius: 6px;
-  color: #1E293B;
+/* ── Modern Dropdown & Menu Styles ── */
+dropdown {
+  background: transparent;
+  border: none;
+  padding: 0;
+  box-shadow: none;
 }
 
-dropdown {
-  border: 1px solid #E2E8F0;
+dropdown > button.toggle {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 10px;
+  min-height: 28px;
+  min-width: 120px;
+  box-shadow: none;
+  transition: all 0.15s ease;
+}
+
+dropdown > button.toggle:hover {
+  background-color: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+dropdown > button.toggle:checked,
+dropdown > button.toggle:active {
+  background-color: #f1f5f9;
+  border-color: #3b82f6;
+}
+
+dropdown > button.toggle box {
+  background: transparent;
+}
+
+dropdown > button.toggle box stack,
+dropdown > button.toggle box stack label {
+  background: transparent;
+  color: #0f172a;
+}
+
+dropdown > button.toggle arrow {
+  color: #64748b;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+dropdown popover.menu {
+  background: transparent;
+  padding: 0;
+  margin-top: 4px;
+}
+
+dropdown popover.menu > contents {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 2px 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+dropdown popover.menu listview {
+  background-color: transparent;
+  margin: 0;
   padding: 0;
 }
 
-dropdown > button {
-  border: none;
-  min-height: 32px;
-  padding: 0 8px;
-  box-shadow: none;
+dropdown popover.menu listview > row {
+  padding: 2px 12px;
+  border-radius: 6px;
+  color: #0f172a;
+  min-height: 24px;
+  margin: 1px 0;
 }
 
-dropdown:hover {
-  border-color: #CBD5E1;
-}
-
-/* Popover & Dropdown Menu Styles */
-popover {
-  box-shadow: none;
-}
-
-popover > contents {
-  color: #1E293B;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-popover listview {
+dropdown popover.menu listview > row:hover {
   background-color: #f1f5f9;
-  color: #1E293B;
-  margin: 0;
 }
 
-popover row:selected,
-popover listview > row:selected {
-  background-color: #3B82F6;
-  color: #FFFFFF;
-  border-radius: 4px;
+dropdown popover.menu listview > row:selected {
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+dropdown popover.menu listview > row:selected:hover {
+  background-color: #2563eb;
+}
+
+dropdown popover.menu listview > row image {
+  margin-left: 12px;
 }
 
 /* Keyboard focus reuses the hover look instead of GTK's default focus ring. */

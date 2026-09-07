@@ -1,6 +1,6 @@
 {
     "name": "Klipr",
-    "version": "1.2.5",
+    "version": "1.2.7",
     "description": "Clipboard Manager",
     "closeToTray": true,
     "autostart": true,
@@ -13,5 +13,5 @@
     "ocrOpenAIKey": "",
     "ocrOpenAIModel": "gpt-4o-mini",
     "ocrOpenAIBaseUrl": "https://api.openai.com/v1",
-    "ocrNotifyOnScreenshot": true
+    "ocrNotifyOnExtract": true
 }

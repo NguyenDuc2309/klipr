@@ -290,6 +290,25 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         key_controller.connect('key-pressed', self._on_key_pressed)
         self.add_controller(key_controller)
 
+        # Focus leave controller to automatically close floating popovers when tabbing away
+        win_focus_ctrl = Gtk.EventControllerFocus()
+        win_focus_ctrl.connect("leave", self._on_window_focus_leave)
+        self.add_controller(win_focus_ctrl)
+
+        # Surface state listener for Wayland: dismiss floating popovers when window loses focus
+        def on_surface_init(w, p=None):
+            surface = w.get_surface()
+            if surface:
+                def on_state(s, p):
+                    try:
+                        if not (s.get_state() & Gdk.ToplevelState.FOCUSED):
+                            self._dismiss_popovers()
+                    except Exception:
+                        pass
+                surface.connect("notify::state", on_state)
+        self.connect("realize", on_surface_init)
+        self.connect("notify::visible", lambda w, p: self._dismiss_popovers() if not w.get_visible() else None)
+
         # Monitor system theme changes
         settings_default = Gtk.Settings.get_default()
         if settings_default:
@@ -419,7 +438,15 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         if self.get_mapped():
             self.refresh_list(self.search_entry.get_text())
 
+    def _dismiss_popovers(self):
+        if hasattr(self, 'settings_view') and self.settings_view:
+            self.settings_view._close_dropdown_popover()
+
+    def _on_window_focus_leave(self, controller):
+        self._dismiss_popovers()
+
     def _on_unmap(self, *_args):
+        self._dismiss_popovers()
         utils.trim_memory()
 
     def _on_map(self, *_args):
@@ -629,7 +656,6 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         if error_msg:
             print(f"[Klipr OCR] Finished with error: {error_msg}")
             self.show_toast(f"OCR: {error_msg}", "error")
-            self._send_desktop_notification("Klipr OCR Failed", error_msg)
             return False
 
         if text:
@@ -640,9 +666,11 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                     self.refresh_list(self.search_entry.get_text())
                 except Exception as e:
                     print(f"[Klipr OCR Warning] Could not save to DB: {e}")
-            snippet = text[:60].replace("\n", " ") + ("..." if len(text) > 60 else "")
             self.show_toast("OCR text copied to clipboard!", "success")
-            self._send_desktop_notification("Klipr OCR Copied", snippet)
+            conf = settings.load()
+            if conf.get("ocrNotifyOnExtract", True):
+                snippet = text[:60].replace("\n", " ") + ("..." if len(text) > 60 else "")
+                self._send_desktop_notification("Text Extracted", snippet)
         return False
 
     def _on_pin_clicked(self, row, item_id, content):
@@ -803,6 +831,8 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.stack.set_visible_child_name("settings")
 
     def _on_settings_closed(self, saved):
+        if hasattr(self, 'settings_view') and self.settings_view:
+            self.settings_view._close_dropdown_popover()
         self.stack.set_visible_child_name("main")
         if saved:
             app = self.get_application()
