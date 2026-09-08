@@ -393,13 +393,14 @@ class ClipboardApp(Gtk.Application):
 
         def worker():
             try:
-                from ocr import OCRService
-                extracted_text = OCRService.extract(image_path)
+                from ai import AIService
+                extracted_text = AIService.extract(image_path)
                 if extracted_text and extracted_text.strip():
-                    print(f"[Klipr OCR Success] Background OCR extracted {len(extracted_text)} chars")
+                    print(f"[Klipr AI Success] Background AI extracted {len(extracted_text)} chars")
                     GLib.idle_add(self._on_background_ocr_success, extracted_text.strip())
                 else:
-                    print("[Klipr OCR] No text found in image")
+                    print("[Klipr AI] No text found in image")
+
             except Exception as e:
                 import traceback
                 print("[Klipr OCR Exception in background action]")

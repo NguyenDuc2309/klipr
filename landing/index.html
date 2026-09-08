@@ -338,105 +338,77 @@
         <section class="section ai-section" id="ai-features">
             <div class="container">
                 <div class="section-header reveal">
-                    <span class="section-tag ai-tag" data-i18n="ai.tag">AI Features</span>
-                    <h2 class="section-title" data-i18n="ai.title">Smarter clipboard with Next-Gen AI</h2>
-                    <p class="section-subtitle" data-i18n="ai.subtitle">Boost your productivity with seamless AI capabilities built directly into your desktop workflow.</p>
+                    <span class="section-tag ai-tag" data-i18n="ai.tag">AI Powered</span>
+                    <h2 class="section-title" data-i18n="ai.title">Extract text from image in seconds</h2>
+                    <p class="section-subtitle" data-i18n="ai.subtitle">Turn screenshots, invoices, receipts, and documents into clean, editable text with next-gen AI.</p>
                 </div>
 
                 <div class="ai-hero-card reveal">
-                    <div class="ai-hero-content">
-                        <div class="ai-badge">
-                            <span class="ai-badge-dot"></span>
-                            <span data-i18n="ai.ocr_badge">AI OCR &bull; Instant Text Extraction</span>
+                    <!-- Prominent Image Showcase Window -->
+                    <div class="window-frame ai-window-frame" title="Click to view full image">
+                        <div class="window-header">
+                            <div class="window-controls">
+                                <span class="window-dot dot-close"></span>
+                                <span class="window-dot dot-min"></span>
+                                <span class="window-dot dot-max"></span>
+                            </div>
+                            <span class="window-title" data-i18n="ai.showcase_title">Klipr AI — Image &amp; Invoice Text Extraction</span>
+                            <div style="width: 42px;"></div>
                         </div>
-                        <h3 class="ai-card-title" data-i18n="ai.ocr_title">Extract text from copied images in one click</h3>
-                        <p class="ai-card-desc" data-i18n="ai.ocr_desc">
-                            Copy any screenshot or image to your clipboard. Klipr can immediately send a desktop notification to extract text using AI, or click the OCR button on any image entry in your history to instantly copy detected text to your clipboard.
-                        </p>
-                        
-                        <div class="ai-highlights">
-                            <div class="ai-highlight-item">
-                                <div class="ai-highlight-icon">
-                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 data-i18n="ai.feat1_title">1-Click Desktop Notification</h4>
-                                    <p data-i18n="ai.feat1_desc">Detects when screenshots are copied and shows a quick action notification to transcribe text immediately.</p>
-                                </div>
-                            </div>
-
-                            <div class="ai-highlight-item">
-                                <div class="ai-highlight-icon">
-                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 data-i18n="ai.feat2_title">Gemini &amp; OpenAI Integration</h4>
-                                    <p data-i18n="ai.feat2_desc">Choose between Google Gemini or OpenAI. Use custom models like gemini-3.1-flash-lite or gpt-4o-mini.</p>
-                                </div>
-                            </div>
-
-                            <div class="ai-highlight-item">
-                                <div class="ai-highlight-icon">
-                                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 data-i18n="ai.feat3_title">Bring Your Own Key (BYOK)</h4>
-                                    <p data-i18n="ai.feat3_desc">100% private. Your API keys are stored locally on your device with direct API calls and zero third-party proxy.</p>
-                                </div>
-                            </div>
+                        <img src="./assets/ai_features.png" alt="Extract text from image with Klipr AI" class="window-img ai-showcase-img" loading="lazy">
+                        <div class="window-caption">
+                            <span data-i18n="ai.showcase_caption">Smart layout-preserved extraction for receipts, bills, and code</span>
+                            <span class="zoom-hint">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"/></svg>
+                                <span data-i18n="showcase.zoom">Click to Zoom</span>
+                            </span>
                         </div>
                     </div>
 
-                    <div class="ai-preview-box">
-                        <div class="ai-flow-card">
-                            <div class="ai-flow-step">
-                                <span class="ai-step-num">1</span>
-                                <div class="ai-step-body">
-                                    <span class="ai-step-label" data-i18n="ai.step1_label">Copy Screenshot</span>
-                                    <span class="ai-step-detail" data-i18n="ai.step1_detail">Press PrtScn or copy any image</span>
-                                </div>
-                            </div>
-                            <div class="ai-flow-divider">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    <!-- 4-Column Feature Highlights -->
+                    <div class="ai-feature-points-grid">
+                        <div class="ai-point-card">
+                            <div class="ai-point-icon-wrapper">
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <div class="ai-flow-step highlight">
-                                <span class="ai-step-num">2</span>
-                                <div class="ai-step-body">
-                                    <span class="ai-step-label" data-i18n="ai.step2_label">AI Extraction</span>
-                                    <span class="ai-step-detail" data-i18n="ai.step2_detail">Gemini / OpenAI extracts high-precision text</span>
-                                </div>
-                            </div>
-                            <div class="ai-flow-divider">
-                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                </svg>
-                            </div>
-                            <div class="ai-flow-step success">
-                                <span class="ai-step-num">3</span>
-                                <div class="ai-step-body">
-                                    <span class="ai-step-label" data-i18n="ai.step3_label">Auto-Copied &amp; Ready</span>
-                                    <span class="ai-step-detail" data-i18n="ai.step3_detail">Text added to history, ready to paste</span>
-                                </div>
-                            </div>
+                            <h3 data-i18n="ai.point1_title">Fast &amp; Accurate</h3>
+                            <p data-i18n="ai.point1_desc">Powered by Google Gemini &amp; OpenAI. Get text in under 2 seconds with high accuracy.</p>
                         </div>
 
-                        <div class="ai-future-box">
-                            <div class="ai-future-tag">
-                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                                <span data-i18n="ai.future_tag">Future AI Features</span>
+                        <div class="ai-point-card">
+                            <div class="ai-point-icon-wrapper">
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                             </div>
-                            <p class="ai-future-desc" data-i18n="ai.future_desc">Designed for future expansion: intelligent text summarization, instant code translation, and contextual helpers are on the roadmap.</p>
+                            <h3 data-i18n="ai.point2_title">Bills, Receipts &amp; Docs</h3>
+                            <p data-i18n="ai.point2_desc">Works with paper receipts, financial invoices, tabular data, documents, and code screenshots.</p>
+                        </div>
+
+                        <div class="ai-point-card">
+                            <div class="ai-point-icon-wrapper">
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <h3 data-i18n="ai.point3_title">Clean &amp; Aligned Output</h3>
+                            <p data-i18n="ai.point3_desc">Smart plain-text column alignment with zero markdown clutter. Ready to paste anywhere.</p>
+                        </div>
+
+                        <div class="ai-point-card">
+                            <div class="ai-point-icon-wrapper">
+                                <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <h3 data-i18n="ai.point4_title">100% Private (BYOK)</h3>
+                            <p data-i18n="ai.point4_desc">Bring Your Own Key. API keys are stored locally on your device with direct API calls and zero telemetry.</p>
                         </div>
                     </div>
                 </div>
+
             </div>
         </section>
 

@@ -447,7 +447,12 @@ dropdown > button.toggle {
   transition: all 0.15s ease;
 }
 
+dropdown.compact-dropdown > button.toggle {
+  min-width: 80px;
+}
+
 dropdown > button.toggle:hover {
+
   background-color: #2d2d30;
   border-color: #5a5a5f;
 }

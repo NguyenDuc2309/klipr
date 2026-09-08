@@ -635,14 +635,15 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         def worker():
             try:
-                from ocr import OCRService
-                extracted_text = OCRService.extract(image_path)
+                from ai import AIService
+                extracted_text = AIService.extract(image_path)
                 if not extracted_text or not extracted_text.strip():
-                    print("[Klipr OCR] No text found in image")
+                    print("[Klipr AI] No text found in image")
                     GLib.idle_add(self._on_ocr_finish, btn, None, "No text detected in image")
                 else:
-                    print(f"[Klipr OCR Success] Extracted {len(extracted_text)} characters:\n---\n{extracted_text}\n---")
+                    print(f"[Klipr AI Success] Extracted {len(extracted_text)} characters:\n---\n{extracted_text}\n---")
                     GLib.idle_add(self._on_ocr_finish, btn, extracted_text.strip(), None)
+
             except Exception as e:
                 import traceback
                 print("[Klipr OCR Exception]")
@@ -1051,9 +1052,10 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             btn_ocr.set_focusable(False)
             btn_ocr.add_css_class("icon-btn")
             btn_ocr.add_css_class("ocr")
-            btn_ocr.set_tooltip_text("Extract text (AI OCR)")
+            btn_ocr.set_tooltip_text("Extract text (AI)")
             btn_ocr.connect('clicked', lambda b: self._on_ocr_clicked(btn_ocr, content))
             actions.append(btn_ocr)
+
 
         if self.active_filter == "favorites":
             btn_edit = Gtk.Button(icon_name="document-edit-symbolic")

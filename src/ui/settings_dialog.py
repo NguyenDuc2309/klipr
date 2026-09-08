@@ -87,10 +87,12 @@ class SettingsView(Gtk.Box):
         general_grid.attach(limit_label, 0, 0, 1, 1)
 
         self.history_limit_dropdown = Gtk.DropDown.new_from_strings(["50", "100", "150", "200"])
+        self.history_limit_dropdown.add_css_class("compact-dropdown")
         self.history_limit_dropdown.set_halign(Gtk.Align.END)
         self.history_limit_dropdown.set_hexpand(True)
         self.history_limit_dropdown.connect("notify::selected", self._on_history_limit_changed)
         general_grid.attach(self.history_limit_dropdown, 1, 0, 1, 1)
+
 
         self._configure_dropdown_popover(self.history_limit_dropdown)
 
