@@ -7,6 +7,7 @@ import os
 import threading
 from PIL import Image
 from .base import BaseAIProvider
+from .prompt import EXTRACTION_PROMPT
 
 
 class GeminiAIProvider(BaseAIProvider):
@@ -15,8 +16,8 @@ class GeminiAIProvider(BaseAIProvider):
     DEFAULT_MODEL = "gemini-3.1-flash-lite"
     HOST = "generativelanguage.googleapis.com"
 
-    _conn_lock = threading.Lock()
-    _shared_conn = None
+    MAX_PARALLEL_REQUESTS = 3
+    _request_semaphore = threading.Semaphore(MAX_PARALLEL_REQUESTS)
 
     def __init__(self, api_key: str, model: str = None):
         self.api_key = (api_key or "").strip()
@@ -24,23 +25,6 @@ class GeminiAIProvider(BaseAIProvider):
         if m.endswith("flast"):
             m = m[:-5] + "flash"
         self.model = m
-
-    @classmethod
-    def _get_connection(cls) -> http.client.HTTPSConnection:
-        with cls._conn_lock:
-            if cls._shared_conn is None:
-                cls._shared_conn = http.client.HTTPSConnection(cls.HOST, timeout=30)
-            return cls._shared_conn
-
-    @classmethod
-    def _reset_connection(cls):
-        with cls._conn_lock:
-            if cls._shared_conn is not None:
-                try:
-                    cls._shared_conn.close()
-                except Exception:
-                    pass
-                cls._shared_conn = None
 
     @staticmethod
     def _prepare_image(image_path: str, max_dimension: int = 1200, quality: int = 80) -> tuple[bytes, str]:
@@ -79,10 +63,10 @@ class GeminiAIProvider(BaseAIProvider):
 
     def extract_text(self, image_path: str) -> str:
         if not self.api_key:
-            raise ValueError("Gemini API Key is not set. Configure it in Klipr Settings -> AI Features.")
+            raise ValueError("Gemini API Key not set")
 
         if not os.path.isfile(image_path):
-            raise FileNotFoundError(f"Image not found at: {image_path}")
+            raise FileNotFoundError("Image file not found")
 
         raw_bytes, mime_type = self._prepare_image(image_path)
         encoded_image = base64.b64encode(raw_bytes).decode("utf-8")
@@ -95,15 +79,7 @@ class GeminiAIProvider(BaseAIProvider):
             "systemInstruction": {
                 "parts": [
                     {
-                        "text": (
-                            "You are an intelligent document text extraction engine.\n"
-                            "Extract all text accurately while preserving the natural visual layout, line breaks, and spatial alignment.\n"
-                            "FORMATTING RULES:\n"
-                            "- Never use markdown table syntax (do NOT use vertical pipes '|' or '---' dividers). "
-                            "Instead, align columns cleanly using natural spacing so tables read legibly in plain text.\n"
-                            "- Maintain clean paragraph and section breaks between different information blocks.\n"
-                            "- Output ONLY the clean plain text verbatim without markdown code fences, notes, or explanations."
-                        )
+                        "text": EXTRACTION_PROMPT
                     }
                 ]
             },
@@ -137,37 +113,46 @@ class GeminiAIProvider(BaseAIProvider):
             "Connection": "keep-alive",
         }
 
-        # Send request with automatic reconnect on stale socket
+        # Each call opens its own connection (no shared socket state across threads),
+        # gated by a semaphore so at most MAX_PARALLEL_REQUESTS run concurrently.
         data = None
-        for attempt in range(2):
-            conn = self._get_connection()
-            try:
-                conn.request("POST", path, body=body, headers=headers)
-                resp = conn.getresponse()
-                raw_resp = resp.read().decode("utf-8")
+        with self._request_semaphore:
+            for attempt in range(2):
+                conn = http.client.HTTPSConnection(self.HOST, timeout=30)
+                try:
+                    conn.request("POST", path, body=body, headers=headers)
+                    resp = conn.getresponse()
+                    raw_resp = resp.read().decode("utf-8")
 
-                if resp.status >= 400:
+                    if resp.status >= 400:
+                        try:
+                            err_json = json.loads(raw_resp)
+                            msg = err_json.get("error", {}).get("message", raw_resp)
+                        except Exception:
+                            msg = raw_resp
+                        print(f"[Klipr AI Error] Gemini HTTP {resp.status}: {msg}")
+                        if resp.status == 429:
+                            raise RuntimeError("Rate limit exceeded")
+                        elif resp.status in (401, 403):
+                            raise RuntimeError("Invalid Gemini API key")
+                        raise RuntimeError(f"Gemini error ({resp.status})")
+
+                    data = json.loads(raw_resp)
+                    break
+                except (http.client.RemoteDisconnected, BrokenPipeError, ConnectionResetError) as e:
+                    if attempt == 1:
+                        print(f"[Klipr AI Error] Gemini connection error: {e}")
+                        raise RuntimeError("Connection failed")
+                except Exception as e:
+                    if "Gemini" in str(e) or "Rate limit" in str(e) or "API key" in str(e):
+                        raise
+                    print(f"[Klipr AI Error] Gemini request failed: {e}")
+                    raise RuntimeError("Request failed")
+                finally:
                     try:
-                        err_json = json.loads(raw_resp)
-                        msg = err_json.get("error", {}).get("message", raw_resp)
+                        conn.close()
                     except Exception:
-                        msg = raw_resp
-                    print(f"[Klipr AI Error] Gemini HTTP {resp.status}: {msg}")
-                    raise RuntimeError(f"Gemini error ({resp.status}): {msg}")
-
-                data = json.loads(raw_resp)
-                break
-            except (http.client.RemoteDisconnected, BrokenPipeError, ConnectionResetError) as e:
-                self._reset_connection()
-                if attempt == 1:
-                    print(f"[Klipr AI Error] Gemini connection error: {e}")
-                    raise RuntimeError(f"Cannot connect to Gemini: {e}")
-            except Exception as e:
-                self._reset_connection()
-                if "Gemini error" in str(e):
-                    raise
-                print(f"[Klipr AI Error] Gemini request failed: {e}")
-                raise RuntimeError(f"Gemini request failed: {e}")
+                        pass
 
         try:
             candidates = data.get("candidates", [])
@@ -176,7 +161,7 @@ class GeminiAIProvider(BaseAIProvider):
                 block_reason = feedback.get("blockReason")
                 if block_reason:
                     print(f"[Klipr AI Error] Gemini blocked content: {block_reason}")
-                    raise RuntimeError(f"Content blocked by Gemini: {block_reason}")
+                    raise RuntimeError("Content blocked")
                 return ""
 
             parts = candidates[0].get("content", {}).get("parts", [])
@@ -185,7 +170,7 @@ class GeminiAIProvider(BaseAIProvider):
             print(f"[Klipr AI] Gemini extraction completed ({len(result)} chars)")
             return result
         except Exception as e:
-            if "blocked by Gemini" in str(e):
+            if "Content blocked" in str(e):
                 raise
             print(f"[Klipr AI Error] Failed to parse Gemini response: {e}")
-            raise RuntimeError(f"Failed to parse Gemini response: {e}")
+            raise RuntimeError("Response parse error")

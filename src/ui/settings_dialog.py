@@ -641,7 +641,7 @@ class SettingsView(Gtk.Box):
             self.on_theme_changed(restored_theme)
             
         if self.on_show_toast:
-            self.on_show_toast("Settings restored to defaults", "success")
+            self.on_show_toast("Settings restored", "success")
 
 
 

@@ -238,6 +238,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
         self.toast_box.append(self.toast_icon)
 
         self.toast_label = Gtk.Label()
+        self.toast_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.toast_label.set_max_width_chars(40)
+        self.toast_label.set_single_line_mode(True)
         self.toast_box.append(self.toast_label)
 
         self.toast_revealer.set_child(self.toast_box)
@@ -627,11 +630,11 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         if not os.path.exists(image_path):
             print(f"[Klipr OCR Error] Image file not found: {image_path}")
-            self.show_toast("Image file not found", "error")
+            self.show_toast("Image not found", "error")
             return
 
         btn.set_sensitive(False)
-        self.show_toast("Extracting text with AI...", "info")
+        self.show_toast("Extracting text...", "info")
 
         def worker():
             try:
@@ -639,7 +642,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                 extracted_text = AIService.extract(image_path)
                 if not extracted_text or not extracted_text.strip():
                     print("[Klipr AI] No text found in image")
-                    GLib.idle_add(self._on_ocr_finish, btn, None, "No text detected in image")
+                    GLib.idle_add(self._on_ocr_finish, btn, None, "No text detected")
                 else:
                     print(f"[Klipr AI Success] Extracted {len(extracted_text)} characters:\n---\n{extracted_text}\n---")
                     GLib.idle_add(self._on_ocr_finish, btn, extracted_text.strip(), None)
@@ -652,11 +655,39 @@ class ClipboardWindow(Gtk.ApplicationWindow):
 
         threading.Thread(target=worker, daemon=True).start()
 
+    def _format_ocr_error(self, error_msg: str) -> str:
+        """Map raw error messages/exceptions to concise, clean toast messages."""
+        msg = str(error_msg or "").strip()
+        msg_lower = msg.lower()
+
+        if "api key" in msg_lower or "api_key" in msg_lower or "key is not set" in msg_lower:
+            return "API Key not configured"
+        if "not found" in msg_lower:
+            return "Image not found"
+        if "no text" in msg_lower:
+            return "No text detected"
+        if "rate limit" in msg_lower or "429" in msg_lower or "resource_exhausted" in msg_lower:
+            return "Rate limit exceeded"
+        if "blocked" in msg_lower or "safety" in msg_lower:
+            return "Content blocked"
+        if "connection" in msg_lower or "cannot connect" in msg_lower or "network" in msg_lower:
+            return "Connection failed"
+        if "timeout" in msg_lower:
+            return "Request timed out"
+
+        for prefix in ("OCR: ", "RuntimeError: ", "ValueError: "):
+            if msg.startswith(prefix):
+                msg = msg[len(prefix):].strip()
+
+        if len(msg) > 30:
+            msg = msg[:27].rstrip() + "..."
+        return msg or "Extraction failed"
+
     def _on_ocr_finish(self, btn, text, error_msg):
         btn.set_sensitive(True)
         if error_msg:
             print(f"[Klipr OCR] Finished with error: {error_msg}")
-            self.show_toast(f"OCR: {error_msg}", "error")
+            self.show_toast(self._format_ocr_error(error_msg), "error")
             return False
 
         if text:
@@ -667,7 +698,7 @@ class ClipboardWindow(Gtk.ApplicationWindow):
                     self.refresh_list(self.search_entry.get_text())
                 except Exception as e:
                     print(f"[Klipr OCR Warning] Could not save to DB: {e}")
-            self.show_toast("OCR text copied to clipboard!", "success")
+            self.show_toast("Text copied to clipboard", "success")
             conf = settings.load()
             if conf.get("ocrNotifyOnExtract", True):
                 snippet = text[:60].replace("\n", " ") + ("..." if len(text) > 60 else "")

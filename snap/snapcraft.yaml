@@ -24,6 +24,7 @@ apps:
       # the gnome extension above — unity7 is what a StatusNotifierItem tray
       # icon additionally needs on strict confinement.
       - unity7
+      - network
 
 slots:
   dbus-klipr:
@@ -54,12 +55,11 @@ parts:
       fi
 
       DEST="$CRAFT_PART_INSTALL/usr/share/klipr"
-      mkdir -p "$DEST/ui" "$DEST/ai" "$DEST/ocr" "$DEST/assets"
+      mkdir -p "$DEST/ui" "$DEST/ai" "$DEST/assets"
       cp "$CRAFT_PART_SRC"/src/*.py "$DEST/"
       cp "$CRAFT_PART_SRC"/src/*.css "$DEST/"
       cp "$CRAFT_PART_SRC"/src/ui/*.py "$DEST/ui/"
       cp "$CRAFT_PART_SRC"/src/ai/*.py "$DEST/ai/"
-      cp "$CRAFT_PART_SRC"/src/ocr/*.py "$DEST/ocr/"
 
       cp "$CRAFT_PART_SRC"/setting.json "$DEST/"
       cp "$CRAFT_PART_SRC"/assets/logo.png "$CRAFT_PART_SRC"/assets/light_logo.png "$DEST/assets/"

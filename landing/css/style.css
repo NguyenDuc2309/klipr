@@ -384,64 +384,6 @@ img {
     margin-bottom: 20px;
 }
 
-/* ── Free Promise Section ── */
-.free-promise-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-.free-card {
-    background: var(--bg-surface-glass);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    padding: 28px 22px;
-    backdrop-filter: blur(12px);
-    transition: transform var(--transition-normal), border-color var(--transition-normal), background var(--transition-normal);
-}
-
-.free-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-accent);
-    background: var(--bg-surface-elevated);
-}
-
-.free-card-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-md);
-    background: rgba(63, 185, 80, 0.1);
-    border: 1px solid rgba(63, 185, 80, 0.25);
-    color: var(--accent-emerald);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 18px;
-}
-
-.free-card h3 {
-    font-size: 1.08rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.free-card p {
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    line-height: 1.6;
-}
-
-@media (max-width: 992px) {
-    .free-promise-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 600px) {
-    .free-promise-grid {
-        grid-template-columns: 1fr;
-    }
-}
 
 /* ── Buttons ── */
 .btn {
@@ -1046,10 +988,25 @@ img {
 .delay-2 { transition-delay: 0.2s; }
 .delay-3 { transition-delay: 0.3s; }
 
-/* ── AI Features Section ── */
-.ai-section {
-    padding: 70px 0 90px;
+/* ── AI Features (nested inside Features section) ── */
+.ai-subsection {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
     position: relative;
+}
+
+.ai-subheader {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto 32px;
+}
+
+.ai-subtitle-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 12px 0 10px;
 }
 
 .ai-tag {

@@ -3,10 +3,12 @@ import io
 import json
 import mimetypes
 import os
+import threading
 import urllib.error
 import urllib.request
 from PIL import Image
 from .base import BaseAIProvider
+from .prompt import EXTRACTION_PROMPT
 
 
 class OpenAIProvider(BaseAIProvider):
@@ -14,6 +16,9 @@ class OpenAIProvider(BaseAIProvider):
 
     DEFAULT_MODEL = "gpt-4o-mini"
     DEFAULT_BASE_URL = "https://api.openai.com/v1"
+
+    MAX_PARALLEL_REQUESTS = 3
+    _request_semaphore = threading.Semaphore(MAX_PARALLEL_REQUESTS)
 
     def __init__(self, api_key: str, model: str = None, base_url: str = None):
         self.api_key = (api_key or "").strip()
@@ -71,10 +76,10 @@ class OpenAIProvider(BaseAIProvider):
 
     def extract_text(self, image_path: str) -> str:
         if not self.api_key:
-            raise ValueError("OpenAI API Key is not set. Configure it in Klipr Settings -> AI Features.")
+            raise ValueError("OpenAI API Key not set")
 
         if not os.path.isfile(image_path):
-            raise FileNotFoundError(f"Image not found at: {image_path}")
+            raise FileNotFoundError("Image file not found")
 
         raw_bytes, mime_type = self._prepare_image(image_path)
         encoded_image = base64.b64encode(raw_bytes).decode("utf-8")
@@ -86,11 +91,7 @@ class OpenAIProvider(BaseAIProvider):
 
         print(f"[Klipr AI] Calling OpenAI API (endpoint: {url}, model: {self.model}, image: {os.path.basename(image_path)}, size: {len(raw_bytes)/1024:.1f}KB, mime: {mime_type})...")
 
-        prompt_text = (
-            "Extract all text from this image accurately. "
-            "Output only the raw extracted text without any markdown formatting, "
-            "preamble, or explanations."
-        )
+        prompt_text = EXTRACTION_PROMPT
 
         data_url = f"data:{mime_type};base64,{encoded_image}"
 
@@ -118,39 +119,40 @@ class OpenAIProvider(BaseAIProvider):
             "max_tokens": 4096,
         }
 
-        try:
-            data = self._send_request(payload, url)
-        except urllib.error.HTTPError as e:
-            raw_err = e.read().decode("utf-8", errors="replace")
-            # If backend expects string content instead of array
-            if "json: cannot unmarshal array into Go struct" in raw_err:
-                payload["messages"][0]["content"] = prompt_text
-                payload["messages"][0]["images"] = [data_url]
-                try:
-                    data = self._send_request(payload, url)
-                except urllib.error.HTTPError as e2:
-                    raw_err2 = e2.read().decode("utf-8", errors="replace")
-                    print(f"[Klipr AI Error] Go format retry HTTP {e2.code}: {raw_err2}")
-                    raise RuntimeError(f"OpenAI error ({e2.code}): {raw_err2}")
-                except Exception as e2:
-                    print(f"[Klipr AI Error] Go format retry error: {e2}")
-                    raise RuntimeError(f"OpenAI error: {e2}")
-            else:
-                try:
-                    err_data = json.loads(raw_err)
-                    msg = err_data.get("error", {}).get("message", raw_err)
-                except Exception:
-                    msg = raw_err
-                print(f"[Klipr AI Error] OpenAI HTTP {e.code}: {msg}")
-                raise RuntimeError(f"OpenAI error ({e.code}): {msg}")
-        except urllib.error.URLError as e:
-            print(f"[Klipr AI Error] OpenAI connection error ({url}): {e.reason}")
-            raise RuntimeError(f"Cannot connect to OpenAI: {e.reason}")
+        # Gated by a semaphore so at most MAX_PARALLEL_REQUESTS run concurrently.
+        with self._request_semaphore:
+            try:
+                data = self._send_request(payload, url)
+            except urllib.error.HTTPError as e:
+                raw_err = e.read().decode("utf-8", errors="replace")
+                # If backend expects string content instead of array
+                if "json: cannot unmarshal array into Go struct" in raw_err:
+                    payload["messages"][0]["content"] = prompt_text
+                    payload["messages"][0]["images"] = [data_url]
+                    try:
+                        data = self._send_request(payload, url)
+                    except urllib.error.HTTPError as e2:
+                        raw_err2 = e2.read().decode("utf-8", errors="replace")
+                        print(f"[Klipr AI Error] Go format retry HTTP {e2.code}: {raw_err2}")
+                        raise RuntimeError(f"OpenAI error ({e2.code}): {raw_err2}")
+                    except Exception as e2:
+                        print(f"[Klipr AI Error] Go format retry error: {e2}")
+                        raise RuntimeError(f"OpenAI error: {e2}")
+                else:
+                    print(f"[Klipr AI Error] OpenAI HTTP {e.code}")
+                    if e.code == 429:
+                        raise RuntimeError("Rate limit exceeded")
+                    elif e.code in (401, 403):
+                        raise RuntimeError("Invalid OpenAI API key")
+                    raise RuntimeError(f"OpenAI error ({e.code})")
+            except urllib.error.URLError as e:
+                print(f"[Klipr AI Error] OpenAI connection error ({url}): {e.reason}")
+                raise RuntimeError("Connection failed")
 
         if "error" in data:
             err_msg = data["error"].get("message", str(data["error"]))
             print(f"[Klipr AI Error] OpenAI server returned error: {err_msg}")
-            raise RuntimeError(f"OpenAI error: {err_msg}")
+            raise RuntimeError("Request failed")
 
         try:
             choices = data.get("choices", [])
@@ -167,4 +169,4 @@ class OpenAIProvider(BaseAIProvider):
             return result
         except Exception as e:
             print(f"[Klipr AI Error] Failed to parse OpenAI response: {e}")
-            raise RuntimeError(f"Failed to parse OpenAI response: {e}")
+            raise RuntimeError("Response parse error")

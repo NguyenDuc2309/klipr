@@ -1,7 +1,6 @@
 src/*.py                usr/share/klipr
 src/*.css               usr/share/klipr
 src/ui/*.py             usr/share/klipr/ui
-src/ocr/*.py            usr/share/klipr/ocr
 src/ai/*.py             usr/share/klipr/ai
 
 setting.json            usr/share/klipr

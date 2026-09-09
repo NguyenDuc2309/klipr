@@ -14,8 +14,8 @@ const translations = {
         'nav.star': 'Star on GitHub',
 
         'hero.release_suffix': '— Latest Release',
-        'hero.title': 'Clipboard history,<br><span class="gradient-text">made seamless for Linux.</span>',
-        'hero.desc': 'Klipr captures everything you copy — text, code, commands, and screenshots. Native GTK4 desktop integration, zero Electron bloat, and instant fuzzy search.',
+        'hero.title': 'Clipboard history,<br><span class="gradient-text">made seamless for Ubuntu & Linux.</span>',
+        'hero.desc': 'Klipr is a native clipboard manager for Linux and Ubuntu that captures everything you copy — text, code, commands, and screenshots. Zero Electron bloat, instant fuzzy search over your clipboard history.',
         'hero.install_guide': 'Install Now',
         'hero.download_deb': 'Download .deb',
         'hero.pill_free': 'Open Source',
@@ -23,21 +23,9 @@ const translations = {
         'hero.pill_privacy': 'Offline & Private',
         'hero.pill_no_account': 'No Account Required',
 
-        'promise.tag': 'Open Source',
-        'promise.title': 'Built openly for the Linux community',
-        'promise.subtitle': 'Klipr is lightweight and transparent. No paywalls, no monetization, no tracking.',
-        'promise.c1_title': 'Community Driven',
-        'promise.c1_desc': 'No paid tiers, subscriptions, or locked features. Built as an open tool for everyone.',
-        'promise.c2_title': 'Zero Advertisements',
-        'promise.c2_desc': 'No sponsored banners, no upgrade prompts, and no annoying popups. Clean and focused.',
-        'promise.c3_title': 'Offline & Private',
-        'promise.c3_desc': 'All snippets and history remain strictly on your local disk. Nothing is uploaded to any cloud server.',
-        'promise.c4_title': 'Permissive MIT License',
-        'promise.c4_desc': 'Free for both personal and commercial use. Inspect, modify, or fork the full codebase on GitHub.',
-
         'showcase.tag': 'Demo',
-        'showcase.title': 'Clean, focused GTK4 interface',
-        'showcase.subtitle': 'Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.',
+        'showcase.title': 'Clean, focused clipboard manager UI',
+        'showcase.subtitle': 'Fits right at home on Ubuntu and every major Linux desktop environment — GNOME, XFCE, and KDE.',
         'showcase.window1_title': 'Klipr — History & Favorites',
         'showcase.window1_caption': 'Clipboard History with Thumbnail Previews',
         'showcase.window2_title': 'Klipr — Settings & Customization',
@@ -45,8 +33,8 @@ const translations = {
         'showcase.zoom': 'Click to Zoom',
 
         'features.tag': 'Features',
-        'features.title': 'Built for daily developer productivity',
-        'features.subtitle': 'Everything you need to effortlessly manage clipboard history without bloat.',
+        'features.title': 'Everything a Linux clipboard manager should do',
+        'features.subtitle': 'Core clipboard history features for Ubuntu, Fedora, and every major Linux desktop — no bloat, no subscriptions.',
         'features.f1_title': 'Automatic History',
         'features.f1_desc': 'Quietly records snippets and automatically prunes older items based on your configured limit.',
         'features.f2_title': 'Instant Fuzzy Search',
@@ -60,9 +48,9 @@ const translations = {
         'features.f6_title': 'Pure Native Performance',
         'features.f6_desc': 'Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.',
 
-        'ai.tag': 'AI Powered',
-        'ai.title': 'Extract text from image in seconds',
-        'ai.subtitle': 'Turn screenshots, invoices, receipts, and documents into clean, editable text with next-gen AI.',
+        'ai.tag': 'Bonus: AI Powered',
+        'ai.title': 'Extract text from any image in seconds',
+        'ai.subtitle': 'On top of clipboard history, Klipr can turn screenshots, invoices, and receipts into clean, editable text.',
         'ai.showcase_title': 'Klipr AI — Image & Invoice Text Extraction',
         'ai.showcase_caption': 'Smart layout-preserved extraction for receipts, bills, and code',
         'ai.point1_title': 'Fast & Accurate',
@@ -74,19 +62,19 @@ const translations = {
         'ai.point4_title': '100% Private (BYOK)',
         'ai.point4_desc': 'Bring Your Own Key. Your keys are stored locally with direct API calls and zero tracking.',
 
-        'install.title': 'Install Klipr in Seconds',
-        'install.subtitle': 'Copy, paste, run. That\'s it.',
-        'install.note_apt': 'Works on any Ubuntu system out of the box. Future updates then arrive through `sudo snap refresh` automatically.',
+        'install.title': 'Install the Klipr Clipboard Manager in Seconds',
+        'install.subtitle': 'One command on Ubuntu or any Snap-enabled Linux distro.',
+        'install.note_apt': 'Works out of the box on Ubuntu, Fedora, Arch, and other major Linux distributions. Future updates then arrive through `sudo snap refresh` automatically.',
 
         'faq.tag': 'FAQ',
         'faq.title': 'Frequently Asked Questions',
         'faq.subtitle': 'Quick answers to common questions about Klipr.',
         'faq.q0': 'Is Klipr really 100% free? Are there any hidden fees or Pro tiers?',
-        'faq.a0': 'Yes. Klipr is 100% free and open source under the permissive MIT License. There are no paid tiers, subscriptions, hidden fees, or advertisements.',
+        'faq.a0': 'Yes. Klipr is 100% free and open source under the permissive MIT License. There are no paid tiers, subscriptions, hidden fees, upgrade prompts, or advertisements — ever.',
         'faq.q1': 'Which Linux distributions and desktop environments are supported?',
         'faq.a1': 'Klipr runs on any modern Linux distribution with GTK4 and D-Bus support, including Ubuntu, Debian, Fedora, Arch Linux, and Linux Mint. It works seamlessly across GNOME, KDE Plasma, XFCE, Cinnamon, and MATE.',
         'faq.q2': 'Is my clipboard data sent anywhere?',
-        'faq.a2': 'No. Klipr operates 100% offline. All text, code snippets, and image history are stored strictly on your local device in a local SQLite database with zero telemetry or network calls.',
+        'faq.a2': 'No. Klipr operates 100% offline by default. All text, code snippets, and image history are stored strictly on your local device in a local SQLite database with zero telemetry. The only exception is the optional AI OCR feature, which only calls out to your own configured Gemini/OpenAI API key — see the next question.',
         'faq.q3': 'How many clipboard items does Klipr keep?',
         'faq.a3': 'By default, Klipr stores your last 50 items. You can easily adjust this limit to 100 or 150 items in the Settings dialog to fit your workflow.',
         'faq.q4': 'Are my pinned items deleted when the history fills up?',
@@ -114,8 +102,8 @@ const translations = {
         'nav.star': 'Star trên GitHub',
 
         'hero.release_suffix': '— Bản phát hành mới nhất',
-        'hero.title': 'Quản lý lịch sử clipboard,<br><span class="gradient-text">mượt mà cho Linux.</span>',
-        'hero.desc': 'Klipr tự động lưu lại mọi nội dung bạn sao chép — văn bản, mã nguồn, lệnh terminal và ảnh chụp màn hình. Tích hợp GTK4 native, không dùng Electron nặng nề, tìm kiếm siêu nhanh.',
+        'hero.title': 'Quản lý lịch sử clipboard,<br><span class="gradient-text">mượt mà cho Ubuntu & Linux.</span>',
+        'hero.desc': 'Klipr là ứng dụng quản lý clipboard (clipboard manager) native cho Linux và Ubuntu, tự động lưu lại mọi nội dung bạn sao chép — văn bản, mã nguồn, lệnh terminal và ảnh chụp màn hình. Không dùng Electron nặng nề, tìm kiếm lịch sử clipboard siêu nhanh.',
         'hero.install_guide': 'Cài đặt ngay',
         'hero.download_deb': 'Tải gói .deb',
         'hero.pill_free': 'Mã nguồn mở',
@@ -123,21 +111,9 @@ const translations = {
         'hero.pill_privacy': 'Offline & Bảo mật',
         'hero.pill_no_account': 'Không cần tài khoản',
 
-        'promise.tag': 'Mã nguồn mở',
-        'promise.title': 'Mã nguồn mở và minh bạch',
-        'promise.subtitle': 'Klipr được phát triển công khai cho cộng đồng Linux. Không thu phí, không theo dõi.',
-        'promise.c1_title': 'Hoàn toàn mở',
-        'promise.c1_desc': 'Không có bản Pro, không thu phí bản quyền, không khóa tính năng. Mọi tính năng đều miễn phí cho tất cả mọi người.',
-        'promise.c2_title': 'Không quảng cáo',
-        'promise.c2_desc': 'Không pop-up mời nâng cấp, không banner quảng cáo, không làm phiền trải nghiệm làm việc của bạn.',
-        'promise.c3_title': 'Offline & Bảo mật',
-        'promise.c3_desc': 'Toàn bộ nội dung sao chép lưu trữ nội bộ trên máy bạn. Tuyệt đối không gửi dữ liệu lên bất kỳ máy chủ nào.',
-        'promise.c4_title': 'Mã nguồn mở MIT',
-        'promise.c4_desc': 'Hoàn toàn tự do sử dụng cho cá nhân lẫn thương mại. Thoải mái kiểm tra, chỉnh sửa mã nguồn trên GitHub.',
-
         'showcase.tag': 'Demo',
-        'showcase.title': 'Thiết kế GTK4 tinh tế & gọn gàng',
-        'showcase.subtitle': 'Hoạt động hoàn hảo trên các môi trường desktop Linux hiện đại như GNOME, XFCE và KDE.',
+        'showcase.title': 'Giao diện quản lý clipboard gọn gàng, tập trung',
+        'showcase.subtitle': 'Hoạt động hoàn hảo trên Ubuntu và mọi môi trường desktop Linux phổ biến như GNOME, XFCE và KDE.',
         'showcase.window1_title': 'Klipr — Lịch sử & Yêu thích',
         'showcase.window1_caption': 'Lịch sử clipboard kèm hình ảnh thumbnail trực quan',
         'showcase.window2_title': 'Klipr — Cài đặt & Tùy biến',
@@ -145,8 +121,8 @@ const translations = {
         'showcase.zoom': 'Bấm để phóng to',
 
         'features.tag': 'Tính năng',
-        'features.title': 'Tối ưu cho hiệu suất làm việc mỗi ngày',
-        'features.subtitle': 'Mọi thứ bạn cần để quản lý nội dung clipboard mà không gây nặng máy.',
+        'features.title': 'Đầy đủ những gì một clipboard manager Linux cần có',
+        'features.subtitle': 'Tính năng quản lý lịch sử clipboard cốt lõi cho Ubuntu, Fedora và mọi bản Linux phổ biến — không nặng máy, không thu phí.',
         'features.f1_title': 'Lưu trữ tự động',
         'features.f1_desc': 'Âm thầm ghi nhớ các đoạn văn bản, tự động dọn dẹp các mục cũ theo giới hạn bạn đặt.',
         'features.f2_title': 'Tìm kiếm tức thì',
@@ -160,9 +136,9 @@ const translations = {
         'features.f6_title': 'Hiệu năng Native vượt trội',
         'features.f6_desc': 'Viết bằng Python và GTK4. Chiếm cực ít bộ nhớ RAM và chạy ẩn trên khay hệ thống.',
 
-        'ai.tag': 'Trí tuệ nhân tạo (AI)',
+        'ai.tag': 'Bonus: Trí tuệ nhân tạo (AI)',
         'ai.title': 'Trích xuất chữ từ hình ảnh & hóa đơn tức thì',
-        'ai.subtitle': 'Biến ảnh chụp màn hình, hóa đơn đỏ, bill thanh toán và tài liệu thành văn bản sạch sẽ, ngay ngắn chỉ với 1 click.',
+        'ai.subtitle': 'Ngoài lịch sử clipboard, Klipr còn biến ảnh chụp màn hình, hóa đơn và bill thanh toán thành văn bản sạch sẽ, ngay ngắn.',
         'ai.showcase_title': 'Klipr AI — Trích xuất chữ từ Ảnh & Hóa đơn / Bill',
         'ai.showcase_caption': 'Thông minh nhận diện và căn chỉnh cột cho hóa đơn, biên lai, bảng biểu và mã nguồn',
         'ai.point1_title': 'Nhanh chóng & Chuẩn xác',
@@ -174,19 +150,19 @@ const translations = {
         'ai.point4_title': 'Bảo mật tuyệt đối (BYOK)',
         'ai.point4_desc': 'Dùng API Key cá nhân của bạn. Key lưu an toàn trên máy, kết nối trực tiếp không qua máy chủ trung gian.',
 
-        'install.title': 'Cài đặt Klipr dễ dàng',
-        'install.subtitle': 'Copy, dán, chạy. Vậy là xong.',
-        'install.note_apt': 'Chạy được ngay trên mọi máy Ubuntu. Các bản cập nhật sau đó sẽ tự động tới qua `sudo snap refresh`.',
+        'install.title': 'Cài đặt Klipr — Clipboard Manager cho Linux',
+        'install.subtitle': 'Một câu lệnh duy nhất trên Ubuntu hoặc mọi bản Linux hỗ trợ Snap.',
+        'install.note_apt': 'Chạy được ngay trên Ubuntu, Fedora, Arch và các bản phân phối Linux phổ biến khác. Các bản cập nhật sau đó sẽ tự động tới qua `sudo snap refresh`.',
 
         'faq.tag': 'Hỏi & Đáp',
         'faq.title': 'Câu hỏi thường gặp',
         'faq.subtitle': 'Giải đáp nhanh các thắc mắc phổ biến về Klipr.',
         'faq.q0': 'Klipr có thực sự miễn phí 100% không? Có chi phí ẩn hay gói Pro không?',
-        'faq.a0': 'Có. Klipr hoàn toàn miễn phí 100% và là phần mềm mã nguồn mở theo giấy phép MIT. Không có bản trả phí, không thuê bao, không chi phí ẩn và không quảng cáo.',
+        'faq.a0': 'Có. Klipr hoàn toàn miễn phí 100% và là phần mềm mã nguồn mở theo giấy phép MIT. Không có bản trả phí, không thuê bao, không chi phí ẩn, không mời mọc nâng cấp và không quảng cáo — mãi mãi.',
         'faq.q1': 'Những bản phân phối Linux và môi trường desktop nào được hỗ trợ?',
         'faq.a1': 'Klipr chạy trên mọi bản phân phối Linux hiện đại hỗ trợ GTK4 và D-Bus, bao gồm Ubuntu, Debian, Fedora, Arch Linux và Linux Mint. Ứng dụng hoạt động mượt mà trên GNOME, KDE Plasma, XFCE, Cinnamon và MATE.',
         'faq.q2': 'Dữ liệu clipboard của tôi có bị gửi đi đâu không?',
-        'faq.a2': 'Không. Klipr hoạt động 100% offline. Toàn bộ văn bản, đoạn mã và hình ảnh sao chép được lưu trữ cục bộ trong cơ sở dữ liệu SQLite trên máy bạn, tuyệt đối không có telemetry hay kết nối mạng.',
+        'faq.a2': 'Không. Mặc định Klipr hoạt động 100% offline. Toàn bộ văn bản, đoạn mã và hình ảnh sao chép được lưu trữ cục bộ trong cơ sở dữ liệu SQLite trên máy bạn, tuyệt đối không có telemetry. Ngoại lệ duy nhất là tính năng AI OCR (tùy chọn), chỉ gọi tới API key Gemini/OpenAI do chính bạn cấu hình — xem câu hỏi tiếp theo.',
         'faq.q3': 'Klipr lưu trữ được bao nhiêu mục clipboard?',
         'faq.a3': 'Mặc định Klipr lưu trữ 50 mục gần nhất. Bạn có thể dễ dàng điều chỉnh giới hạn này thành 100 hoặc 150 mục trong bảng Cài đặt để phù hợp với nhu cầu.',
         'faq.q4': 'Các mục đã ghim có bị xóa khi lịch sử clipboard bị đầy không?',
@@ -233,7 +209,9 @@ window.setLanguage = function(lang) {
     safeSetStorage('klipr_lang', lang);
     document.documentElement.lang = lang;
 
-    document.title = 'Klipr - Linux Clipboard Manager';
+    document.title = lang === 'vi'
+        ? 'Klipr - Ứng dụng quản lý Clipboard cho Ubuntu & Linux'
+        : 'Klipr - Clipboard Manager & History for Ubuntu & Linux';
 
     // Update active button state
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -493,7 +471,7 @@ async function fetchLatestRelease() {
         if (!response.ok) return;
 
         const release = await response.json();
-        currentReleaseTag = release.tag_name || 'v1.2.5';
+        currentReleaseTag = release.tag_name || 'v1.2.7';
         updateVersionBadge();
 
         const debAsset = release.assets?.find(asset => asset.name.endsWith('.deb'));

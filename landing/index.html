@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klipr - Linux Clipboard Manager</title>
-    <meta name="description" content="Native GTK4 clipboard history manager for Linux with instant search and image support.">
-    <meta name="keywords" content="linux clipboard manager, gtk4 clipboard, klipr, open source clipboard, lightweight clipboard history">
+    <title>Klipr - Clipboard Manager & History for Ubuntu & Linux</title>
+    <meta name="description" content="Klipr is a free, open-source clipboard manager for Ubuntu and Linux. Instant clipboard history search, image support, and zero telemetry — no Electron bloat.">
+    <meta name="keywords" content="ubuntu clipboard manager, linux clipboard manager, clipboard history, clipboard history manager linux, clipboard manager ubuntu, gtk4 clipboard, klipr, open source clipboard manager, snap clipboard manager, lightweight clipboard history">
     <meta name="author" content="Nguyen Duc">
     <meta name="theme-color" content="#070a0f">
 
@@ -22,17 +22,18 @@
     <meta property="og:locale" content="en_US">
     <meta property="og:locale:alternate" content="vi_VN">
     <meta property="og:url" content="https://nguyenduc2309.github.io/klipr/">
-    <meta property="og:title" content="Klipr - Linux Clipboard Manager">
-    <meta property="og:description" content="Native GTK4 clipboard history manager for Linux. Fast, lightweight, and offline.">
+    <meta property="og:title" content="Klipr - Clipboard Manager & History for Ubuntu & Linux">
+    <meta property="og:description" content="Free, open-source clipboard manager for Ubuntu and Linux. Instant clipboard history search, image support, zero telemetry.">
     <meta property="og:image" content="https://nguyenduc2309.github.io/klipr/assets/home_page.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="750">
-    <meta property="og:image:alt" content="Klipr GTK4 Clipboard History Manager Interface">
+    <meta property="og:image:alt" content="Klipr - Ubuntu & Linux Clipboard Manager Showing Clipboard History">
 
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Klipr - Linux Clipboard Manager">
-    <meta name="twitter:description" content="Native GTK4 clipboard history manager for Linux. Fast, lightweight, and offline.">
+    <meta name="twitter:site" content="@NguyenDuc2309">
+    <meta name="twitter:title" content="Klipr - Clipboard Manager & History for Ubuntu & Linux">
+    <meta name="twitter:description" content="Free, open-source clipboard manager for Ubuntu and Linux. Instant clipboard history search, image support, zero telemetry.">
     <meta name="twitter:image" content="https://nguyenduc2309.github.io/klipr/assets/home_page.png">
     <meta name="twitter:creator" content="@NguyenDuc2309">
 
@@ -42,11 +43,22 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Klipr",
+      "alternateName": "Klipr Clipboard Manager",
       "applicationCategory": "UtilitiesApplication",
-      "operatingSystem": "Linux",
-      "description": "A native GTK4 clipboard history manager for Linux desktops with instant search and local storage.",
+      "applicationSubCategory": "Clipboard Manager",
+      "operatingSystem": "Linux, Ubuntu, Debian, Fedora, Arch Linux, Linux Mint",
+      "description": "A native GTK4 clipboard manager for Ubuntu and Linux with instant clipboard history search, image capture, and local storage.",
       "image": "https://nguyenduc2309.github.io/klipr/assets/logo.png",
       "screenshot": "https://nguyenduc2309.github.io/klipr/assets/home_page.png",
+      "featureList": [
+        "Automatic clipboard history for Linux and Ubuntu",
+        "Instant fuzzy search across clipboard history",
+        "Pinned favorites protected from auto-pruning",
+        "Image and screenshot clipboard capture",
+        "Dark, light, and system theme sync",
+        "Native GTK4 performance with low RAM usage",
+        "AI-powered OCR text extraction (BYOK)"
+      ],
       "offers": {
         "@type": "Offer",
         "price": "0",
@@ -61,6 +73,72 @@
       "downloadUrl": "https://github.com/NguyenDuc2309/klipr/releases/latest",
       "softwareVersion": "1.2.7",
       "license": "https://opensource.org/licenses/MIT"
+    }
+    </script>
+
+    <!-- FAQPage Structured Data — mirrors the FAQ section below, keep in sync -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is Klipr really 100% free? Are there any hidden fees or Pro tiers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Klipr is 100% free and open source under the permissive MIT License. There are no paid tiers, subscriptions, hidden fees, upgrade prompts, or advertisements — ever."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which Linux distributions and desktop environments are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Klipr runs on any modern Linux distribution with GTK4 and D-Bus support, including Ubuntu, Debian, Fedora, Arch Linux, and Linux Mint. It works seamlessly across GNOME, KDE Plasma, XFCE, Cinnamon, and MATE."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my clipboard data sent anywhere?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Klipr operates 100% offline by default. All text, code snippets, and image history are stored strictly on your local device in a local SQLite database with zero telemetry. The only exception is the optional AI OCR feature, which only calls out to your own configured Gemini/OpenAI API key."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How many clipboard items does Klipr keep?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "By default, Klipr stores your last 50 items. You can easily adjust this limit to 100 or 150 items in the Settings dialog to fit your workflow."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my pinned items deleted when the history fills up?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Never. Pinned favorites are stored separately and protected from automatic pruning. They remain safely pinned until you explicitly remove them."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How are copied images stored?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Copied images and screenshots are saved as optimized PNG files in your local cache directory (~/.cache/klipr/images/) with instant thumbnail previews. Deduplication ensures identical images are not saved twice."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the AI OCR text extraction work? Is my data private?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Klipr uses Bring Your Own Key (BYOK) for Google Gemini and OpenAI. Your API keys are stored locally on your device. When you extract text, images are sent directly to the official AI provider endpoint with zero telemetry or middleman servers. If you don't configure an API key, Klipr remains 100% offline."
+          }
+        }
+      ]
     }
     </script>
 
@@ -132,11 +210,11 @@
                 </div>
 
                 <h1 class="hero-title reveal delay-1" data-i18n="hero.title">
-                    Clipboard history,<br><span class="gradient-text">made seamless for Linux.</span>
+                    Clipboard history,<br><span class="gradient-text">made seamless for Ubuntu & Linux.</span>
                 </h1>
 
                 <p class="hero-description reveal delay-2" data-i18n="hero.desc">
-                    Klipr captures everything you copy — text, code, commands, and screenshots. Native GTK4 desktop integration, zero Electron bloat, and instant fuzzy search.
+                    Klipr is a native clipboard manager for Linux and Ubuntu that captures everything you copy — text, code, commands, and screenshots. Zero Electron bloat, instant fuzzy search over your clipboard history.
                 </p>
 
                 <div class="hero-actions reveal delay-3">
@@ -175,58 +253,13 @@
             </div>
         </section>
 
-        <!-- Open Source Promise Section -->
-        <section class="section" id="free-promise" style="padding: 40px 0 60px;">
-            <div class="container">
-                <div class="section-header reveal">
-                    <span class="section-tag" data-i18n="promise.tag">Open Source</span>
-                    <h2 class="section-title" data-i18n="promise.title">Built openly for the Linux community</h2>
-                    <p class="section-subtitle" data-i18n="promise.subtitle">Klipr is lightweight and transparent. No paywalls, no monetization, no tracking.</p>
-                </div>
-
-                <div class="free-promise-grid reveal">
-                    <div class="free-card">
-                        <div class="free-card-icon">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        </div>
-                        <h3 data-i18n="promise.c1_title">Community Driven</h3>
-                        <p data-i18n="promise.c1_desc">No paid tiers, no subscriptions, and no locked features. Everything is open for everyone.</p>
-                    </div>
-
-                    <div class="free-card">
-                        <div class="free-card-icon">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
-                        </div>
-                        <h3 data-i18n="promise.c2_title">Zero Advertisements</h3>
-                        <p data-i18n="promise.c2_desc">No sponsored banners, no upgrade prompts, and no annoying popups. Clean and focused.</p>
-                    </div>
-
-                    <div class="free-card">
-                        <div class="free-card-icon">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        </div>
-                        <h3 data-i18n="promise.c3_title">Offline &amp; Private</h3>
-                        <p data-i18n="promise.c3_desc">All snippets and history remain strictly on your local disk. Nothing is uploaded to any cloud server.</p>
-                    </div>
-
-                    <div class="free-card">
-                        <div class="free-card-icon">
-                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                        </div>
-                        <h3 data-i18n="promise.c4_title">Permissive MIT License</h3>
-                        <p data-i18n="promise.c4_desc">Free for both personal and commercial use. Inspect, modify, or fork the full codebase on GitHub.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Screenshots / Showcase -->
         <section class="showcase" id="screenshots">
             <div class="container">
                 <div class="section-header reveal">
                     <span class="section-tag" data-i18n="showcase.tag">Demo</span>
-                    <h2 class="section-title" data-i18n="showcase.title">Clean, focused GTK4 interface</h2>
-                    <p class="section-subtitle" data-i18n="showcase.subtitle">Fits right at home on modern Linux desktop environments including GNOME, XFCE, and KDE.</p>
+                    <h2 class="section-title" data-i18n="showcase.title">Clean, focused clipboard manager UI</h2>
+                    <p class="section-subtitle" data-i18n="showcase.subtitle">Fits right at home on Ubuntu and every major Linux desktop environment — GNOME, XFCE, and KDE.</p>
                 </div>
 
                 <div class="showcase-container">
@@ -260,7 +293,7 @@
                             <span class="window-title" data-i18n="showcase.window2_title">Klipr — Settings &amp; Customization</span>
                             <div style="width: 42px;"></div>
                         </div>
-                        <img src="./assets/setting_page.png" alt="Klipr Settings View" class="window-img" loading="lazy">
+                        <img src="./assets/setting_page.png" alt="Klipr Ubuntu Linux Clipboard Manager Settings" class="window-img" loading="lazy">
                         <div class="window-caption">
                             <span data-i18n="showcase.window2_caption">Themes, Global Hotkeys &amp; Tray Settings</span>
                             <span class="zoom-hint">
@@ -278,8 +311,8 @@
             <div class="container">
                 <div class="section-header reveal">
                     <span class="section-tag" data-i18n="features.tag">Features</span>
-                    <h2 class="section-title" data-i18n="features.title">Built for daily developer productivity</h2>
-                    <p class="section-subtitle" data-i18n="features.subtitle">Everything you need to effortlessly manage clipboard history without bloat.</p>
+                    <h2 class="section-title" data-i18n="features.title">Everything a Linux clipboard manager should do</h2>
+                    <p class="section-subtitle" data-i18n="features.subtitle">Core clipboard history features for Ubuntu, Fedora, and every major Linux desktop — no bloat, no subscriptions.</p>
                 </div>
 
                 <div class="features-grid">
@@ -331,19 +364,16 @@
                         <p data-i18n="features.f6_desc">Built with Python and GTK4. Tiny memory footprint that runs silently in the system tray.</p>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- AI Features Section -->
-        <section class="section ai-section" id="ai-features">
-            <div class="container">
-                <div class="section-header reveal">
-                    <span class="section-tag ai-tag" data-i18n="ai.tag">AI Powered</span>
-                    <h2 class="section-title" data-i18n="ai.title">Extract text from image in seconds</h2>
-                    <p class="section-subtitle" data-i18n="ai.subtitle">Turn screenshots, invoices, receipts, and documents into clean, editable text with next-gen AI.</p>
-                </div>
+                <!-- AI Features (bonus capability, nested in the same Features flow) -->
+                <div class="ai-subsection" id="ai-features">
+                    <div class="ai-subheader reveal">
+                        <span class="section-tag ai-tag" data-i18n="ai.tag">Bonus: AI Powered</span>
+                        <h3 class="ai-subtitle-title" data-i18n="ai.title">Extract text from any image in seconds</h3>
+                        <p class="section-subtitle" data-i18n="ai.subtitle">On top of clipboard history, Klipr can turn screenshots, invoices, and receipts into clean, editable text.</p>
+                    </div>
 
-                <div class="ai-hero-card reveal">
+                    <div class="ai-hero-card reveal">
                     <!-- Prominent Image Showcase Window -->
                     <div class="window-frame ai-window-frame" title="Click to view full image">
                         <div class="window-header">
@@ -408,6 +438,7 @@
                         </div>
                     </div>
                 </div>
+                </div>
 
             </div>
         </section>
@@ -417,8 +448,8 @@
             <div class="container">
                 <div class="install-card reveal">
                     <div class="install-header">
-                        <h3 data-i18n="install.title">Install Klipr in Seconds</h3>
-                        <p data-i18n="install.subtitle">One command. That's it.</p>
+                        <h3 data-i18n="install.title">Install the Klipr Clipboard Manager in Seconds</h3>
+                        <p data-i18n="install.subtitle">One command on Ubuntu or any Snap-enabled Linux distro.</p>
                     </div>
 
                     <div class="terminal-window">
@@ -442,7 +473,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="install-note" data-i18n="install.note_apt">Works on any Ubuntu system out of the box. Future updates then arrive through <code>sudo snap refresh</code> automatically.</p>
+                    <p class="install-note" data-i18n="install.note_apt">Works out of the box on Ubuntu, Fedora, Arch, and other major Linux distributions. Future updates then arrive through <code>sudo snap refresh</code> automatically.</p>
                 </div>
             </div>
         </section>
@@ -463,7 +494,7 @@
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p data-i18n="faq.a0">Yes. Klipr is 100% free and open source under the permissive MIT License. There are no paid tiers, subscriptions, hidden fees, or advertisements.</p>
+                            <p data-i18n="faq.a0">Yes. Klipr is 100% free and open source under the permissive MIT License. There are no paid tiers, subscriptions, hidden fees, upgrade prompts, or advertisements — ever.</p>
                         </div>
                     </div>
 
@@ -483,7 +514,7 @@
                             <span class="faq-icon">+</span>
                         </button>
                         <div class="faq-answer">
-                            <p data-i18n="faq.a2">No. Klipr operates 100% offline. All text, code snippets, and image history are stored strictly on your local device in a local SQLite database with zero telemetry or network calls.</p>
+                            <p data-i18n="faq.a2">No. Klipr operates 100% offline by default. All text, code snippets, and image history are stored strictly on your local device in a local SQLite database with zero telemetry. The only exception is the optional AI OCR feature, which only calls out to your own configured Gemini/OpenAI API key — see the next question.</p>
                         </div>
                     </div>
 
