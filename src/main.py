@@ -128,6 +128,8 @@ class ClipboardApp(Gtk.Application):
     def do_activate(self):
         settings.load()
         self.hold()
+        if is_snap:
+            GLib.timeout_add_seconds(5, self._check_snap_revision_gone)
         if self.window:
             if self._pending_toggle:
                 self._pending_toggle = False
@@ -177,6 +179,17 @@ class ClipboardApp(Gtk.Application):
         except Exception:
             pass
         return False  # one-shot
+
+    def _check_snap_revision_gone(self):
+        """snapd never signals a `command:` app on `snap remove`/refresh — it just
+        unmounts the squashfs. Poll for that so we self-quit and release our last
+        reference (cwd, mmap'd .py files), letting the kernel free the orphaned
+        loop device instead of leaving it for udisks to misdetect as a volume."""
+        if os.path.exists(os.path.join(os.environ["SNAP"], "meta", "snap.yaml")):
+            return True
+        print("Klipr: snap revision unmounted (removed or refreshed) — exiting.")
+        self.quit()
+        return False
 
     def _monitor_settings(self):
         """Watch setting.json for changes and reload."""
