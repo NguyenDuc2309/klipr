@@ -26,20 +26,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Fast gate (~15s): syntax errors / undefined names fail here before any build.
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile check
+        run: python3 -m compileall -q src tests
+
+      # Only error-class rules (syntax, undefined names, bad comparisons) —
+      # style warnings don't block a release.
+      - name: Ruff
+        run: pipx run ruff==0.16.9 check src tests --select E9,F63,F7,F82 --output-format github
+
+      - name: Validate desktop entry
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends desktop-file-utils && desktop-file-validate packaging/klipr.desktop
+
   build:
     name: Build .deb
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends desktop-file-utils lintian
-
-      - name: Compile check
-        run: python3 -m compileall -q src
-
-      - name: Validate desktop entry
-        run: desktop-file-validate packaging/klipr.desktop
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends lintian
 
       - name: Build package
         run: ./packaging/build.sh

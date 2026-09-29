@@ -57,3 +57,19 @@ def format_time(timestamp_str):
             return dt_local.strftime("%d/%m/%Y %H:%M")
     except Exception:
         return timestamp_str
+
+
+def gnome_interface_settings():
+    """Return Gio.Settings for org.gnome.desktop.interface, or None.
+
+    Gio.Settings.new() on a schema (or later get on a key) that is not
+    installed aborts the whole process via g_error — try/except cannot catch
+    it. Desktops without gsettings-desktop-schemas (or with an old one lacking
+    color-scheme) would crash on window creation, so look it up first.
+    """
+    from gi.repository import Gio
+    source = Gio.SettingsSchemaSource.get_default()
+    schema = source.lookup("org.gnome.desktop.interface", True) if source else None
+    if schema is None or not schema.has_key("color-scheme"):
+        return None
+    return Gio.Settings.new_full(schema, None, None)
