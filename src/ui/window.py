@@ -318,11 +318,9 @@ class ClipboardWindow(Gtk.ApplicationWindow):
             settings_default.connect("notify::gtk-application-prefer-dark-theme", self._on_system_theme_changed)
 
         # Also try to monitor GNOME interface settings directly
-        try:
-             self._gnome_interface_settings = Gio.Settings.new("org.gnome.desktop.interface")
+        self._gnome_interface_settings = utils.gnome_interface_settings()
+        if self._gnome_interface_settings:
              self._gnome_interface_settings.connect("changed::color-scheme", self._on_system_theme_changed)
-        except Exception:
-             self._gnome_interface_settings = None
 
     def _on_system_theme_changed(self, *args):
         """Called when system theme preference changes."""

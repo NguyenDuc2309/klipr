@@ -3,6 +3,7 @@ gi.require_version('Gtk', '4.0')
 from gi.repository import Gtk, Gdk, Gio, GLib
 import os
 import settings
+import utils
 
 
 
@@ -320,13 +321,9 @@ class SettingsView(Gtk.Box):
             
             # Check Freedesktop/GNOME color-scheme via Gio.Settings (more reliable on modern GNOME)
             is_dark_gnome = False
-            try:
-                gnome_settings = Gio.Settings.new("org.gnome.desktop.interface")
-                color_scheme = gnome_settings.get_string("color-scheme")
-                if "dark" in color_scheme.lower():
-                    is_dark_gnome = True
-            except Exception:
-                pass
+            gnome_settings = utils.gnome_interface_settings()
+            if gnome_settings and "dark" in gnome_settings.get_string("color-scheme").lower():
+                is_dark_gnome = True
 
             if not is_dark_gtk and not is_dark_gnome:
                  resolved = "light"
