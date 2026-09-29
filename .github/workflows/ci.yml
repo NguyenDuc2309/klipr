@@ -1,0 +1,92 @@
+name: CI
+
+# Build + test the .deb. Only runs when something that ends up in the package
+# changes — docs, landing page, debian/ (Debian submission) do not trigger it.
+on:
+  pull_request:
+    paths: &app_paths
+      - 'src/**'
+      - 'assets/**'
+      - 'packaging/**'
+      - 'setting.json'
+      - 'requirements.txt'
+      - 'tests/smoke_test.py'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [main]
+    paths: *app_paths
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build .deb
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends desktop-file-utils lintian
+
+      - name: Compile check
+        run: python3 -m compileall -q src
+
+      - name: Validate desktop entry
+        run: desktop-file-validate packaging/klipr.desktop
+
+      - name: Build package
+        run: ./packaging/build.sh
+
+      - name: Lintian (report only)
+        run: lintian --info klipr_*_all.deb || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: klipr-deb
+          path: klipr_*_all.deb
+          if-no-files-found: error
+          retention-days: 7
+
+  install-test:
+    name: Install + smoke test (${{ matrix.image }})
+    needs: build
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ['ubuntu:22.04', 'ubuntu:24.04']
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: klipr-deb
+
+      - name: Install package (resolves Depends from the archive)
+        run: |
+          apt-get update
+          apt-get install -y ./klipr_*_all.deb xvfb xauth dbus
+
+      - name: Every source module is packaged
+        run: |
+          missing=0
+          for f in $(cd src && find . -name '*.py'); do
+            [ -f "/usr/share/klipr/$f" ] || { echo "::error::missing in .deb: $f"; missing=1; }
+          done
+          exit $missing
+
+      - name: Smoke test against the installed package
+        run: |
+          cd /tmp
+          KLIPR_SRC=/usr/share/klipr xvfb-run -a dbus-run-session -- \
+            python3 "$GITHUB_WORKSPACE/tests/smoke_test.py"
