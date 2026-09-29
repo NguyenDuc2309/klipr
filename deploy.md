@@ -18,15 +18,15 @@ sudo gem install --no-document fpm
 
 ### Lệnh build package
 ```bash
-# Cú pháp: ./packaging/build.sh [VERSION]
-./packaging/build.sh 1.2.7
+# Cú pháp: ./packaging/build.sh [VERSION]  (bỏ trống = lấy version trong setting.json)
+./packaging/build.sh
 ```
-*Output:* File `klipr_1.2.7_all.deb` tạo tại thư mục gốc.
+*Output:* File `klipr_<version>_all.deb` tạo tại thư mục gốc.
 
 ### Cài đặt kiểm tra & gỡ bỏ
 ```bash
 # Cài đặt file vừa build (tự giải quyết dependencies)
-sudo apt install ./klipr_1.2.7_all.deb
+sudo apt install ./klipr_<version>_all.deb
 
 # Chạy thử
 klipr            # Mở cửa sổ chính
@@ -49,7 +49,7 @@ sudo snap install lxd && sudo lxd init --auto   # môi trường build mặc đ�
 ### Cấu hình version (nếu cần đổi phiên bản)
 Sửa `version` trong file [snap/snapcraft.yaml](snap/snapcraft.yaml):
 ```yaml
-version: '1.2.7'
+version: 'X.Y.Z'   # packaging/release.sh tự bump
 ```
 
 ### Lệnh build package
@@ -60,12 +60,12 @@ snapcraft
 # HOẶC build trực tiếp trên máy host / CI:
 snapcraft --destructive-mode
 ```
-*Output:* File `klipr_1.2.7_amd64.snap` tạo tại thư mục gốc.
+*Output:* File `klipr_<version>_amd64.snap` tạo tại thư mục gốc.
 
 ### Cài đặt kiểm tra & gỡ bỏ
 ```bash
 # Cài đặt file snap local (bỏ qua xác thực store)
-sudo snap install --dangerous klipr_1.2.7_amd64.snap
+sudo snap install --dangerous klipr_<version>_amd64.snap
 
 # Cấp quyền kết nối tray icon (StatusNotifierItem/Unity7) nếu cần
 sudo snap connect klipr:unity7
@@ -86,7 +86,7 @@ snapcraft login
 snapcraft register klipr
 
 # Upload và phát hành vào kênh stable
-snapcraft upload --release=stable klipr_1.2.7_amd64.snap
+snapcraft upload --release=stable klipr_<version>_amd64.snap
 ```
 
 ---
@@ -95,7 +95,21 @@ snapcraft upload --release=stable klipr_1.2.7_amd64.snap
 
 | Tác vụ | Lệnh .deb | Lệnh Snap |
 |---|---|---|
-| **Build** | `./packaging/build.sh 1.2.7` | `snapcraft` |
-| **Cài đặt thử** | `sudo apt install ./klipr_1.2.7_all.deb` | `sudo snap install --dangerous klipr_1.2.7_amd64.snap` |
+| **Build** | `./packaging/build.sh` | `snapcraft` |
+| **Cài đặt thử** | `sudo apt install ./klipr_<version>_all.deb` | `sudo snap install --dangerous klipr_<version>_amd64.snap` |
 | **Chạy app** | `klipr` | `snap run klipr` |
 | **Gỡ bỏ** | `sudo apt remove klipr` | `sudo snap remove klipr` |
+
+---
+
+## 4. Release tự động (GitHub Actions)
+
+```bash
+git checkout main && git pull
+packaging/release.sh 1.2.8
+```
+Script bump version ở `setting.json`, `snap/snapcraft.yaml`, fallback trong `landing/`, rồi commit `release: v1.2.8`, tạo tag `v1.2.8` và push.
+
+- **`ci.yml`**: chạy trên PR/push main **chỉ khi đổi code app** (`src/`, `assets/`, `packaging/`, `setting.json`...). Sửa docs, `landing/`, `debian/` không trigger. Build `.deb`, lintian, cài thử trên Ubuntu 22.04 + 24.04, smoke test GUI qua xvfb.
+- **`release.yml`**: chỉ chạy khi push tag `vX.Y.Z`. Kiểm tra tag khớp version, chạy lại toàn bộ CI, rồi tạo GitHub Release (latest) kèm `klipr_X.Y.Z_all.deb` + `SHA256SUMS`.
+- Snap: Launchpad tự build từ `snap/snapcraft.yaml` khi push. APT repo (`publish_apt.sh`) vẫn chạy tay vì cần khoá GPG.
