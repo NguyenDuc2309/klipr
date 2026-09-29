@@ -2,7 +2,7 @@
 # Bump the version everywhere, commit, tag and push.
 # GitHub Actions (release.yml) then tests, builds the .deb and publishes the release.
 #
-# Usage: packaging/release.sh 1.2.8
+# Usage: scripts/release.sh 1.2.8
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
