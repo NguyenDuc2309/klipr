@@ -82,7 +82,7 @@ Snap remaps these under `~/snap/klipr/current/`.
 | `.deb` (`Architecture: all`) | `packaging/build.sh` | CI on every code change, attached to GitHub Releases |
 | APT repo | `scripts/publish_apt.sh` → `landing/apt/` | Maintainer, locally (needs the signing key) |
 | Snap | `snap/snapcraft.yaml` | Launchpad auto-build on push |
-| Debian archive | `debian/` | Not used by CI; see [debian.md](debian.md) |
+| Debian archive | `debian/` | Not used by CI (maintainer only) |
 
 The `.deb` installs modules to `/usr/share/klipr/`, a launcher to `/usr/bin/klipr` (it `cd`s there and runs
 `main.py`), the desktop entry as `io.github.nguyenduc2309.klipr.desktop`, and the icon at

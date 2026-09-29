@@ -56,3 +56,6 @@ settings.json
 .claude/
 CLAUDE.md
 claude.md
+
+# Maintainer-only deploy notes (Snap Store, APT signing, Debian) — kept local
+docs/maintainer/

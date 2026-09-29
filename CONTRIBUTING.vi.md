@@ -53,11 +53,11 @@ assets/         logo và ảnh chụp cho README
 setting.json    cấu hình mặc định đóng kèm app + version của app (nguồn chuẩn duy nhất)
 packaging/      đầu vào để build .deb: build.sh, launcher, file .desktop
 snap/           recipe snapcraft (Launchpad tự build)
-debian/         đóng gói cho kho Debian chính thức (tách khỏi CI, xem docs/debian.md)
+debian/         đóng gói cho kho Debian chính thức (tách khỏi CI, chỉ maintainer dùng)
 landing/        website trên GitHub Pages, chứa luôn kho APT (landing/apt/)
 tests/          test tự động (chạy trong CI) + tests/e2e/ test tay trên desktop thật
 scripts/        tool cho maintainer: release, publish APT, benchmark, debug
-docs/           kiến trúc, quy trình release, ghi chú Debian
+docs/           tài liệu kiến trúc
 ```
 
 ## Trước khi mở PR
@@ -87,7 +87,7 @@ Với thay đổi lớn, chạy thêm test end-to-end trên desktop thật (cầ
   thiếu file và crash lúc import. CI sẽ báo `missing in .deb: …` nếu bạn quên.
 - **Không gọi thẳng GSettings schema.** `Gio.Settings.new()` với schema chưa cài sẽ giết cả process, không
   `try/except` được. Hãy tra schema trước, như `utils.gnome_interface_settings()`.
-- **Không tự sửa version.** Việc này do quy trình release làm (xem bên dưới).
+- **Không tự sửa version.** Maintainer sẽ bump khi release.
 - **Không commit file build** (`*.deb`, `*.snap`, `build/`, `parts/`…). Chúng đã nằm trong `.gitignore`, giữ nguyên như vậy.
 
 ## Pull request
@@ -99,15 +99,6 @@ Với thay đổi lớn, chạy thêm test end-to-end trên desktop thật (cầ
    Có ảnh chụp nếu đổi UI.
 4. **CI phải xanh rồi mới merge.** CI chạy lint → build `.deb` → cài + test GUI trên Ubuntu 22.04 và 24.04.
    CI chỉ chạy khi đổi code app, nên PR chỉ sửa docs sẽ không có check nào. Đó là bình thường.
-
-## Release (dành cho maintainer)
-
-```bash
-scripts/release.sh X.Y.Z
-```
-
-Script bump version, tạo tag và push. Sau đó GitHub Actions test, build và đăng GitHub Release.
-Snap và kho APT: xem [docs/releasing.md](docs/releasing.md).
 
 ## Giấy phép
 

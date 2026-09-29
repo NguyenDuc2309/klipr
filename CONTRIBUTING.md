@@ -53,11 +53,11 @@ assets/         logos and README screenshots
 setting.json    bundled default settings + the app version (source of truth)
 packaging/      .deb inputs: build.sh, launcher, .desktop file
 snap/           snapcraft recipe (built by Launchpad)
-debian/         Debian-archive packaging (separate from CI, see docs/debian.md)
+debian/         Debian-archive packaging (separate from CI, maintainer only)
 landing/        website on GitHub Pages, includes the APT repo (landing/apt/)
 tests/          automated tests (run in CI) + tests/e2e/ manual tests on a real desktop
 scripts/        maintainer tools: release, APT publish, benchmarks, debugging
-docs/           architecture, releasing, Debian notes
+docs/           architecture notes
 ```
 
 ## Before you open a PR
@@ -87,7 +87,7 @@ For bigger changes, the end-to-end tests exercise the installed app on your real
   `.deb` ships without it and crashes on import. CI fails with `missing in .deb: …` when this happens.
 - **Don't hard-code GSettings schemas.** `Gio.Settings.new()` on a schema that isn't installed kills the process
   (it can't be caught). Use a lookup like `utils.gnome_interface_settings()`.
-- **Don't bump the version by hand.** Releases do that (see below).
+- **Don't bump the version.** The maintainer does it when cutting a release.
 - **Don't commit build output** (`*.deb`, `*.snap`, `build/`, `parts/`…). It's git-ignored; keep it that way.
 
 ## Pull requests
@@ -99,15 +99,6 @@ For bigger changes, the end-to-end tests exercise the installed app on your real
    Screenshots for UI changes.
 4. **CI must be green before merge.** It runs lint → build `.deb` → install + GUI tests on Ubuntu 22.04 and 24.04.
    CI only runs when app code changes, so docs-only PRs have no checks. That's expected.
-
-## Releases (maintainers)
-
-```bash
-scripts/release.sh X.Y.Z
-```
-
-This bumps the version, tags and pushes. GitHub Actions then tests, builds and publishes the GitHub Release.
-Snap and the APT repo: see [docs/releasing.md](docs/releasing.md).
 
 ## License
 
