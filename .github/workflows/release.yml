@@ -1,6 +1,6 @@
 name: Release
 
-# Fires only on a version tag pushed by packaging/release.sh — never on plain merges.
+# Fires only on a version tag pushed by scripts/release.sh — never on plain merges.
 on:
   push:
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
@@ -21,7 +21,7 @@ jobs:
           snap=$(sed -n "s/^version: *'\{0,1\}\([^']*\)'\{0,1\}$/\1/p" snap/snapcraft.yaml)
           echo "tag=$tag setting.json=$app snapcraft.yaml=$snap"
           [ "$tag" = "$app" ] && [ "$tag" = "$snap" ] || {
-            echo "::error::Version mismatch — run packaging/release.sh instead of tagging by hand"; exit 1; }
+            echo "::error::Version mismatch — run scripts/release.sh instead of tagging by hand"; exit 1; }
 
   ci:
     needs: verify

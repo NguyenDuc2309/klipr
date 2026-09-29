@@ -51,19 +51,8 @@ log.txt
 # Settings (user-specific, created at runtime)
 settings.json
 
-# Documentation / Internal Notes
+# AI agent notes (local only)
 .agent
 .claude/
 CLAUDE.md
 claude.md
-PUBLISH.md
-publish.md
-PACKAGING.md
-packaging.md
-SNAP.md
-snap.md
-DEBIAN-SUBMISSION.md
-debian-submission.md
-*submission*.md
-scripts/
-packaging/publish_apt.sh
